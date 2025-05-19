@@ -16,18 +16,17 @@ export default defineConfig({
     host_permissions: [
       // "https://your-backend-api.com/*", // 替换为您的后端API域名
     ],
-    allFrames: true,       // 同源 iframe 也注入
-    matchAboutBlank: true, // about:blank / srcdoc 也能拿到
     // WXT 会根据 entrypoints 的 matches 自动处理内容脚本的权限
     // 例如，如果您在 entrypoints/content.ts 的配置中指定了 matches: ["<all_urls>"]
     // WXT 会确保 manifest.json 中包含相应的 content_scripts 配置和权限。
     // 如果没有在 entrypoints 中指定，或者需要更复杂的权限，可以在这里显式添加。
     // content_scripts 字段将由 WXT 根据 entrypoints/content.ts 自动生成。
+
   },
   // 由于顶层 'entrypoints' 配置导致类型错误，我们在此处移除它。
   // WXT 仍会自动发现 'entrypoints/content.ts'。
 
-   // 只在 `wxt dev` 时生效
+  // 只在 `wxt dev` 时生效
   dev: {
     server: {
       // 保留 server 配置（如果需要）

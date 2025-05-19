@@ -13,6 +13,8 @@ interface ExtensionMessage {
 
 export default defineContentScript({
   matches: ['<all_urls>'],
+  allFrames: true,
+  matchAboutBlank: true,
   main() {
     /* ---------------- iframe‑context guard ---------------- */
     try {
@@ -23,7 +25,7 @@ export default defineContentScript({
     } catch {
       // Cross‑origin iframe: abort early to avoid DOMException.
       console.warn('Lucid: skipping cross‑origin iframe (no same‑origin access)');
-      return () => {};
+      return () => { };
     }
     console.log('Lucid 扩展：内容脚本已加载');
 
@@ -37,7 +39,7 @@ export default defineContentScript({
           console.log('[Lucid] Selection is collapsed and empty, skipping highlight.');
           return;
         }
-        
+
         console.log(`[DEBUG][SELECTION] current raw selection: "${sel.toString()}"`);
         console.log(`[DEBUG][SELECTION] original range text: "${originalRange.toString()}"`);
 
