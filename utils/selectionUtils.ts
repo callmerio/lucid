@@ -199,6 +199,7 @@ export function expandSelectionToFullWord(range: Range): Range {
   let endNode: Node | null = range.endContainer;
   let endOffset = range.endOffset;
 
+
   // 跳过起始的边界字符
   if (startNode?.nodeType === Node.TEXT_NODE) {
     const txt = (startNode as Text).textContent ?? '';

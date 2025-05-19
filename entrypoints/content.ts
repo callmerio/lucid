@@ -46,9 +46,26 @@ export default defineContentScript({
         const expandedRange = expandSelectionToFullWord(originalRange.cloneRange()); // 确保传递克隆的 range
         console.log(`[DEBUG][SELECTION] expanded range text: "${expandedRange.toString()}"`);
 
+        // isDarkText 判断
         if (expandedRange && !expandedRange.collapsed) {
-          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          await applyWordHighlight(expandedRange, isDarkMode);
+          // Determine if the selection’s text color is dark by computing brightness
+          let container: Element | null = expandedRange.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+            ? expandedRange.commonAncestorContainer as Element
+            : (expandedRange.commonAncestorContainer.parentElement as Element);
+          // If inside an existing highlight mark, use its parent for color sampling
+          const existingMark = container.closest('mark.lucid-highlight');
+          if (existingMark) {
+            container = existingMark.parentElement;
+          }
+          const computedColor = container
+            ? window.getComputedStyle(container).color
+            : window.getComputedStyle(document.body).color;
+          // Parse "rgb(r, g, b)" and compute brightness
+          const [r, g, b] = computedColor.match(/\d+/g)!.map(Number);
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          const isDarkText = brightness < 128;
+          console.log(`[DEBUG][SELECTION] computed color: ${computedColor}, brightness: ${brightness}, isDarkText: ${isDarkText}`);
+          await applyWordHighlight(expandedRange, isDarkText);
           // applyWordHighlight 内部会处理 sel.removeAllRanges()
         } else {
           // 如果扩展后范围无效或折叠，则恢复原始选择（或清除）

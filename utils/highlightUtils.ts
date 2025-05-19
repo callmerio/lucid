@@ -47,7 +47,7 @@ const StyleManager = {
     const styleEl = document.createElement('style');
     styleEl.id = this.STYLE_ID;
     styleEl.textContent = this.HIGHLIGHT_STYLES.trim();
-    
+
     // 将样式添加到文档的头部或Shadow DOM中
     if (root === document) {
       document.head.appendChild(styleEl);
@@ -66,29 +66,29 @@ const StyleManager = {
 export function calculateHighlight(
   baseColor: string,
   queryCount: number,
-  isDarkMode: boolean,
+  isDarkText: boolean,
 ): { className: string; hex: string } {
   const level = Math.min(MAX_MARK_COUNT, Math.ceil(queryCount / 3));
 
   const lightShades: Record<number, number> = { 1: 600, 2: 700, 3: 800, 4: 900, 5: 950 };
-  const darkShades: Record<number, number>  = { 1: 400, 2: 300, 3: 200, 4: 100, 5: 50 };
-  const shade = isDarkMode ? darkShades[level] : lightShades[level];
+  const darkShades: Record<number, number> = { 1: 400, 2: 300, 3: 200, 4: 100, 5: 50 };
+  const shade = isDarkText ? darkShades[level] : lightShades[level];
 
   const className = `text-${baseColor}-${shade}`;
 
   // 仅列常用调色盘，可按需扩充
   const PALETTE: Record<string, Record<number, string>> = {
     orange: {
-      50:'#fff7ed',100:'#ffedd5',200:'#fed7aa',300:'#fdba74',400:'#fb923c',
-      500:'#f97316',600:'#ea580c',700:'#c2410c',800:'#9a3412',900:'#7c2d12',950:'#431407',
+      50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c',
+      500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407',
     },
     blue: {
-      50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',
-      500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',950:'#172554',
+      50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+      500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
     },
     green: {
-      50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',
-      500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d',950:'#052e16',
+      50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80',
+      500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16',
     },
   };
 
@@ -132,8 +132,8 @@ function unwrapHighlightsInRange(rng: Range) {
     {
       acceptNode: node =>
         node instanceof HTMLElement &&
-        node.classList.contains('lucid-highlight') &&
-        rng.intersectsNode(node)
+          node.classList.contains('lucid-highlight') &&
+          rng.intersectsNode(node)
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT,
     },
@@ -147,9 +147,9 @@ function unwrapHighlightsInRange(rng: Range) {
 /**
  * 应用高亮到指定的 Range 对象
  * @param range 扩展后的选区 Range 对象
- * @param isDarkMode 当前是否为暗黑模式
+ * @param isDarkText 当前是否为暗黑模式
  */
-export async function applyWordHighlight(range: Range, isDarkMode: boolean): Promise<void> {
+export async function applyWordHighlight(range: Range, isDarkText: boolean): Promise<void> {
   // 确保 flash 动效等全局样式已注入
   StyleManager.ensureStyles(document);
 
@@ -165,7 +165,7 @@ export async function applyWordHighlight(range: Range, isDarkMode: boolean): Pro
     const { hex } = calculateHighlight(
       ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR,
       newCount,
-      isDarkMode,
+      isDarkText,
     );
     if (hex) ancestorMark.style.color = hex;
 
@@ -198,7 +198,7 @@ export async function applyWordHighlight(range: Range, isDarkMode: boolean): Pro
     wordMarkings[word] = currentMarkCount;
     await browser.storage.local.set({ wordMarkings });
 
-    const { className: highlightClassName, hex } = calculateHighlight(baseColor, currentMarkCount, isDarkMode);
+    const { className: highlightClassName, hex } = calculateHighlight(baseColor, currentMarkCount, isDarkText);
 
     // 先展开选区内已有的高亮，避免嵌套
     unwrapHighlightsInRange(range);
@@ -262,7 +262,7 @@ export async function applyWordHighlight(range: Range, isDarkMode: boolean): Pro
       } else {
         // If it's not an InvalidStateError, or some other error, re-throw it.
         console.error(`[Lucid] Error during surroundContents (not InvalidStateError) for word "${word}":`, e);
-        throw e; 
+        throw e;
       }
     }
 
@@ -280,7 +280,7 @@ export async function applyWordHighlight(range: Range, isDarkMode: boolean): Pro
       selection.removeAllRanges();
     }
   } catch (error) {
-    console.error('[Lucid] General error in applyWordHighlight for word "'+word+'":', error);
+    console.error('[Lucid] General error in applyWordHighlight for word "' + word + '":', error);
     // Handle other potential errors from storage access, etc.
   }
 }
@@ -306,11 +306,11 @@ function wrapTextNodesInFragment(fragment: DocumentFragment, highlightPrototype:
     // Ensure the textNode still has a parent in the fragment (it should)
     if (textNode.parentNode) {
       const highlightSpan = highlightPrototype.cloneNode(false) as HTMLElement; // Create a new mark for each text part
-      
+
       // Important: The textNode itself is moved into the highlightSpan.
       // No need to clone textNode here as it's already extracted from the main DOM.
       highlightSpan.appendChild(textNode.cloneNode(false)); // Append a clone of the text content
-      
+
       // Replace the original text node with the new highlightSpan containing the text
       textNode.parentNode.replaceChild(highlightSpan, textNode);
     }

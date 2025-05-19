@@ -312,12 +312,12 @@ graph TD
         *   将更新后的 `wordMarkings` 保存回 `browser.storage.local.set({ wordMarkings })`。
     *   **b. 计算高亮样式**:
         *   获取用户配置的基础颜色 `baseColor` (e.g., "orange", 来自 `settings.highlightBaseColor`)。
-        *   获取当前页面主题 `isDarkMode` (来自第5点的检测)。
-        *   根据 `baseColor`, `markCount`, `isDarkMode` 计算 Tailwind CSS 类名。
+        *   获取当前页面主题 `isDarkText` (来自第5点的检测)。
+        *   根据 `baseColor`, `markCount`, `isDarkText` 计算 Tailwind CSS 类名。
             *   定义颜色阶梯映射：
                 *   `lightModeShades = {1: 500, 2: 600, 3: 700, 4: 800, 5: 900}`
                 *   `darkModeShades = {1: 500, 2: 400, 3: 300, 4: 200, 5: 100}` (注意：Tailwind中数字越小颜色越浅)
-            *   `shade = isDarkMode ? darkModeShades[markCount] : lightModeShades[markCount];`
+            *   `shade = isDarkText ? darkModeShades[markCount] : lightModeShades[markCount];`
             *   `className = \`bg-\${baseColor}-\${shade}\`;` (例如 `bg-orange-600`).
             *   可能还需要一个基础高亮标记类，如 `lucid-highlight`。
     *   **c. 应用高亮**:
@@ -386,9 +386,9 @@ graph TD
 
     // --- Theme Detection ---
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    let isDarkMode = prefersDark.matches;
+    let isDarkText = prefersDark.matches;
     prefersDark.addEventListener('change', (e) => {
-        isDarkMode = e.matches;
+        isDarkText = e.matches;
         // TODO: Optionally re-style existing highlights if theme changes
     });
 
@@ -512,7 +512,7 @@ graph TD
                     currentMarkCount = Math.min(currentMarkCount, 5); // Cap at 5
                     saveWordMarking(wordToMark, currentMarkCount); // Async, but can proceed
 
-                    const className = getHighlightClassName(highlightBaseColor, currentMarkCount, isDarkMode);
+                    const className = getHighlightClassName(highlightBaseColor, currentMarkCount, isDarkText);
                     
                     // Remove previous highlight if any for this exact range or word instance
                     // This part needs careful implementation to avoid issues.

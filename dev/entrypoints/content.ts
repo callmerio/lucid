@@ -20,11 +20,11 @@ export default defineContentScript({
 
     // --- Theme Detection ---
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    let isDarkMode = prefersDark.matches;
+    let isDarkText = prefersDark.matches;
     prefersDark.addEventListener('change', (e) => {
-      isDarkMode = e.matches;
+      isDarkText = e.matches;
       // TODO: 可选: 如果主题更改，重新设置现有高亮的样式
-      console.log('Lucid: Theme changed, isDarkMode:', isDarkMode);
+      console.log('Lucid: Theme changed, isDarkText:', isDarkText);
     });
 
     // --- Storage Interaction ---
@@ -45,9 +45,9 @@ export default defineContentScript({
           if (typeof storage !== 'undefined' && storage.getItem) {
             // 这个分支理论上不应该执行，除非 storage 变量通过其他方式被定义
             console.warn('Lucid: Attempting to use wxt/storage as a fallback (unexpected).');
-             // @ts-ignore
+            // @ts-ignore
             settingsData = await storage.getItem<any>('local:settings');
-             // @ts-ignore
+            // @ts-ignore
             wordMarkingsData = await storage.getItem<{ [key: string]: number }>('local:wordMarkings');
           } else {
             console.error('Lucid: Storage API (browser.storage.local or wxt/storage) is not available.');
@@ -91,14 +91,14 @@ export default defineContentScript({
         console.error('Lucid: Error saving word marking', error);
       }
     }
-    
+
     // 脚本启动时加载配置
     loadConfiguration();
 
     // --- Highlighting Logic ---
     function getHighlightClassName(baseColor: string, markCount: number, isDark: boolean): string {
-      const lightModeShades: { [key: number]: number } = {1: 500, 2: 600, 3: 700, 4: 800, 5: 900};
-      const darkModeShades: { [key: number]: number } = {1: 500, 2: 400, 3: 300, 4: 200, 5: 100};
+      const lightModeShades: { [key: number]: number } = { 1: 500, 2: 600, 3: 700, 4: 800, 5: 900 };
+      const darkModeShades: { [key: number]: number } = { 1: 500, 2: 400, 3: 300, 4: 200, 5: 100 };
       const count = Math.min(Math.max(1, markCount), 5);
 
       const shade = isDark ? darkModeShades[count] : lightModeShades[count];
@@ -109,7 +109,7 @@ export default defineContentScript({
       if (!char) return true;
       return WORD_BOUNDARY_REGEX.test(char);
     }
-    
+
     function getTextContent(node: Node): string {
       return node.textContent || "";
     }
@@ -134,7 +134,7 @@ export default defineContentScript({
         for (const pattern of SPECIAL_PATTERNS) {
           pattern.lastIndex = 0;
           let match;
-          while((match = pattern.exec(text)) !== null) {
+          while ((match = pattern.exec(text)) !== null) {
             const matchStart = match.index;
             const matchEnd = match.index + match[0].length;
             if (direction === 'backward' && offset > matchStart && offset <= matchEnd) {
@@ -161,7 +161,7 @@ export default defineContentScript({
       try {
         range.setStart(startNode, startOffset);
       } catch (e) {
-        console.error("Lucid: Error setting start of range", e, {startNode, startOffset});
+        console.error("Lucid: Error setting start of range", e, { startNode, startOffset });
         return;
       }
 
@@ -179,18 +179,18 @@ export default defineContentScript({
       try {
         range.setEnd(endNode, endOffset);
       } catch (e) {
-        console.error("Lucid: Error setting end of range", e, {endNode, endOffset});
+        console.error("Lucid: Error setting end of range", e, { endNode, endOffset });
         return;
       }
-      
+
       const wordToMark = range.toString().trim().toLowerCase();
       if (wordToMark) {
         let currentMarkCount = (wordMarkings[wordToMark] || 0) + 1;
         currentMarkCount = Math.min(currentMarkCount, 5);
         saveWordMarking(wordToMark, currentMarkCount);
 
-        const className = getHighlightClassName(highlightBaseColor, currentMarkCount, isDarkMode);
-        
+        const className = getHighlightClassName(highlightBaseColor, currentMarkCount, isDarkText);
+
         const highlightElement = document.createElement('mark');
         highlightElement.className = className;
         highlightElement.dataset.word = wordToMark;
