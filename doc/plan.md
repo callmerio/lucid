@@ -279,9 +279,6 @@ graph TD
         *   连字符单词: `/\b[\w]+(?:-[\w]+)+\b/` (e.g., "state-of-the-art")
         *   撇号单词: `/\b\w+'\w+\b/` (e.g., "can't", "it's")
         *   数字与单位: `/\b\d+[\w%]+\b/` (e.g., "100kg", "50%")
-        *   网址/邮箱: (可以使用更复杂的现有正则表达式库或简化版)
-            *   URL: `/\b(?:https?:\/\/|www\.)\S+\b/i`
-            *   Email: `/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i`
         *   **合并策略**: 优先匹配特殊模式。如果选区部分或全部在特殊模式内，则扩展到整个特殊模式。
 
 5.  **扩展选区逻辑**:
@@ -566,3 +563,5 @@ graph TD
 9.  **考虑 React/UI 交互 (如果需要)**:
     *   当前设计主要集中在 Content Script 直接操作 DOM。
     *   如果需要在 Popup UI (React) 或其他 React 组件中反映高亮状态或触发查词，可以通过 `browser.runtime.sendMessage` 从 Content Script 发送消息到 Background Script，再由 Background Script 转发到 Popup，或者 Popup 直接向 Content Script 发送消息请求当前高亮文本。
+
+---
