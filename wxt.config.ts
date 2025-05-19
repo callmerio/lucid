@@ -26,4 +26,23 @@ export default defineConfig({
   },
   // 由于顶层 'entrypoints' 配置导致类型错误，我们在此处移除它。
   // WXT 仍会自动发现 'entrypoints/content.ts'。
+
+   // 只在 `wxt dev` 时生效
+  dev: {
+    server: {
+      // 保留 server 配置（如果需要）
+    },
+    // 使用类型断言来允许 browserFlags
+    ...({
+      /**
+       * 任何传给 Chrome 的附加 flag。
+       * 这里开启自动弹 DevTools；你也可以顺便启用实验特性。
+       */
+      browserFlags: [
+        '--auto-open-devtools-for-tabs',
+        // ↓ 如果想让 popup 也自动开，Chrome 必须启用实验特性
+        '--enable-features=AutoOpenDevToolsForPopups',
+      ],
+    } as any),
+  },
 });
