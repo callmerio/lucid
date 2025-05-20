@@ -1,5 +1,3 @@
-// utils/highlightUtils.ts
-
 /**
  * 扩展程序存储的类型定义
  */
@@ -13,8 +11,79 @@ export interface ExtensionStorage {
   };
 }
 
-const MAX_MARK_COUNT = 5; // 最大标记次数，对应5个颜色梯度
+/**
+ * Finds the first occurrence of a word in the text nodes of a container element,
+ * splits the text node around that word, and wraps the word in a <mark>.
+ * Returns true if successful.
+ */
+function highlightWordInContainer(
+  container: Element,
+  word: string,
+  count: number,
+  highlightClassName: string,
+  hex: string,
+  baseColor: string
+): boolean {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) {
+    if (!node.nodeValue) continue;
+    const text = node.nodeValue;
+    const lower = text.toLowerCase();
+    const idx = lower.indexOf(word.toLowerCase());
+    if (idx === -1) continue;
+    // Split into three parts
+    const beforeText = text.slice(0, idx);
+    const matchText = text.slice(idx, idx + word.length);
+    const afterText = text.slice(idx + word.length);
+    const parent = node.parentNode;
+    if (!parent) return false;
+    const beforeNode = document.createTextNode(beforeText);
+    const matchNode = document.createElement('mark');
+    matchNode.classList.add('lucid-highlight', highlightClassName);
+    matchNode.dataset.word = word;
+    matchNode.dataset.markCount = count.toString();
+    matchNode.dataset.baseColor = baseColor;
+    matchNode.dataset.appliedTimestamp = Date.now().toString();
+    matchNode.textContent = matchText;
+    // Apply text-gradient colour
+    const gradient = `linear-gradient(to right, ${hex} 0%, ${hex} 60%, ${COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500]} 100%)`;
+    matchNode.style.background = gradient;
+    matchNode.style.webkitBackgroundClip = 'text';
+    matchNode.style.backgroundClip = 'text';
+    matchNode.style.color = 'transparent';
+    const afterNode = document.createTextNode(afterText);
+    parent.insertBefore(beforeNode, node);
+    parent.insertBefore(matchNode, node);
+    parent.insertBefore(afterNode, node);
+    parent.removeChild(node);
+    return true;
+  }
+  return false;
+}
+
+// 一个 shade 等级对应 3 次标记，因此允许到 5 * 3 = 15 次
+const MAX_MARK_COUNT = 12;
 const DEFAULT_BASE_COLOR = 'orange'; // 默认高亮基础颜色
+
+// Pre‑computed shade mappings and palettes to avoid re‑creating them on every call
+const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400 };
+const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600 };
+
+const COLOR_PALETTE: Record<string, Record<number, string>> = {
+  orange: {
+    50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c',
+    500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407',
+  },
+  blue: {
+    50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+    500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
+  },
+  green: {
+    50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80',
+    500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16',
+  },
+} as const;
 
 /**
  * 负责把一次性的全局样式插入到 <head> 或 ShadowRoot。
@@ -22,7 +91,8 @@ const DEFAULT_BASE_COLOR = 'orange'; // 默认高亮基础颜色
 const StyleManager = {
   STYLE_ID: 'lucid-highlight-styles',
   HIGHLIGHT_STYLES: `
-.lucid-highlight { background: inherit!important; transition: color 500ms ease-in-out; }
+.lucid-highlight { transition: color 500ms ease-in-out; }
+/* background intentionally left to inline style */
 
 .lucid-highlight.flash {
   animation: lucid-flash 200ms ease-in-out;
@@ -68,31 +138,14 @@ export function calculateHighlight(
   queryCount: number,
   isDarkText: boolean,
 ): { className: string; hex: string } {
-  const level = Math.min(MAX_MARK_COUNT, Math.ceil(queryCount / 3));
+  // 1‒3 次 = level 1, 4‒6 次 = level 2, …，最多 level 5
+  const level = Math.min(5, Math.ceil(queryCount / 3));
 
-  const lightShades: Record<number, number> = { 1: 600, 2: 700, 3: 800, 4: 900, 5: 950 };
-  const darkShades: Record<number, number> = { 1: 400, 2: 300, 3: 200, 4: 100, 5: 50 };
-  const shade = isDarkText ? darkShades[level] : lightShades[level];
+  const shade = isDarkText ? DARK_SHADES[level] : LIGHT_SHADES[level];
 
   const className = `text-${baseColor}-${shade}`;
 
-  // 仅列常用调色盘，可按需扩充
-  const PALETTE: Record<string, Record<number, string>> = {
-    orange: {
-      50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c',
-      500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407',
-    },
-    blue: {
-      50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
-      500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
-    },
-    green: {
-      50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80',
-      500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16',
-    },
-  };
-
-  const hex = PALETTE[baseColor]?.[shade] ?? PALETTE.orange[shade];
+  const hex = COLOR_PALETTE[baseColor]?.[shade] ?? COLOR_PALETTE.orange[shade];
   return { className, hex };
 }
 
@@ -167,7 +220,13 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       newCount,
       isDarkText,
     );
-    if (hex) ancestorMark.style.color = hex;
+    // Text gradient: from the current shade (hex) → baseColor-500
+    const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
+    const refreshGradient = `linear-gradient(to right, ${hex} 0%, ${hex} 60%, ${COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500]} 100%)`;
+    ancestorMark.style.background = refreshGradient;
+    ancestorMark.style.webkitBackgroundClip = 'text';
+    ancestorMark.style.backgroundClip = 'text';
+    ancestorMark.style.color = 'transparent';
 
     // 闪烁提示
     ancestorMark.classList.add('flash');
@@ -180,7 +239,9 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
     return;
   }
 
-  const word = range.toString().trim().toLowerCase();
+  // Use original user selection for word matching to avoid expansions pulling in page-inserted text
+  const rawSelection = window.getSelection()?.toString().trim() || '';
+  const word = rawSelection.toLowerCase();
   if (!word) {
     console.warn('[Lucid] applyWordHighlight: Word is empty. Skipping.');
     return;
@@ -209,56 +270,48 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       // Smooth highlight: animate text color via transition.
       const highlightElement = document.createElement('mark');
       highlightElement.classList.add('lucid-highlight');
+      // Apply the Tailwind‑style class so DevTools shows the exact shade
+      highlightElement.classList.add(highlightClassName);
       // preserve data attributes but DO NOT set color or highlightClassName yet
       if (hex) highlightElement.dataset.baseColor = baseColor;
       highlightElement.dataset.word = word;
       highlightElement.dataset.markCount = currentMarkCount.toString();
       highlightElement.dataset.appliedTimestamp = Date.now().toString();
 
+      // Text gradient: from the current shade (hex) → baseColor-500
+      const startHex = hex;
+      const endHex = COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500];
+      const gradient = `linear-gradient(to right, ${startHex} 0%, ${startHex} 40%, ${endHex} 100%)`;
+      highlightElement.style.background = gradient;
+      highlightElement.style.webkitBackgroundClip = 'text';
+      highlightElement.style.backgroundClip = 'text';
+      highlightElement.style.color = 'transparent';
+
       const newHighlight = highlightElement.cloneNode(false) as HTMLElement;
       range.surroundContents(newHighlight);
       console.log(`[Lucid] Word "${word}" highlighted with smooth transition to color ${hex}`);
 
-      // Trigger text color transition:
-      setTimeout(() => {
-        newHighlight.style.color = hex;
-      }, 0);
+      // No need for delayed color transition; text color is now handled by gradient background-clip.
+      // Optionally, could still trigger a transition if desired.
+      // Immediately set the same gradient on newHighlight as well:
+      newHighlight.style.background = gradient;
+      newHighlight.style.webkitBackgroundClip = 'text';
+      newHighlight.style.backgroundClip = 'text';
+      newHighlight.style.color = 'transparent';
     } catch (e) {
       if (e instanceof DOMException && e.name === 'InvalidStateError') {
-        console.warn(`[Lucid] surroundContents failed for word "${word}", attempting fragment modification fallback. Error: ${e.message}`);
-        // Fallback: Extract, wrap text nodes in fragment, then insert
-        try {
-          // Ensure the range is not collapsed before extracting.
-          if (range.collapsed) {
-            console.warn('[Lucid] Fallback: Range is collapsed, skipping highlight for word:', word);
-            return; // Exit if range is collapsed, nothing to extract or highlight
-          }
-          const fragment = range.extractContents(); // This removes content from DOM
-          const highlightElement = document.createElement('mark');
-          highlightElement.classList.add('lucid-highlight');
-          if (hex) highlightElement.dataset.baseColor = baseColor;
-          highlightElement.dataset.word = word;
-          highlightElement.dataset.markCount = currentMarkCount.toString();
-          highlightElement.dataset.appliedTimestamp = Date.now().toString();
-
-          // Wrap and collect all new highlight nodes:
-          wrapTextNodesInFragment(fragment, highlightElement);
-          const newHighlights = Array.from(fragment.querySelectorAll<HTMLElement>('mark.lucid-highlight'));
-          range.insertNode(fragment);
-          console.log(`[Lucid] Word "${word}" highlighted with smooth transition fallback to color ${hex}`);
-
-          // Trigger text color transition on each:
-          newHighlights.forEach(el => {
-            setTimeout(() => {
-              el.style.color = hex;
-            }, 0);
-          });
-        } catch (fallbackError) {
-          console.error(`[Lucid] Fragment modification fallback failed for word "${word}":`, fallbackError);
-          // If the fallback also fails, the original content is already extracted.
-          // This state is hard to recover from without more complex undo logic.
-          // For now, we log the error. The page might be partially broken at the highlight spot.
+        console.warn(`[Lucid] surroundContents failed for word "${word}", using container-based fallback`);
+        // Use tree-walker based highlight within the smallest block container
+        const containerEl = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+          ? range.commonAncestorContainer as Element
+          : (range.commonAncestorContainer.parentElement as Element);
+        if (containerEl && highlightWordInContainer(containerEl, word, currentMarkCount, highlightClassName, hex, baseColor)) {
+          console.log(`[Lucid] Word "${word}" highlighted via container-based fallback`);
+          return;
         }
+        // If even this fails, log and exit without throwing
+        console.error(`[Lucid] Container-based fallback failed for word "${word}"`);
+        return;
       } else {
         // If it's not an InvalidStateError, or some other error, re-throw it.
         console.error(`[Lucid] Error during surroundContents (not InvalidStateError) for word "${word}":`, e);
