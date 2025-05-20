@@ -35,9 +35,9 @@ const isBoundaryChar = (ch: string) => !/[a-z0-9]/i.test(ch);
  */
 function hasWordBoundary(lower: string, idx: number, wordLen: number): boolean {
   const before = idx === 0 ? '' : lower[idx - 1];
-  const after  = idx + wordLen >= lower.length ? '' : lower[idx + wordLen];
+  const after = idx + wordLen >= lower.length ? '' : lower[idx + wordLen];
   const boundaryBefore = before === '' || isBoundaryChar(before);
-  const boundaryAfter  = after  === '' || isBoundaryChar(after);
+  const boundaryAfter = after === '' || isBoundaryChar(after);
   return boundaryBefore && boundaryAfter;
 }
 
@@ -48,8 +48,9 @@ function createHighlightElement(
   word: string,
   count: number,
   highlightClassName: string,
-  hex: string,
+  primaryHex: string,
   baseColor: string,
+  originHex: string,
 ): HTMLElement {
   const el = document.createElement('mark');
   el.classList.add('lucid-highlight', highlightClassName);
@@ -59,7 +60,7 @@ function createHighlightElement(
   el.dataset.appliedTimestamp = Date.now().toString();
   el.textContent = word;
 
-  const gradient = buildTextGradient(hex, baseColor);
+  const gradient = buildTextGradient(primaryHex, baseColor, originHex);
   el.style.background = gradient;
   el.style.webkitBackgroundClip = 'text';
   el.style.backgroundClip = 'text';
@@ -113,7 +114,8 @@ function highlightWordInContainer(
       if (!parent) break;
 
       const beforeNode = document.createTextNode(beforeText);
-      const matchNode  = createHighlightElement(word, count, highlightClassName, hex, baseColor);
+      const originHex = getEffectiveTextColor(parent);
+      const matchNode = createHighlightElement(word, count, highlightClassName, hex, baseColor, originHex);
       matchNode.textContent = matchText; // preserve original casing
 
       const afterNode = document.createTextNode(afterText);
@@ -168,9 +170,48 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
  * @returns   可直接赋给 `style.background` 的 `linear-gradient(...)` 字符串
  */
 const GRADIENT_SPLIT = 60; // percentage where the gradient switches colour
-function buildTextGradient(primaryHex: string, baseColor: string): string {
+const BLEND_WEIGHT = 0.8; // 9 : 1 blend with original text colour
+
+function mixHexColors(hexA: string, hexB: string, weight = 0.5): string {
+  const a = parseInt(hexA.replace('#', ''), 16);
+  const b = parseInt(hexB.replace('#', ''), 16);
+  const ar = (a >> 16) & 255, ag = (a >> 8) & 255, ab = a & 255;
+  const br = (b >> 16) & 255, bg = (b >> 8) & 255, bb = b & 255;
+  const r = Math.round(ar * weight + br * (1 - weight));
+  const g = Math.round(ag * weight + bg * (1 - weight));
+  const bl = Math.round(ab * weight + bb * (1 - weight));
+  return '#' + [r, g, bl].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function getEffectiveTextColor(node: Node | null): string {
+  let cur: Node | null =
+    node && node.nodeType === Node.TEXT_NODE ? node.parentNode : node;
+  while (cur && cur !== document) {
+    if (cur instanceof HTMLElement) {
+      const col = window.getComputedStyle(cur).color;
+      if (col && col !== 'transparent' && !col.startsWith('rgba(0, 0, 0, 0')) {
+        const m = col.match(/\d+/g);
+        if (m && m.length >= 3) {
+          const [r, g, b] = m.map(Number);
+          return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+        }
+      }
+    }
+    cur = cur?.parentNode || null;
+  }
+  const [r, g, b] = (window.getComputedStyle(document.body).color.match(/\d+/g) || ['0', '0', '0']).map(Number);
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function buildTextGradient(
+  primaryHex: string,
+  baseColor: string,
+  originHex: string,
+): string {
   const endHex = COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500];
-  return `linear-gradient(to right, ${primaryHex} 0%, ${primaryHex} ${GRADIENT_SPLIT}%, ${endHex} 100%)`;
+  const fromMix = mixHexColors(primaryHex, originHex, BLEND_WEIGHT);
+  const toMix = mixHexColors(endHex, originHex, BLEND_WEIGHT);
+  return `linear-gradient(to right, ${fromMix} 0%, ${fromMix} ${GRADIENT_SPLIT}%, ${toMix} 100%)`;
 }
 
 /**
@@ -314,7 +355,8 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
     );
     // Text gradient: from the current shade (hex) → baseColor-500
     const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
-    ancestorMark.style.background = buildTextGradient(hex, baseColor);
+    const originHex = getEffectiveTextColor(ancestorMark.parentNode);
+    ancestorMark.style.background = buildTextGradient(hex, baseColor, originHex);
     ancestorMark.style.webkitBackgroundClip = 'text';
     ancestorMark.style.backgroundClip = 'text';
     ancestorMark.style.color = 'transparent';
@@ -369,7 +411,8 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       highlightElement.dataset.markCount = currentMarkCount.toString();
       highlightElement.dataset.appliedTimestamp = Date.now().toString();
 
-      const gradient = buildTextGradient(hex, baseColor);
+      const originHex = getEffectiveTextColor(range.startContainer);
+      const gradient = buildTextGradient(hex, baseColor, originHex);
       highlightElement.style.background = gradient;
       highlightElement.style.webkitBackgroundClip = 'text';
       highlightElement.style.backgroundClip = 'text';
@@ -393,7 +436,9 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       // No need for delayed color transition; text color is now handled by gradient background-clip.
       // Optionally, could still trigger a transition if desired.
       // Immediately set the same gradient on newHighlight as well:
-      newHighlight.style.background = gradient;
+      const originHex2 = getEffectiveTextColor(range.startContainer);
+      const gradient2 = buildTextGradient(hex, baseColor, originHex2);
+      newHighlight.style.background = gradient2;
       newHighlight.style.webkitBackgroundClip = 'text';
       newHighlight.style.backgroundClip = 'text';
       newHighlight.style.color = 'transparent';
