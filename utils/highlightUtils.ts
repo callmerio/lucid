@@ -18,6 +18,7 @@ export interface ExtensionStorage {
  */
 function highlightWordInContainer(
   container: Element,
+  startNode: Node,              // reference node: ignore text before it
   word: string,
   count: number,
   highlightClassName: string,
@@ -27,6 +28,10 @@ function highlightWordInContainer(
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   let node: Text | null;
   while ((node = walker.nextNode() as Text | null)) {
+    // Skip text nodes that appear before the selection start
+    if (startNode.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING) {
+      continue;
+    }
     if (!node.nodeValue) continue;
     const text = node.nodeValue;
     const lower = text.toLowerCase();
@@ -300,18 +305,32 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       newHighlight.style.color = 'transparent';
     } catch (e) {
       if (e instanceof DOMException && e.name === 'InvalidStateError') {
-        console.warn(`[Lucid] surroundContents failed for word "${word}", using container-based fallback`);
-        // Use tree-walker based highlight within the smallest block container
-        const containerEl = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-          ? range.commonAncestorContainer as Element
-          : (range.commonAncestorContainer.parentElement as Element);
-        if (containerEl && highlightWordInContainer(containerEl, word, currentMarkCount, highlightClassName, hex, baseColor)) {
-          console.log(`[Lucid] Word "${word}" highlighted via container-based fallback`);
-          return;
+        // Progressive fallback: start from the element that directly contains the selection,
+        // walk up DOM ancestors until highlight succeeds or <body> is reached.
+        let containerEl: Element | null = (range.startContainer.nodeType === Node.TEXT_NODE
+          ? range.startContainer.parentElement
+          : (range.startContainer as Element));
+
+        let highlighted = false;
+        while (containerEl && !highlighted) {
+          highlighted = highlightWordInContainer(
+            containerEl,
+            range.startContainer,
+            word,
+            currentMarkCount,
+            highlightClassName,
+            hex,
+            baseColor,
+          );
+          if (!highlighted) containerEl = containerEl.parentElement;
         }
-        // If even this fails, log and exit without throwing
-        console.error(`[Lucid] Container-based fallback failed for word "${word}"`);
-        return;
+
+        if (highlighted) {
+          console.log(`[Lucid] Word "${word}" highlighted via progressive container-based fallback`);
+          return;
+        } else {
+          console.warn('[Lucid] Progressive fallback failed to highlight the word.');
+        }
       } else {
         // If it's not an InvalidStateError, or some other error, re-throw it.
         console.error(`[Lucid] Error during surroundContents (not InvalidStateError) for word "${word}":`, e);
