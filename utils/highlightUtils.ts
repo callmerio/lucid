@@ -27,6 +27,46 @@ export interface ExtensionStorage {
  * @param split               主色占比百分比（0‑100），用于生成渐变
  * @returns 是否成功包裹并插入高亮节点
  */
+// ---------- utility helpers (extracted for clarity) ----------
+const isBoundaryChar = (ch: string) => !/[a-z0-9]/i.test(ch);
+
+/**
+ * Check if the substring starting at `idx` is surrounded by word‑boundaries.
+ */
+function hasWordBoundary(lower: string, idx: number, wordLen: number): boolean {
+  const before = idx === 0 ? '' : lower[idx - 1];
+  const after  = idx + wordLen >= lower.length ? '' : lower[idx + wordLen];
+  const boundaryBefore = before === '' || isBoundaryChar(before);
+  const boundaryAfter  = after  === '' || isBoundaryChar(after);
+  return boundaryBefore && boundaryAfter;
+}
+
+/**
+ * Construct a <mark> element carrying Lucid highlight data & gradient style.
+ */
+function createHighlightElement(
+  word: string,
+  count: number,
+  highlightClassName: string,
+  hex: string,
+  baseColor: string,
+): HTMLElement {
+  const el = document.createElement('mark');
+  el.classList.add('lucid-highlight', highlightClassName);
+  el.dataset.word = word;
+  el.dataset.markCount = count.toString();
+  el.dataset.baseColor = baseColor;
+  el.dataset.appliedTimestamp = Date.now().toString();
+  el.textContent = word;
+
+  const gradient = buildTextGradient(hex, baseColor);
+  el.style.background = gradient;
+  el.style.webkitBackgroundClip = 'text';
+  el.style.backgroundClip = 'text';
+  el.style.color = 'transparent';
+  return el;
+}
+// ---------- end helpers ----------
 function highlightWordInContainer(
   container: Element,
   startNode: Node,              // reference node: ignore text before it
@@ -38,44 +78,62 @@ function highlightWordInContainer(
 ): boolean {
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   let node: Text | null;
+  const wordLower = word.toLowerCase();
+  const wordLen = wordLower.length;
+  let highlightedAny = false;
   while ((node = walker.nextNode() as Text | null)) {
+    // Skip nodes already wrapped in a highlight
+    if (getAncestorHighlight(node)) continue;
     // Skip text nodes that appear before the selection start
     if (startNode.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING) {
       continue;
     }
     if (!node.nodeValue) continue;
-    const text = node.nodeValue;
-    const lower = text.toLowerCase();
-    const idx = lower.indexOf(word.toLowerCase());
-    if (idx === -1) continue;
-    // Split into three parts
-    const beforeText = text.slice(0, idx);
-    const matchText = text.slice(idx, idx + word.length);
-    const afterText = text.slice(idx + word.length);
-    const parent = node.parentNode;
-    if (!parent) return false;
-    const beforeNode = document.createTextNode(beforeText);
-    const matchNode = document.createElement('mark');
-    matchNode.classList.add('lucid-highlight', highlightClassName);
-    matchNode.dataset.word = word;
-    matchNode.dataset.markCount = count.toString();
-    matchNode.dataset.baseColor = baseColor;
-    matchNode.dataset.appliedTimestamp = Date.now().toString();
-    matchNode.textContent = matchText;
-    // Apply text-gradient colour
-    const gradient = buildTextGradient(hex, baseColor);
-    matchNode.style.background = gradient;
-    matchNode.style.webkitBackgroundClip = 'text';
-    matchNode.style.backgroundClip = 'text';
-    matchNode.style.color = 'transparent';
-    const afterNode = document.createTextNode(afterText);
-    parent.insertBefore(beforeNode, node);
-    parent.insertBefore(matchNode, node);
-    parent.insertBefore(afterNode, node);
-    parent.removeChild(node);
-    return true;
+
+    let text = node.nodeValue;
+    let lower = text.toLowerCase();
+    let searchFrom = 0;
+
+    while (true) {
+      const idx = lower.indexOf(wordLower, searchFrom);
+      if (idx === -1) break;
+
+      // strict word‑boundary check
+      if (!hasWordBoundary(lower, idx, wordLen)) {
+        searchFrom = idx + wordLen;       // substring of a larger word – keep searching
+        continue;
+      }
+
+      /* ----- wrap the matched word ----- */
+      const beforeText = text.slice(0, idx);
+      const matchText = text.slice(idx, idx + word.length);
+      const afterText = text.slice(idx + word.length);
+
+      const parent = node.parentNode;
+      if (!parent) break;
+
+      const beforeNode = document.createTextNode(beforeText);
+      const matchNode  = createHighlightElement(word, count, highlightClassName, hex, baseColor);
+      matchNode.textContent = matchText; // preserve original casing
+
+      const afterNode = document.createTextNode(afterText);
+
+      parent.insertBefore(beforeNode, node);
+      parent.insertBefore(matchNode, node);
+      parent.insertBefore(afterNode, node);
+      parent.removeChild(node);
+
+      highlightedAny = true;
+
+      /* Continue scanning the remainder of this text node */
+      node = afterNode;
+      text = afterText;
+      lower = afterText.toLowerCase();
+      searchFrom = 0;
+      walker.currentNode = afterNode;
+    }
   }
-  return false;
+  return highlightedAny;
 }
 
 // 一个 shade 等级对应 3 次标记，因此允许到 5 * 3 = 15 次
@@ -109,7 +167,7 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
  * @param split      主色在渐变中的占比百分比 (0‑100)，默认 60
  * @returns   可直接赋给 `style.background` 的 `linear-gradient(...)` 字符串
  */
-const GRADIENT_SPLIT = 40; // percentage where the gradient switches colour
+const GRADIENT_SPLIT = 60; // percentage where the gradient switches colour
 function buildTextGradient(primaryHex: string, baseColor: string): string {
   const endHex = COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500];
   return `linear-gradient(to right, ${primaryHex} 0%, ${primaryHex} ${GRADIENT_SPLIT}%, ${endHex} 100%)`;
@@ -321,6 +379,17 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       range.surroundContents(newHighlight);
       console.log(`[Lucid] Word "${word}" highlighted with smooth transition to color ${hex}`);
 
+      // Highlight all remaining occurrences of the same word across the entire page
+      highlightWordInContainer(
+        document.body,      // search the full document
+        document.body,      // do not skip any preceding text nodes
+        word,
+        currentMarkCount,
+        highlightClassName,
+        hex,
+        baseColor,
+      );
+
       // No need for delayed color transition; text color is now handled by gradient background-clip.
       // Optionally, could still trigger a transition if desired.
       // Immediately set the same gradient on newHighlight as well:
@@ -352,6 +421,16 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
 
         if (highlighted) {
           console.log(`[Lucid] Word "${word}" highlighted via progressive container-based fallback`);
+          // Highlight any remaining occurrences across the full document (including before the original selection)
+          highlightWordInContainer(
+            document.body,
+            document.body,
+            word,
+            currentMarkCount,
+            highlightClassName,
+            hex,
+            baseColor,
+          );
           return;
         } else {
           console.warn('[Lucid] Progressive fallback failed to highlight the word.');
