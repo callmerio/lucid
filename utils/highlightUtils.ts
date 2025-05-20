@@ -1,5 +1,7 @@
 /**
- * 扩展程序存储的类型定义
+ * 扩展程序在 `browser.storage.local` 中保存的数据结构。
+ * @property settings     用户设置
+ * @property wordMarkings 已标记单词次数的映射表
  */
 export interface ExtensionStorage {
   settings?: {
@@ -12,9 +14,18 @@ export interface ExtensionStorage {
 }
 
 /**
- * Finds the first occurrence of a word in the text nodes of a container element,
- * splits the text node around that word, and wraps the word in a <mark>.
- * Returns true if successful.
+ * 在给定 `container` 中的文本节点里查找首个匹配 `word` 的片段，
+ * 将其拆分并用 `<mark>` 包裹实现高亮。
+ *
+ * @param container           要遍历的容器元素
+ * @param startNode           选区起始节点；遍历时会跳过其之前的文本
+ * @param word                待匹配的单词（已统一转为小写）
+ * @param count               当前单词累计标记次数
+ * @param highlightClassName  Tailwind 风格类名，便于 DevTools 查看
+ * @param hex                 文字主色的十六进制值
+ * @param baseColor           调色盘基色，例如 'orange'
+ * @param split               主色占比百分比（0‑100），用于生成渐变
+ * @returns 是否成功包裹并插入高亮节点
  */
 function highlightWordInContainer(
   container: Element,
@@ -52,7 +63,7 @@ function highlightWordInContainer(
     matchNode.dataset.appliedTimestamp = Date.now().toString();
     matchNode.textContent = matchText;
     // Apply text-gradient colour
-    const gradient = `linear-gradient(to right, ${hex} 0%, ${hex} 60%, ${COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500]} 100%)`;
+    const gradient = buildTextGradient(hex, baseColor);
     matchNode.style.background = gradient;
     matchNode.style.webkitBackgroundClip = 'text';
     matchNode.style.backgroundClip = 'text';
@@ -68,12 +79,12 @@ function highlightWordInContainer(
 }
 
 // 一个 shade 等级对应 3 次标记，因此允许到 5 * 3 = 15 次
-const MAX_MARK_COUNT = 12;
+const MAX_MARK_COUNT = 15;
 const DEFAULT_BASE_COLOR = 'orange'; // 默认高亮基础颜色
 
 // Pre‑computed shade mappings and palettes to avoid re‑creating them on every call
-const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400 };
-const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600 };
+const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400, 5: 300 };
+const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600, 5: 700 };
 
 const COLOR_PALETTE: Record<string, Record<number, string>> = {
   orange: {
@@ -89,6 +100,20 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
     500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16',
   },
 } as const;
+
+/**
+ * 构造“由左向右”的文本渐变字符串。
+ *
+ * @param primaryHex 首颜色的十六进制值
+ * @param baseColor  调色盘基色，用于取得 500 阶的终止色
+ * @param split      主色在渐变中的占比百分比 (0‑100)，默认 60
+ * @returns   可直接赋给 `style.background` 的 `linear-gradient(...)` 字符串
+ */
+const GRADIENT_SPLIT = 40; // percentage where the gradient switches colour
+function buildTextGradient(primaryHex: string, baseColor: string): string {
+  const endHex = COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500];
+  return `linear-gradient(to right, ${primaryHex} 0%, ${primaryHex} ${GRADIENT_SPLIT}%, ${endHex} 100%)`;
+}
 
 /**
  * 负责把一次性的全局样式插入到 <head> 或 ShadowRoot。
@@ -133,10 +158,14 @@ const StyleManager = {
 };
 
 /**
- * 根据查询次数 & 主题计算文字颜色。
- * 返回：
- *   - className：仍保留 Tailwind 风格，方便 DevTools 查看；
- *   - hex      ：真实颜色值，用于行内 style，保证目标页未引入 Tailwind 也能生效。
+ * 根据标记次数与主题色计算应使用的色阶。
+ *
+ * @param baseColor   高亮基色，例如 'orange'
+ * @param queryCount  当前单词的累计标记次数
+ * @param isDarkText  文本是否处于深色背景（影响取深/浅色阶）
+ * @returns  结果对象：
+ *  - `className`：Tailwind 风格类名，便于调试
+ *  - `hex`      ：实际用于行内样式的十六进制颜色
  */
 export function calculateHighlight(
   baseColor: string,
@@ -227,8 +256,7 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
     );
     // Text gradient: from the current shade (hex) → baseColor-500
     const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
-    const refreshGradient = `linear-gradient(to right, ${hex} 0%, ${hex} 60%, ${COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500]} 100%)`;
-    ancestorMark.style.background = refreshGradient;
+    ancestorMark.style.background = buildTextGradient(hex, baseColor);
     ancestorMark.style.webkitBackgroundClip = 'text';
     ancestorMark.style.backgroundClip = 'text';
     ancestorMark.style.color = 'transparent';
@@ -283,10 +311,7 @@ export async function applyWordHighlight(range: Range, isDarkText: boolean): Pro
       highlightElement.dataset.markCount = currentMarkCount.toString();
       highlightElement.dataset.appliedTimestamp = Date.now().toString();
 
-      // Text gradient: from the current shade (hex) → baseColor-500
-      const startHex = hex;
-      const endHex = COLOR_PALETTE[baseColor]?.[500] ?? COLOR_PALETTE.orange[500];
-      const gradient = `linear-gradient(to right, ${startHex} 0%, ${startHex} 40%, ${endHex} 100%)`;
+      const gradient = buildTextGradient(hex, baseColor);
       highlightElement.style.background = gradient;
       highlightElement.style.webkitBackgroundClip = 'text';
       highlightElement.style.backgroundClip = 'text';
