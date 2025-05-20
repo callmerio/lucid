@@ -139,12 +139,12 @@ function highlightWordInContainer(
 }
 
 // 一个 shade 等级对应 3 次标记，因此允许到 5 * 3 = 15 次
-const MAX_MARK_COUNT = 15;
+const MAX_MARK_COUNT = 12;
 const DEFAULT_BASE_COLOR = 'orange'; // 默认高亮基础颜色
 
 // Pre‑computed shade mappings and palettes to avoid re‑creating them on every call
-const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400, 5: 300 };
-const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600, 5: 700 };
+const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400 };
+const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600 };
 
 const COLOR_PALETTE: Record<string, Record<number, string>> = {
   orange: {
@@ -170,7 +170,7 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
  * @returns   可直接赋给 `style.background` 的 `linear-gradient(...)` 字符串
  */
 const GRADIENT_SPLIT = 60; // percentage where the gradient switches colour
-const BLEND_WEIGHT = 0.8; // 9 : 1 blend with original text colour
+const BLEND_WEIGHT = 0.7; // 9 : 1 blend with original text colour
 
 function mixHexColors(hexA: string, hexB: string, weight = 0.5): string {
   const a = parseInt(hexA.replace('#', ''), 16);
