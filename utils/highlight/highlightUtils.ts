@@ -181,13 +181,13 @@ function highlightWordInContainer(
 }
 
 // 一个 shade 等级对应 3 次标记，因此允许到 5 * 3 = 15 次
-const MAX_MARK_COUNT = 15;
-const LEVEL_STEP = 3;
+const MAX_MARK_COUNT = 10;
+const LEVEL_STEP = 2;
 const DEFAULT_BASE_COLOR = "orange"; // 默认高亮基础颜色
 
 // Pre‑computed shade mappings and palettes to avoid re‑creating them on every call
 const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400, 5: 300 };
-const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600, 5: 700 };
+const LIGHT_SHADES: Record<number, number> = { 1: 400, 2: 500, 3: 600, 4: 700, 5: 800 };
 
 const COLOR_PALETTE: Record<string, Record<number, string>> = {
   orange: {
@@ -199,7 +199,7 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
     500: "#f97316",
     600: "#ea580c",
     700: "#c2410c",
-    800: "#9a3412",
+    800: "#C10007",
     900: "#7c2d12",
     950: "#431407",
   },
@@ -240,7 +240,7 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
  * @returns   可直接赋给 `style.background` 的 `linear-gradient(...)` 字符串
  */
 const GRADIENT_SPLIT = 60; // percentage where the gradient switches colour
-const BLEND_WEIGHT = 0.6; // 9 : 1 blend with original text colour
+const BLEND_WEIGHT = 0.7; // 9 : 1 blend with original text colour
 
 function mixHexColors(hexA: string, hexB: string, weight = 0.5): string {
   const a = parseInt(hexA.replace("#", ""), 16);
@@ -344,9 +344,8 @@ const StyleManager = {
   background: rgba(40, 40, 40, 0.4);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 6px 10px;
+  /* padding 由 JavaScript 动态设置 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   color: rgba(255, 255, 255, 0.95);
   position: relative;
@@ -355,9 +354,110 @@ const StyleManager = {
   text-align: left;
   font-weight: 400;
   letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 确保内容左对齐 */
+  transition: all 400ms ease-out;
+  height: auto;
+  /* min-height 由 JavaScript 动态设置 */
 }
 
-/* 移除箭头样式 */
+.lucid-tooltip-main {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  /* min-height 由 JavaScript 动态设置 */
+}
+
+.lucid-tooltip-text {
+  flex: 1;
+  /* line-height 和 min-height 由 JavaScript 动态设置 */
+  display: flex;
+  align-items: center; /* 确保文本垂直居中 */
+}
+
+.lucid-tooltip-hover-zone {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40%; /* 调整为2/5区域 */
+  pointer-events: none;
+}
+
+.lucid-tooltip-actions {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  opacity: 0;
+  transform: translateX(15px) scale(0.8);
+  transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1); /* 更流畅的弹性缓动 */
+  /* height 由 JavaScript 动态设置 */
+}
+
+.lucid-tooltip-expanded .lucid-tooltip-content {
+  padding-right: 6px;
+}
+
+.lucid-tooltip-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  padding: 0;
+}
+
+.lucid-tooltip-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 1);
+  animation: heartbeat 4.2s ease-in-out infinite;
+}
+
+.lucid-tooltip-btn:active {
+  transform: scale(0.95);
+}
+
+.lucid-tooltip-btn-like svg {
+  transform: scale(0.7); /* 爱心图标缩小到70% */
+}
+
+.lucid-tooltip-btn-liked {
+  background: rgba(255, 107, 107, 0.8) !important;
+  color: white !important;
+}
+
+.lucid-tooltip-btn-liked:hover {
+  background: rgba(255, 107, 107, 1) !important;
+  animation: heartbeat 1.2s ease-in-out infinite;
+}
+
+/* 心跳动画 */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.15);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
 
 /* Light theme tooltip */
 @media (prefers-color-scheme: light) {
@@ -369,6 +469,21 @@ const StyleManager = {
     border: 1px solid rgba(0, 0, 0, 0.1);
     color: rgba(20, 20, 20, 0.9);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .lucid-tooltip-btn {
+    background: rgba(0, 0, 0, 0.1);
+    color: rgba(20, 20, 20, 0.8);
+  }
+
+  .lucid-tooltip-btn:hover {
+    background: rgba(0, 0, 0, 0.2);
+    color: rgba(20, 20, 20, 1);
+  }
+
+  .lucid-tooltip-btn-liked {
+    background: rgba(255, 107, 107, 0.8) !important;
+    color: white !important;
   }
 }
   `,
@@ -548,13 +663,37 @@ export async function applyWordHighlight(
   // 确保 flash 动效等全局样式已注入
   StyleManager.ensureStyles(document);
 
-  // 如果选区已处于现有高亮内部 → 更新计数与颜色，并同步更新所有相同词汇的元素
+  // 检查选区是否与现有高亮相关 - 使用更全面的检测方法
+  let targetHighlight: HTMLElement | null = null;
+  let selectedWord = "";
+
+  // 方法1: 检查选区起始点是否在高亮元素内
   const ancestorMark = getAncestorHighlight(range.startContainer);
-  if (
-    ancestorMark &&
-    ancestorMark.dataset.word === range.toString().trim().toLowerCase()
-  ) {
-    const word = ancestorMark.dataset.word;
+
+  // 方法2: 检查选区范围内是否包含高亮元素
+  const selectedText = range.toString().trim().toLowerCase();
+  if (selectedText) {
+    // 查找页面上是否已有相同词汇的高亮
+    const existingHighlights = document.querySelectorAll<HTMLElement>(".lucid-highlight");
+    for (const highlight of existingHighlights) {
+      const highlightWord = highlight.dataset.word || "";
+      if (highlightWord === selectedText) {
+        targetHighlight = highlight;
+        selectedWord = highlightWord;
+        break;
+      }
+    }
+  }
+
+  // 方法3: 如果选区与高亮元素有交集
+  if (!targetHighlight && ancestorMark) {
+    targetHighlight = ancestorMark;
+    selectedWord = ancestorMark.dataset.word || "";
+  }
+
+  // 如果找到了相关的高亮元素，进行重新高亮处理
+  if (targetHighlight && selectedWord) {
+    const word = selectedWord;
 
     // 更新storage中的计数
     try {
@@ -564,33 +703,36 @@ export async function applyWordHighlight(
       ])) as ExtensionStorage;
       const wordMarkings = data.wordMarkings || {};
 
-      const prev = Number(ancestorMark.dataset.markCount ?? 0);
+      const prev = Number(targetHighlight.dataset.markCount ?? 0);
       const newCount = Math.min(prev + 1, MAX_MARK_COUNT);
+
+      // Diagnostic log to check counts during re-highlight
+      console.log(`[Lucid] Re-highlighting. Word: "${word}", Prev DOM count: ${prev}, Calculated new count: ${newCount}, Max count: ${MAX_MARK_COUNT}`);
 
       // 更新storage
       wordMarkings[word] = newCount;
       await browser.storage.local.set({ wordMarkings });
 
       // 更新页面上所有相同词汇的高亮元素
-      const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
+      const baseColor = targetHighlight.dataset.baseColor || DEFAULT_BASE_COLOR;
       updateAllWordHighlights(word, newCount, baseColor, isDarkText);
 
       // 闪烁提示当前选中的元素
-      ancestorMark.classList.add("flash");
-      setTimeout(() => ancestorMark.classList.remove("flash"), 500);
+      targetHighlight.classList.add("flash");
+      setTimeout(() => targetHighlight.classList.remove("flash"), 500);
 
       console.log(`[Lucid] Updated all "${word}" highlights to count ${newCount}`);
       return;
     } catch (error) {
       console.error(`[Lucid] Error updating word markings for "${word}":`, error);
       // 如果storage更新失败，仍然尝试更新DOM
-      const prev = Number(ancestorMark.dataset.markCount ?? 0);
+      const prev = Number(targetHighlight.dataset.markCount ?? 0);
       const newCount = Math.min(prev + 1, MAX_MARK_COUNT);
-      const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
+      const baseColor = targetHighlight.dataset.baseColor || DEFAULT_BASE_COLOR;
       updateAllWordHighlights(word, newCount, baseColor, isDarkText);
 
-      ancestorMark.classList.add("flash");
-      setTimeout(() => ancestorMark.classList.remove("flash"), 500);
+      targetHighlight.classList.add("flash");
+      setTimeout(() => targetHighlight.classList.remove("flash"), 500);
       return;
     }
   }

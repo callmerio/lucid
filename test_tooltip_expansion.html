@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucid Tooltip 扩展功能测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .test-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .test-section {
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-top: 0;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .test-text {
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+
+        .highlight-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #0066cc;
+        }
+
+        .feature-demo {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .feature-demo h4 {
+            margin-top: 0;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-indicator {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .expected-result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .expected-result strong {
+            color: #155724;
+        }
+
+        .test-word {
+            font-weight: bold;
+            color: #dc3545;
+            background: #fff5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+
+        .demo-tooltip {
+            display: inline-block;
+            background: rgba(40, 40, 40, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 10px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .demo-tooltip-expanded {
+            background: rgba(40, 40, 40, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .demo-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            animation: heartbeat-demo 1.2s ease-in-out infinite;
+        }
+
+        .demo-heart {
+            transform: scale(0.7);
+        }
+
+        /* 演示心跳动画 */
+        @keyframes heartbeat-demo {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.15); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.15); }
+            70% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 Lucid Tooltip 扩展功能测试</h1>
+
+        <div class="instructions">
+            <h3>📋 新功能说明</h3>
+            <p>Tooltip 现在支持右侧扩展功能，当鼠标悬停在 tooltip 右侧 2/5 区域时，会向右扩展并显示两个交互按钮。</p>
+
+            <h4>🎯 测试步骤：</h4>
+            <ol>
+                <li><span class="step-indicator">步骤1</span>选择下面的英文单词，按 <kbd>Shift</kbd> 键进行高亮</li>
+                <li><span class="step-indicator">步骤2</span>将鼠标悬停在高亮的单词上，显示基础 tooltip</li>
+                <li><span class="step-indicator">步骤3</span>将鼠标移动到 tooltip 的右侧 2/5 区域（从 3/5 位置开始）</li>
+                <li><span class="step-indicator">步骤4</span>观察 tooltip 立即向右扩展并显示两个按钮</li>
+                <li><span class="step-indicator">步骤5</span>将鼠标移回左侧 3/5 区域，观察 tooltip 收缩</li>
+                <li><span class="step-indicator">步骤6</span>测试按钮功能：
+                    <ul>
+                        <li>下三角按钮：展开详情（控制台日志）</li>
+                        <li>大拇指按钮：收藏单词（控制台日志 + 视觉反馈）</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="expected-result">
+                <strong>预期效果（最新优化）：</strong>
+                <ul>
+                    <li>鼠标移动到 tooltip 右侧 2/5 时，tooltip 立即平滑扩展（无延迟）</li>
+                    <li>显示两个按钮：下三角 ▼ 和爱心 ❤️（爱心缩小至 70%）</li>
+                    <li>按钮有弹性动画效果：从右侧滑入并带有缩放效果</li>
+                    <li><strong>新增：</strong>hover 按钮时有心跳动画效果</li>
+                    <li>鼠标移回左侧 1/3 区域时，扩展状态收缩</li>
+                    <li><strong>新增：</strong>按钮退出动画与整体 tooltip 退出动画同时发生</li>
+                    <li>整体高度保持不变，不会因为按钮出现而变高</li>
+                    <li>使用弹性缓动函数提供更自然的动画</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-demo">
+            <h4>
+                <span class="icon">🎨</span>
+                功能演示
+            </h4>
+            <p><strong>基础状态：</strong></p>
+            <div class="demo-tooltip">n. 框架; 结构; 体系</div>
+
+            <p><strong>扩展状态（hover 按钮查看心跳效果）：</strong></p>
+            <div class="demo-tooltip-expanded">
+                <span>n. 框架; 结构; 体系</span>
+                <button class="demo-btn">▼</button>
+                <button class="demo-btn"><span class="demo-heart">❤️</span></button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 1 - 编程相关词汇</h3>
+            <div class="test-text">
+                The modern framework provides comprehensive documentation for developers. This utility-first design approach makes component development more efficient and maintainable.
+            </div>
+            <div class="highlight-info">
+                💡 测试词汇：framework, comprehensive, documentation, utility, component, development
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 2 - 技术术语</h3>
+            <div class="test-text">
+                JavaScript and TypeScript are popular programming languages. React framework simplifies website development with modern design patterns.
+            </div>
+            <div class="highlight-info">
+                💡 测试词汇：JavaScript, TypeScript, React, website, development, design, modern
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 3 - 混合词汇</h3>
+            <div class="test-text">
+                This year brings new opportunities for framework development. The comprehensive approach ensures better design and utility for all users.
+            </div>
+            <div class="highlight-info">
+                💡 测试词汇：year, framework, comprehensive, design, utility
+            </div>
+        </div>
+
+        <div class="feature-demo">
+            <h4>
+                <span class="icon">🔍</span>
+                调试信息
+            </h4>
+            <p><strong>实现细节（已优化）：</strong></p>
+            <ul>
+                <li><strong>触发区域：</strong>tooltip 右侧 2/5 区域（从 3/5 位置开始，通过 mousemove 事件检测）</li>
+                <li><strong>扩展延迟：</strong>无延迟（立即响应）</li>
+                <li><strong>动画时长：</strong>400ms 平滑过渡（更慢更优雅）</li>
+                <li><strong>高度控制：</strong>固定高度 20px，防止按钮出现时变高</li>
+                <li><strong>按钮功能：</strong>下三角展开详情，大拇指收藏单词</li>
+            </ul>
+
+            <p><strong>检查方法：</strong></p>
+            <ul>
+                <li>打开浏览器开发者工具的控制台</li>
+                <li>观察按钮点击时的日志输出</li>
+                <li>检查 tooltip 元素的 class 变化</li>
+                <li>观察按钮的视觉反馈效果</li>
+                <li>验证 tooltip 高度是否保持不变</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 添加调试辅助功能
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Lucid Tooltip 扩展功能测试页面已加载');
+
+            // 监听 tooltip 相关的 DOM 变化
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === Node.ELEMENT_NODE &&
+                                node.classList &&
+                                node.classList.contains('lucid-tooltip')) {
+                                console.log('✅ Tooltip 已创建:', node);
+                            }
+                        });
+                    }
+
+                    if (mutation.type === 'attributes' &&
+                        mutation.attributeName === 'class' &&
+                        mutation.target.classList.contains('lucid-tooltip')) {
+                        const isExpanded = mutation.target.classList.contains('lucid-tooltip-expanded');
+                        console.log(`📊 Tooltip 状态变化: ${isExpanded ? '扩展' : '收缩'}`, mutation.target);
+                    }
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+    </script>
+</body>
+</html>

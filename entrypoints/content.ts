@@ -27,9 +27,22 @@ export default defineContentScript({
       console.warn(
         "Lucid: skipping cross‑origin iframe (no same‑origin access)",
       );
-      return () => {};
+      return () => { };
     }
     console.log("Lucid 扩展：内容脚本已加载");
+
+    // 在开发环境中加载stagewise工具栏
+    if (import.meta.env.DEV) {
+      import('@stagewise/toolbar').then(({ initToolbar }) => {
+        const stagewiseConfig = {
+          plugins: []
+        };
+        initToolbar(stagewiseConfig);
+        console.log("Stagewise 开发工具栏已加载");
+      }).catch(err => {
+        console.error("无法加载Stagewise工具栏:", err);
+      });
+    }
 
     const handleSelectionAndHighlight = async () => {
       const sel = window.getSelection();
@@ -60,12 +73,12 @@ export default defineContentScript({
 
         // isDarkText 判断
         if (expandedRange && !expandedRange.collapsed) {
-          // Determine if the selection’s text color is dark by computing brightness
+          // Determine if the selection's text color is dark by computing brightness
           let container: Element | null =
             expandedRange.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
               ? (expandedRange.commonAncestorContainer as Element)
               : (expandedRange.commonAncestorContainer
-                  .parentElement as Element);
+                .parentElement as Element);
           // If inside an existing highlight mark, use its parent for color sampling
           const existingMark = container.closest("mark.lucid-highlight");
           if (existingMark) {

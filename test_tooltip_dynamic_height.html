@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tooltip 动态高度测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .test-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+        
+        .test-section h3 {
+            color: #495057;
+            margin-top: 0;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        
+        .font-size-demo {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+        
+        .font-size-demo h4 {
+            margin-top: 0;
+            color: #6c757d;
+        }
+        
+        .small-font {
+            font-size: 12px;
+        }
+        
+        .normal-font {
+            font-size: 16px;
+        }
+        
+        .large-font {
+            font-size: 20px;
+        }
+        
+        .extra-large-font {
+            font-size: 24px;
+        }
+        
+        .highlight-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #0066cc;
+        }
+        
+        .expected-result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        
+        .expected-result strong {
+            color: #155724;
+        }
+        
+        .step-indicator {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .formula-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .formula-box strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 Tooltip 动态高度测试</h1>
+
+        <div class="instructions">
+            <h3>📋 动态高度说明</h3>
+            <p>Tooltip 的高度现在根据页面 body p 元素的字体大小动态调整，确保在不同字体大小下都能保持合适的比例。</p>
+            
+            <div class="formula-box">
+                <strong>计算公式：</strong><br>
+                • 基础字体大小 = body p 元素的字体大小<br>
+                • Tooltip 字体大小 = 基础字体大小 × 0.9<br>
+                • Tooltip 高度 = max(20px, Tooltip字体大小 × 1.4)<br>
+                • 内边距 = max(4px, Tooltip字体大小 × 0.3)<br>
+                • 行高 = Tooltip字体大小 × 1.2
+            </div>
+            
+            <h4>🎯 测试步骤：</h4>
+            <ol>
+                <li><span class="step-indicator">步骤1</span>在不同字体大小的区域中选择英文单词，按 <kbd>Shift</kbd> 键进行高亮</li>
+                <li><span class="step-indicator">步骤2</span>将鼠标悬停在高亮的单词上，观察 tooltip 高度是否与文字大小匹配</li>
+                <li><span class="step-indicator">步骤3</span>测试扩展功能，观察按钮高度是否与文本高度一致</li>
+                <li><span class="step-indicator">步骤4</span>打开开发者工具查看动态设置的样式值</li>
+            </ol>
+            
+            <div class="expected-result">
+                <strong>预期效果：</strong> 
+                <ul>
+                    <li>Tooltip 高度随页面字体大小动态调整</li>
+                    <li>文本在 tooltip 中始终垂直居中</li>
+                    <li>按钮高度与文本高度完全一致</li>
+                    <li>内边距和行高按比例缩放</li>
+                    <li>在不同字体大小下都保持良好的视觉比例</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>不同字体大小测试区域</h3>
+            
+            <div class="font-size-demo small-font">
+                <h4>小字体区域 (12px)</h4>
+                <p>This is a small font test area. The modern <strong>framework</strong> provides comprehensive <strong>documentation</strong> for developers. Test words: <strong>utility</strong>, <strong>component</strong>, <strong>design</strong>.</p>
+            </div>
+            
+            <div class="font-size-demo normal-font">
+                <h4>正常字体区域 (16px)</h4>
+                <p>This is a normal font test area. <strong>JavaScript</strong> and <strong>TypeScript</strong> are popular programming languages. Test words: <strong>modern</strong>, <strong>website</strong>, <strong>development</strong>.</p>
+            </div>
+            
+            <div class="font-size-demo large-font">
+                <h4>大字体区域 (20px)</h4>
+                <p>This is a large font test area. <strong>React</strong> framework simplifies web development. Test words: <strong>comprehensive</strong>, <strong>tailwind</strong>.</p>
+            </div>
+            
+            <div class="font-size-demo extra-large-font">
+                <h4>超大字体区域 (24px)</h4>
+                <p>Extra large font area. <strong>CSS</strong> and <strong>HTML</strong> basics. Test: <strong>year</strong>.</p>
+            </div>
+            
+            <div class="highlight-info">
+                💡 在每个区域测试高亮功能，观察 tooltip 高度如何根据当前区域的字体大小调整
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>动态调整验证</h3>
+            <p>使用浏览器开发者工具检查 tooltip 元素的以下属性：</p>
+            <ul>
+                <li><code>font-size</code> - 应为 body p 字体大小的 90%</li>
+                <li><code>min-height</code> - 应为字体大小的 1.4 倍（最小 20px）</li>
+                <li><code>padding</code> - 应为字体大小的 0.3 倍（最小 4px）</li>
+                <li><code>line-height</code> - 应为字体大小的 1.2 倍</li>
+            </ul>
+            
+            <div class="highlight-info">
+                🔍 右键点击 tooltip → 检查元素 → 查看 Computed 样式
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🔍 技术实现</h3>
+            <p><strong>JavaScript 动态设置：</strong></p>
+            <ul>
+                <li>获取页面 body p 元素的字体大小作为基准</li>
+                <li>计算 tooltip 字体大小（基准 × 0.9）</li>
+                <li>根据字体大小计算合适的高度和内边距</li>
+                <li>动态设置所有相关元素的样式</li>
+                <li>确保按钮高度与文本高度完全一致</li>
+            </ul>
+            
+            <p><strong>CSS 配合：</strong></p>
+            <ul>
+                <li>移除固定的高度和内边距设置</li>
+                <li>保留 flexbox 布局和垂直居中对齐</li>
+                <li>让 JavaScript 完全控制尺寸相关属性</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 添加调试辅助功能
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Tooltip 动态高度测试页面已加载');
+            
+            // 显示当前页面的字体大小信息
+            const bodyP = document.querySelector('body p');
+            if (bodyP) {
+                const fontSize = window.getComputedStyle(bodyP).fontSize;
+                console.log(`📊 页面 body p 字体大小: ${fontSize}`);
+            }
+            
+            // 监听 tooltip 创建并显示动态计算的值
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === Node.ELEMENT_NODE && 
+                                node.classList && 
+                                node.classList.contains('lucid-tooltip')) {
+                                console.log('✅ Tooltip 已创建，检查动态样式:', node);
+                                
+                                const content = node.querySelector('.lucid-tooltip-content');
+                                const text = node.querySelector('.lucid-tooltip-text');
+                                const actions = node.querySelector('.lucid-tooltip-actions');
+                                
+                                if (content) {
+                                    const styles = window.getComputedStyle(content);
+                                    console.log('📊 Tooltip 动态样式:', {
+                                        fontSize: styles.fontSize,
+                                        minHeight: styles.minHeight,
+                                        padding: styles.padding,
+                                        lineHeight: text ? window.getComputedStyle(text).lineHeight : 'N/A',
+                                        actionsHeight: actions ? window.getComputedStyle(actions).height : 'N/A'
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    </script>
+</body>
+</html>

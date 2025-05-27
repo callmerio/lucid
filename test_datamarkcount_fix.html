@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucid 重新高亮 DataMarkCount 修复测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .test-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .test-section {
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .test-section h3 {
+            color: #495057;
+            margin-top: 0;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .test-text {
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+
+        .highlight-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #0066cc;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+        }
+
+        .debug-info h4 {
+            margin-top: 0;
+            color: #6c757d;
+        }
+
+        .step-indicator {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .expected-result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .expected-result strong {
+            color: #155724;
+        }
+
+        .test-word {
+            font-weight: bold;
+            color: #dc3545;
+            background: #fff5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Lucid DataMarkCount 修复测试</h1>
+
+        <div class="instructions">
+            <h3>📋 测试说明</h3>
+            <p>本测试专门验证"重新高亮按 shift datamarkcount 不会增加"问题的修复效果。</p>
+
+            <h4>🎯 测试步骤：</h4>
+            <ol>
+                <li><span class="step-indicator">步骤1</span>选择下面任意一个 <span class="test-word">"JavaScript"</span> 词汇</li>
+                <li><span class="step-indicator">步骤2</span>按 <kbd>Shift</kbd> 键进行高亮（应该看到 data-mark-count="1"）</li>
+                <li><span class="step-indicator">步骤3</span>再次选择同一个或不同的 <span class="test-word">"JavaScript"</span> 词汇</li>
+                <li><span class="step-indicator">步骤4</span>再次按 <kbd>Shift</kbd> 键</li>
+                <li><span class="step-indicator">步骤5</span>检查所有 <span class="test-word">"JavaScript"</span> 词汇的 data-mark-count 是否都更新为 2</li>
+                <li><span class="step-indicator">步骤6</span>重复步骤3-4，验证计数是否继续增加</li>
+            </ol>
+
+            <div class="expected-result">
+                <strong>预期结果：</strong>
+                <ul>
+                    <li>每次重新高亮时，所有相同词汇的 data-mark-count 都应该同步增加</li>
+                    <li>高亮颜色应该随着计数增加而变深</li>
+                    <li>即使选择范围略有不同，也应该能正确识别并增加计数</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 1 - 多个 JavaScript 词汇</h3>
+            <div class="test-text">
+                JavaScript is a versatile programming language. Modern JavaScript frameworks like React and Vue.js make JavaScript development more efficient. Learning JavaScript fundamentals is essential for web development.
+            </div>
+            <div class="highlight-info">
+                💡 这段包含4个"JavaScript"词汇，测试全局同步更新功能
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 2 - 混合大小写</h3>
+            <div class="test-text">
+                JAVASCRIPT and javascript are the same language. Whether you write JavaScript, Javascript, or javascript, they all refer to the same programming language.
+            </div>
+            <div class="highlight-info">
+                💡 测试不同大小写的词汇是否能正确识别和计数
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 3 - 边界情况</h3>
+            <div class="test-text">
+                JavaScript-based applications use JavaScript. The JavaScript engine processes JavaScript code efficiently. JavaScript's popularity makes JavaScript skills valuable.
+            </div>
+            <div class="highlight-info">
+                💡 测试带连字符和所有格形式的词汇处理
+            </div>
+        </div>
+
+        <div class="debug-info">
+            <h4>🔍 调试信息</h4>
+            <p><strong>修复内容（v2.0）：</strong></p>
+            <ul>
+                <li><strong>全面重构检测逻辑：</strong>使用三种方法检测已高亮词汇</li>
+                <li><strong>方法1：</strong>检查选区起始点是否在高亮元素内</li>
+                <li><strong>方法2：</strong>检查选区文本是否与已有高亮词汇匹配</li>
+                <li><strong>方法3：</strong>检查选区与高亮元素是否有交集</li>
+                <li><strong>修复变量引用：</strong>使用 targetHighlight 而不是 ancestorMark</li>
+                <li><strong>增强日志：</strong>添加详细的重新高亮日志信息</li>
+            </ul>
+
+            <p><strong>检查方法：</strong></p>
+            <ul>
+                <li>右键点击高亮元素 → 检查元素</li>
+                <li>查看 data-mark-count 属性值</li>
+                <li>观察高亮颜色变化</li>
+                <li>查看浏览器控制台日志</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>测试文本 4 - 长文本测试</h3>
+            <div class="test-text">
+                JavaScript has evolved significantly since its creation. Modern JavaScript includes features like arrow functions, async/await, and modules. JavaScript frameworks and libraries have made JavaScript development more productive. The JavaScript ecosystem continues to grow, with new JavaScript tools and JavaScript libraries being released regularly.
+            </div>
+            <div class="highlight-info">
+                💡 测试在长文本中的多次高亮和计数同步
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加一些调试辅助功能
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Lucid DataMarkCount 修复测试页面已加载');
+
+            // 监听高亮元素的变化
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === Node.ELEMENT_NODE &&
+                                node.classList &&
+                                node.classList.contains('lucid-highlight')) {
+                                console.log('✅ 新高亮元素已添加:', {
+                                    word: node.dataset.word,
+                                    markCount: node.dataset.markCount,
+                                    element: node
+                                });
+                            }
+                        });
+                    }
+
+                    if (mutation.type === 'attributes' &&
+                        mutation.attributeName === 'data-mark-count') {
+                        console.log('📊 高亮计数已更新:', {
+                            word: mutation.target.dataset.word,
+                            oldCount: mutation.oldValue,
+                            newCount: mutation.target.dataset.markCount,
+                            element: mutation.target
+                        });
+                    }
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeOldValue: true,
+                attributeFilter: ['data-mark-count']
+            });
+        });
+    </script>
+</body>
+</html>
