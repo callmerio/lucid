@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试Tooltip功能</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .instructions {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+        .test-text {
+            font-size: 16px;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+        .feature-note {
+            font-size: 14px;
+            color: #64748b;
+            font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f1f5f9;
+            border-left: 3px solid #3b82f6;
+        }
+        .debug-panel {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .highlight-demo {
+            display: inline-block;
+            background: linear-gradient(to right, #f97316 0%, #f97316 60%, #ea580c 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            padding: 2px 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+        .dark-theme {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        .dark-theme .test-container {
+            background: #334155;
+            color: #e2e8f0;
+        }
+        .dark-theme .test-section {
+            background: #475569;
+            border-color: #64748b;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+
+    <div class="test-container">
+        <h1>🎯 Lucid Tooltip功能测试</h1>
+
+        <div class="instructions">
+            <h3>📋 测试说明</h3>
+            <ol>
+                <li><strong>高亮单词：</strong> 选择下面的英文单词，按Shift键进行高亮</li>
+                <li><strong>查看解释：</strong> 将鼠标悬停在高亮的单词上，应该显示毛玻璃效果的翻译tooltip</li>
+                <li><strong>测试功能：</strong>
+                    <ul>
+                        <li>tooltip应该只显示一行简洁的中文翻译</li>
+                        <li>tooltip应该有真正的毛玻璃透明效果</li>
+                        <li>tooltip位置应该相对于高亮单词智能调整</li>
+                        <li>支持明暗主题自动适配</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🔤 基础词汇测试</h3>
+            <div class="test-text">
+                The <strong>framework</strong> provides excellent <strong>utility</strong> classes for modern web <strong>design</strong>.
+                Tailwind CSS is a popular choice for building responsive websites with clean and maintainable code.
+            </div>
+            <div class="feature-note">
+                💡 测试词汇：framework, utility, design, Tailwind, CSS, modern, website
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 技术词汇测试</h3>
+            <div class="test-text">
+                React and TypeScript work well together for building scalable applications.
+                The comprehensive documentation helps developers understand the component architecture.
+            </div>
+            <div class="feature-note">
+                💡 测试词汇：React, TypeScript, comprehensive, documentation, component, development
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📚 混合内容测试</h3>
+            <div class="test-text">
+                This year marks a significant milestone in web development.
+                The JavaScript ecosystem continues to evolve with new frameworks and utilities.
+            </div>
+            <div class="feature-note">
+                💡 测试词汇：year, JavaScript, framework, utility（测试重复词汇的一致性）
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 样式演示</h3>
+            <div class="test-text">
+                这里有一些预高亮的词汇演示tooltip效果：
+                <span class="highlight-demo" data-word="tailwind">Tailwind</span>、
+                <span class="highlight-demo" data-word="css">CSS</span>、
+                <span class="highlight-demo" data-word="framework">framework</span>
+            </div>
+            <div class="feature-note">
+                💡 这些是静态演示，实际tooltip需要通过扩展功能触发
+            </div>
+        </div>
+
+        <div class="debug-panel">
+            <strong>🔍 调试信息</strong><br>
+            <div id="debug-output">等待高亮操作...</div>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换功能
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        // 调试信息更新
+        function updateDebugInfo() {
+            const highlights = document.querySelectorAll('.lucid-highlight');
+            const tooltips = document.querySelectorAll('.lucid-tooltip');
+            const debugOutput = document.getElementById('debug-output');
+
+            const info = [
+                `高亮元素数量: ${highlights.length}`,
+                `当前tooltip数量: ${tooltips.length}`,
+                `页面主题: ${document.body.classList.contains('dark-theme') ? '暗色' : '亮色'}`,
+                `时间: ${new Date().toLocaleTimeString()}`
+            ];
+
+            if (highlights.length > 0) {
+                info.push('高亮词汇:');
+                highlights.forEach((el, index) => {
+                    info.push(`  ${index + 1}. "${el.dataset.word}" (计数: ${el.dataset.markCount})`);
+                });
+            }
+
+            debugOutput.innerHTML = info.join('<br>');
+        }
+
+        // 每秒更新调试信息
+        setInterval(updateDebugInfo, 1000);
+
+        // 监听DOM变化
+        const observer = new MutationObserver(updateDebugInfo);
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'data-word', 'data-mark-count']
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDebugInfo();
+            console.log('🎯 Tooltip测试页面已加载');
+        });
+    </script>
+</body>
+</html>

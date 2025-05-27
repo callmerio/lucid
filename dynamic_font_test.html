@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态字体大小测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.4) 0%, transparent 50%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 不同字体大小的段落用于测试 */
+        .small-text p {
+            font-size: 12px;
+        }
+        
+        .normal-text p {
+            font-size: 16px;
+        }
+        
+        .large-text p {
+            font-size: 20px;
+        }
+        
+        .extra-large-text p {
+            font-size: 24px;
+        }
+        
+        .highlighted-word {
+            background: linear-gradient(to right, #f97316 0%, #f97316 60%, #ea580c 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        /* 动态字体tooltip样式 */
+        .dynamic-tooltip {
+            position: absolute;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(-2px);
+            transition: opacity 150ms ease-out, transform 150ms ease-out;
+            pointer-events: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        .dynamic-tooltip-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .dynamic-tooltip-content {
+            background: rgba(40, 40, 40, 0.7);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 6px 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.95);
+            position: relative;
+            font-size: 14px; /* 默认大小，会被JavaScript动态覆盖 */
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            min-width: 120px;
+            max-width: 320px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .font-size-display {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📏 动态字体大小测试</h1>
+        
+        <div class="instructions">
+            <h3>测试说明</h3>
+            <p>tooltip字体大小现在会自动调整为所在段落字体大小的90%。测试不同字体大小的段落：</p>
+            <ul>
+                <li>悬停在不同段落的高亮单词上</li>
+                <li>观察tooltip字体大小的变化</li>
+                <li>查看下方的字体大小信息显示</li>
+            </ul>
+        </div>
+        
+        <div class="test-section small-text">
+            <h3>🔤 小字体段落 (12px)</h3>
+            <p>
+                This is a <span class="highlighted-word" data-translation="n. 框架; 结构; 体系">framework</span> 
+                with small text. The <span class="highlighted-word" data-translation="n. 顺风; 有利条件; 推动力">Tailwind</span> 
+                tooltip should be 10.8px (90% of 12px).
+            </p>
+            <div class="font-size-display">段落字体: 12px → tooltip应为: 10.8px</div>
+        </div>
+        
+        <div class="test-section normal-text">
+            <h3>📝 正常字体段落 (16px)</h3>
+            <p>
+                This is a <span class="highlighted-word" data-translation="n. 层叠样式表; 网页样式语言">CSS</span> 
+                paragraph with normal text size. The <span class="highlighted-word" data-translation="n./v. 设计; 图案; 计划">design</span> 
+                tooltip should be 14.4px (90% of 16px).
+            </p>
+            <div class="font-size-display">段落字体: 16px → tooltip应为: 14.4px</div>
+        </div>
+        
+        <div class="test-section large-text">
+            <h3>📖 大字体段落 (20px)</h3>
+            <p>
+                This is a <span class="highlighted-word" data-translation="n. 网站; 网址">website</span> 
+                with large text. The <span class="highlighted-word" data-translation="n. 组件; 成分; 部件">component</span> 
+                tooltip should be 18px (90% of 20px).
+            </p>
+            <div class="font-size-display">段落字体: 20px → tooltip应为: 18px</div>
+        </div>
+        
+        <div class="test-section extra-large-text">
+            <h3>📚 超大字体段落 (24px)</h3>
+            <p>
+                This is a <span class="highlighted-word" data-translation="n. 年; 年纪; 一年的期间; 某年级的学生">year</span> 
+                with extra large text. The <span class="highlighted-word" data-translation="n. 发展; 开发; 发育">development</span> 
+                tooltip should be 21.6px (90% of 24px).
+            </p>
+            <div class="font-size-display">段落字体: 24px → tooltip应为: 21.6px</div>
+        </div>
+        
+        <div id="debug-info" class="font-size-display">
+            <strong>实时调试信息：</strong><br>
+            <span id="debug-text">将鼠标悬停在高亮单词上查看字体大小信息</span>
+        </div>
+    </div>
+    
+    <script>
+        // 动态字体大小tooltip实现
+        let currentTooltip = null;
+        let hideTimeout = null;
+        
+        function getBodyPFontSize(targetElement) {
+            // 查找包含目标元素的最近的p元素
+            let p = targetElement.closest('p');
+            if (p) {
+                const computedStyle = window.getComputedStyle(p);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                if (!isNaN(fontSize)) {
+                    return fontSize;
+                }
+            }
+            
+            // 如果没有找到p元素，尝试获取body的字体大小
+            const body = document.body;
+            if (body) {
+                const computedStyle = window.getComputedStyle(body);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                if (!isNaN(fontSize)) {
+                    return fontSize;
+                }
+            }
+            
+            return 16; // 默认值
+        }
+        
+        function updateDebugInfo(bodyFontSize, tooltipFontSize) {
+            const debugText = document.getElementById('debug-text');
+            debugText.innerHTML = `
+                检测到段落字体大小: ${bodyFontSize}px<br>
+                计算的tooltip字体大小: ${tooltipFontSize}px (${bodyFontSize} × 0.9)<br>
+                时间: ${new Date().toLocaleTimeString()}
+            `;
+        }
+        
+        function cancelHide() {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+        }
+        
+        function hideTooltip(delay = 300) {
+            cancelHide();
+            hideTimeout = setTimeout(() => {
+                if (currentTooltip) {
+                    currentTooltip.remove();
+                    currentTooltip = null;
+                }
+                hideTimeout = null;
+            }, delay);
+        }
+        
+        function showTooltip(targetElement, translation) {
+            cancelHide();
+            
+            if (currentTooltip && currentTooltip.textContent === translation) {
+                return;
+            }
+            
+            if (currentTooltip) {
+                currentTooltip.remove();
+            }
+            
+            // 获取动态字体大小
+            const bodyPFontSize = getBodyPFontSize(targetElement);
+            const tooltipFontSize = bodyPFontSize * 0.9;
+            
+            // 更新调试信息
+            updateDebugInfo(bodyPFontSize, tooltipFontSize);
+            
+            currentTooltip = document.createElement('div');
+            currentTooltip.className = 'dynamic-tooltip dynamic-tooltip-visible';
+            currentTooltip.innerHTML = `<div class="dynamic-tooltip-content">${translation}</div>`;
+            
+            // 设置动态字体大小
+            const tooltipContent = currentTooltip.querySelector('.dynamic-tooltip-content');
+            tooltipContent.style.fontSize = `${tooltipFontSize}px`;
+            
+            document.body.appendChild(currentTooltip);
+            
+            const rect = targetElement.getBoundingClientRect();
+            const tooltipRect = currentTooltip.getBoundingClientRect();
+            
+            let left = rect.left;
+            let top = rect.bottom + 4;
+            
+            if (left < 8) left = 8;
+            if (left + tooltipRect.width > window.innerWidth - 8) {
+                left = window.innerWidth - tooltipRect.width - 8;
+            }
+            
+            currentTooltip.style.left = `${left + window.scrollX}px`;
+            currentTooltip.style.top = `${top + window.scrollY}px`;
+            
+            currentTooltip.addEventListener('mouseenter', cancelHide);
+            currentTooltip.addEventListener('mouseleave', () => hideTooltip(200));
+        }
+        
+        document.querySelectorAll('.highlighted-word').forEach(word => {
+            word.addEventListener('mouseenter', (e) => {
+                const translation = e.target.dataset.translation;
+                if (translation) {
+                    showTooltip(e.target, translation);
+                }
+            });
+            
+            word.addEventListener('mouseleave', () => {
+                hideTooltip(300);
+            });
+        });
+    </script>
+</body>
+</html>

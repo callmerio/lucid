@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>参考样式演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .demo-text {
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 40px 0;
+        }
+        
+        .highlighted-word {
+            background: linear-gradient(to right, #f97316 0%, #f97316 60%, #ea580c 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        /* 精确复制参考图的tooltip样式 */
+        .reference-tooltip {
+            position: absolute;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(-2px);
+            transition: opacity 150ms ease-out, transform 150ms ease-out;
+            pointer-events: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        .reference-tooltip-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .reference-tooltip-content {
+            background: rgba(45, 45, 45, 0.95);
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 6px 10px;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.4),
+                0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
+            color: rgba(255, 255, 255, 0.92);
+            position: relative;
+            font-size: 13px;
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            min-width: 120px;
+            max-width: 320px;
+        }
+        
+        .reference-tooltip-content::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 12px;
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 4px solid rgba(45, 45, 45, 0.95);
+            filter: drop-shadow(0 -1px 2px rgba(0, 0, 0, 0.2));
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .comparison-item h3 {
+            margin-top: 0;
+            color: #f97316;
+        }
+        
+        .reference-image {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 参考样式对比演示</h1>
+        
+        <div class="instructions">
+            <h3>样式对比说明</h3>
+            <p>将鼠标悬停在下面的高亮单词上，查看新的tooltip样式。这个版本更接近您提供的参考图效果。</p>
+            <ul>
+                <li><strong>更小的圆角</strong>：从12px改为6px</li>
+                <li><strong>更紧凑的内边距</strong>：从8px 12px改为6px 10px</li>
+                <li><strong>更深的背景色</strong>：使用rgba(45, 45, 45, 0.95)</li>
+                <li><strong>更小的箭头</strong>：从6px改为4px</li>
+                <li><strong>左对齐文本</strong>：text-align: left</li>
+            </ul>
+        </div>
+        
+        <div class="demo-text">
+            <p>
+                The <span class="highlighted-word" data-translation="n. 框架; 结构; 体系">framework</span> 
+                provides excellent <span class="highlighted-word" data-translation="n. 实用性; 效用; 公用事业">utility</span> 
+                classes for modern web <span class="highlighted-word" data-translation="n./v. 设计; 图案; 计划">design</span>.
+            </p>
+            
+            <p>
+                <span class="highlighted-word" data-translation="n. 顺风; 有利条件; 推动力">Tailwind</span> 
+                <span class="highlighted-word" data-translation="n. 层叠样式表; 网页样式语言">CSS</span> 
+                is a popular choice for building responsive 
+                <span class="highlighted-word" data-translation="n. 网站; 网址">websites</span>.
+            </p>
+            
+            <p>
+                This <span class="highlighted-word" data-translation="n. 年; 年纪; 一年的期间; 某年级的学生">year</span> 
+                marks a significant milestone in web 
+                <span class="highlighted-word" data-translation="n. 发展; 开发; 发育">development</span>.
+            </p>
+        </div>
+        
+        <div class="comparison">
+            <div class="comparison-item">
+                <h3>当前实现效果</h3>
+                <p>悬停上面的高亮单词查看tooltip效果</p>
+                <ul>
+                    <li>毛玻璃背景效果</li>
+                    <li>左对齐定位</li>
+                    <li>紧凑的设计</li>
+                    <li>适中的阴影</li>
+                </ul>
+            </div>
+            
+            <div class="comparison-item">
+                <h3>参考图特点</h3>
+                <ul>
+                    <li>深色半透明背景</li>
+                    <li>小圆角边框</li>
+                    <li>紧凑的内边距</li>
+                    <li>左侧小箭头指示</li>
+                    <li>简洁的一行文本</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 精确模拟tooltip行为
+        document.querySelectorAll('.highlighted-word').forEach(word => {
+            let tooltip = null;
+            let hideTimeout = null;
+            
+            word.addEventListener('mouseenter', (e) => {
+                // 清除隐藏定时器
+                if (hideTimeout) {
+                    clearTimeout(hideTimeout);
+                    hideTimeout = null;
+                }
+                
+                const translation = e.target.dataset.translation;
+                if (!translation) return;
+                
+                // 移除现有tooltip
+                if (tooltip) {
+                    tooltip.remove();
+                }
+                
+                // 创建新tooltip
+                tooltip = document.createElement('div');
+                tooltip.className = 'reference-tooltip reference-tooltip-visible';
+                tooltip.innerHTML = `<div class="reference-tooltip-content">${translation}</div>`;
+                
+                document.body.appendChild(tooltip);
+                
+                // 左对齐定位
+                const rect = e.target.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                let left = rect.left;
+                let top = rect.bottom + 6;
+                
+                // 边界检查
+                if (left < 8) left = 8;
+                if (left + tooltipRect.width > window.innerWidth - 8) {
+                    left = window.innerWidth - tooltipRect.width - 8;
+                }
+                
+                tooltip.style.left = `${left + window.scrollX}px`;
+                tooltip.style.top = `${top + window.scrollY}px`;
+                
+                // 防止tooltip消失
+                tooltip.addEventListener('mouseenter', () => {
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                        hideTimeout = null;
+                    }
+                });
+                
+                tooltip.addEventListener('mouseleave', () => {
+                    hideTimeout = setTimeout(() => {
+                        if (tooltip) {
+                            tooltip.remove();
+                            tooltip = null;
+                        }
+                    }, 200);
+                });
+            });
+            
+            word.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    if (tooltip) {
+                        tooltip.remove();
+                        tooltip = null;
+                    }
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

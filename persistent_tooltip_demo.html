@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>持久Tooltip演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .demo-text {
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 40px 0;
+        }
+
+        .highlighted-word {
+            background: linear-gradient(to right, #f97316 0%, #f97316 60%, #ea580c 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+        }
+
+        /* 持久tooltip样式 - 无箭头，鼠标在高亮上时永不消失 */
+        .persistent-tooltip {
+            position: absolute;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(-2px);
+            transition: opacity 150ms ease-out, transform 150ms ease-out;
+            pointer-events: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        .persistent-tooltip-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .persistent-tooltip-content {
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+            -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px 10px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.5),
+                0 1px 0 rgba(255, 255, 255, 0.15) inset,
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            color: rgba(255, 255, 255, 0.95);
+            position: relative;
+            font-size: 13px;
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            min-width: 120px;
+            max-width: 320px;
+            /* 强制启用硬件加速以确保backdrop-filter生效 */
+            transform: translateZ(0);
+            will-change: backdrop-filter;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .test-cases {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .test-case {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .test-case h4 {
+            margin-top: 0;
+            color: #f97316;
+        }
+
+        .status {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 20px 0;
+            color: #86efac;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 持久Tooltip演示</h1>
+
+        <div class="status">
+            <strong>✓ 核心特性：</strong> 只要鼠标还在高亮单词上，tooltip就永远不会消失
+        </div>
+
+        <div class="instructions">
+            <h3>测试说明</h3>
+            <p>这个版本实现了您要求的核心功能：</p>
+            <ul>
+                <li><strong>持久显示</strong>：鼠标在高亮单词上时，tooltip永远不消失</li>
+                <li><strong>智能切换</strong>：鼠标移动到其他高亮单词时，立即切换tooltip内容</li>
+                <li><strong>延迟隐藏</strong>：只有鼠标完全离开高亮区域后，才会在300ms后隐藏</li>
+                <li><strong>无箭头设计</strong>：简洁的矩形tooltip，无三角形指示器</li>
+            </ul>
+        </div>
+
+        <div class="test-cases">
+            <div class="test-case">
+                <h4>📝 测试用例1：基础持久性</h4>
+                <div class="demo-text">
+                    将鼠标悬停在 <span class="highlighted-word" data-translation="n. 框架; 结构; 体系">framework</span>
+                    上，tooltip应该立即显示并保持可见，直到鼠标离开该单词。
+                </div>
+            </div>
+
+            <div class="test-case">
+                <h4>🔄 测试用例2：快速切换</h4>
+                <div class="demo-text">
+                    快速在这些单词间移动鼠标：
+                    <span class="highlighted-word" data-translation="n. 顺风; 有利条件; 推动力">Tailwind</span>、
+                    <span class="highlighted-word" data-translation="n. 层叠样式表; 网页样式语言">CSS</span>、
+                    <span class="highlighted-word" data-translation="n./v. 设计; 图案; 计划">design</span>。
+                    tooltip应该立即切换内容，不会闪烁或消失。
+                </div>
+            </div>
+
+            <div class="test-case">
+                <h4>⏱️ 测试用例3：延迟隐藏</h4>
+                <div class="demo-text">
+                    悬停在 <span class="highlighted-word" data-translation="n. 实用性; 效用; 公用事业">utility</span>
+                    上，然后将鼠标移动到空白区域。tooltip应该在300ms后消失。
+                </div>
+            </div>
+
+            <div class="test-case">
+                <h4>🎯 测试用例4：复杂文本</h4>
+                <div class="demo-text">
+                    This <span class="highlighted-word" data-translation="n. 年; 年纪; 一年的期间; 某年级的学生">year</span>
+                    marks a significant milestone in web
+                    <span class="highlighted-word" data-translation="n. 发展; 开发; 发育">development</span>.
+                    The <span class="highlighted-word" data-translation="n. 网站; 网址">website</span>
+                    uses modern <span class="highlighted-word" data-translation="n. 组件; 成分; 部件">components</span>.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 持久tooltip实现 - 鼠标在高亮上时永不消失
+        let currentTooltip = null;
+        let hideTimeout = null;
+
+        function cancelHide() {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+        }
+
+        function hideTooltip(delay = 300) {
+            cancelHide();
+            hideTimeout = setTimeout(() => {
+                if (currentTooltip) {
+                    currentTooltip.remove();
+                    currentTooltip = null;
+                }
+                hideTimeout = null;
+            }, delay);
+        }
+
+        function showTooltip(targetElement, translation) {
+            // 取消任何隐藏操作
+            cancelHide();
+
+            // 如果已有tooltip且内容相同，直接返回
+            if (currentTooltip && currentTooltip.textContent === translation) {
+                return;
+            }
+
+            // 移除现有tooltip
+            if (currentTooltip) {
+                currentTooltip.remove();
+            }
+
+            // 创建新tooltip
+            currentTooltip = document.createElement('div');
+            currentTooltip.className = 'persistent-tooltip persistent-tooltip-visible';
+            currentTooltip.innerHTML = `<div class="persistent-tooltip-content">${translation}</div>`;
+
+            document.body.appendChild(currentTooltip);
+
+            // 左对齐定位
+            const rect = targetElement.getBoundingClientRect();
+            const tooltipRect = currentTooltip.getBoundingClientRect();
+
+            let left = rect.left;
+            let top = rect.bottom + 6;
+
+            // 边界检查
+            if (left < 8) left = 8;
+            if (left + tooltipRect.width > window.innerWidth - 8) {
+                left = window.innerWidth - tooltipRect.width - 8;
+            }
+
+            currentTooltip.style.left = `${left + window.scrollX}px`;
+            currentTooltip.style.top = `${top + window.scrollY}px`;
+
+            // 防止tooltip消失
+            currentTooltip.addEventListener('mouseenter', cancelHide);
+            currentTooltip.addEventListener('mouseleave', () => hideTooltip(200));
+        }
+
+        // 为所有高亮单词添加事件监听
+        document.querySelectorAll('.highlighted-word').forEach(word => {
+            word.addEventListener('mouseenter', (e) => {
+                const translation = e.target.dataset.translation;
+                if (translation) {
+                    showTooltip(e.target, translation);
+                }
+            });
+
+            word.addEventListener('mouseleave', () => {
+                // 只有鼠标真正离开高亮元素时才开始隐藏倒计时
+                hideTooltip(300);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+import { TooltipManager } from "../tooltip/tooltipManager";
+
 /**
  * 扩展程序在 `browser.storage.local` 中保存的数据结构。
  * @property settings     用户设置
@@ -65,7 +67,30 @@ function createHighlightElement(
   el.style.webkitBackgroundClip = "text";
   el.style.backgroundClip = "text";
   el.style.color = "transparent";
+
+  // 添加tooltip功能
+  addTooltipEvents(el, word);
+  el.dataset.tooltipEventsAdded = "true";
+
   return el;
+}
+
+/**
+ * 为高亮元素添加tooltip事件监听
+ */
+function addTooltipEvents(element: HTMLElement, word: string): void {
+  const tooltipManager = TooltipManager.getInstance();
+
+  element.addEventListener('mouseenter', () => {
+    // 鼠标进入高亮元素时，取消任何隐藏操作并显示tooltip
+    tooltipManager.cancelHide();
+    tooltipManager.showTooltip(element, word);
+  });
+
+  element.addEventListener('mouseleave', () => {
+    // 只有鼠标真正离开高亮元素时才隐藏tooltip
+    tooltipManager.hideTooltip(300);
+  });
 }
 // ---------- end helpers ----------
 function highlightWordInContainer(
@@ -156,12 +181,13 @@ function highlightWordInContainer(
 }
 
 // 一个 shade 等级对应 3 次标记，因此允许到 5 * 3 = 15 次
-const MAX_MARK_COUNT = 12;
+const MAX_MARK_COUNT = 15;
+const LEVEL_STEP = 3;
 const DEFAULT_BASE_COLOR = "orange"; // 默认高亮基础颜色
 
 // Pre‑computed shade mappings and palettes to avoid re‑creating them on every call
-const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400 };
-const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600 };
+const DARK_SHADES: Record<number, number> = { 1: 700, 2: 600, 3: 500, 4: 400, 5: 300 };
+const LIGHT_SHADES: Record<number, number> = { 1: 300, 2: 400, 3: 500, 4: 600, 5: 700 };
 
 const COLOR_PALETTE: Record<string, Record<number, string>> = {
   orange: {
@@ -214,7 +240,7 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
  * @returns   可直接赋给 `style.background` 的 `linear-gradient(...)` 字符串
  */
 const GRADIENT_SPLIT = 60; // percentage where the gradient switches colour
-const BLEND_WEIGHT = 0.7; // 9 : 1 blend with original text colour
+const BLEND_WEIGHT = 0.6; // 9 : 1 blend with original text colour
 
 function mixHexColors(hexA: string, hexB: string, weight = 0.5): string {
   const a = parseInt(hexA.replace("#", ""), 16);
@@ -276,7 +302,11 @@ function buildTextGradient(
 const StyleManager = {
   STYLE_ID: "lucid-highlight-styles",
   HIGHLIGHT_STYLES: `
-.lucid-highlight { transition: color 500ms ease-in-out; }
+.lucid-highlight {
+  transition: color 500ms ease-in-out;
+  cursor: pointer;
+  position: relative;
+}
 /* background intentionally left to inline style */
 
 .lucid-highlight.flash {
@@ -286,6 +316,60 @@ const StyleManager = {
 @keyframes lucid-flash {
   0%,100% { color:inherit!important; }
   50%     { background-color:currentColor!important; color:#ffffff!important; }
+}
+
+/* Tooltip Styles */
+.lucid-tooltip {
+  position: absolute;
+  z-index: 10000;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+  max-width: 320px;
+  min-width: 120px;
+}
+
+.lucid-tooltip-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.lucid-tooltip-content {
+  /* 简洁的毛玻璃效果 - 灰黑色 */
+  background: rgba(40, 40, 40, 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.95);
+  position: relative;
+  font-size: 14px; /* 默认大小，会被JavaScript动态覆盖 */
+  white-space: nowrap;
+  text-align: left;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* 移除箭头样式 */
+
+/* Light theme tooltip */
+@media (prefers-color-scheme: light) {
+  .lucid-tooltip-content {
+    /* 亮色主题的毛玻璃效果 */
+    background: rgba(240, 240, 240, 0.4);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
 }
   `,
   ensureStyles(root: Node): void {
@@ -332,7 +416,7 @@ export function calculateHighlight(
   isDarkText: boolean,
 ): { className: string; hex: string } {
   // 1-3 次 = level 1, 4-6 次 = level 2, 最多 level 5
-  const level = Math.min(5, Math.ceil(queryCount / 3));
+  const level = Math.min(5, Math.ceil(queryCount / LEVEL_STEP));
 
   const shade = isDarkText ? DARK_SHADES[level] : LIGHT_SHADES[level];
 
@@ -367,6 +451,57 @@ function removeEmptyHighlights() {
   });
 }
 
+/**
+ * 更新页面上所有相同词汇的高亮元素的data-mark-count和样式
+ * @param word 要更新的词汇（小写）
+ * @param newCount 新的标记次数
+ * @param baseColor 基础颜色
+ * @param isDarkText 是否为深色文本
+ */
+function updateAllWordHighlights(
+  word: string,
+  newCount: number,
+  baseColor: string,
+  isDarkText: boolean,
+): void {
+  const { className: highlightClassName, hex } = calculateHighlight(
+    baseColor,
+    newCount,
+    isDarkText,
+  );
+
+  // 查找页面上所有相同词汇的高亮元素
+  document.querySelectorAll<HTMLElement>(".lucid-highlight").forEach((el) => {
+    if (el.dataset.word === word) {
+      // 更新data-mark-count属性
+      el.dataset.markCount = newCount.toString();
+
+      // 更新CSS类名（移除旧的，添加新的）
+      const oldClassName = Array.from(el.classList).find(cls =>
+        cls.startsWith(`text-${baseColor}-`)
+      );
+      if (oldClassName) {
+        el.classList.remove(oldClassName);
+      }
+      el.classList.add(highlightClassName);
+
+      // 更新渐变样式
+      const originHex = getEffectiveTextColor(el.parentNode);
+      const gradient = buildTextGradient(hex, baseColor, originHex);
+      el.style.background = gradient;
+      el.style.webkitBackgroundClip = "text";
+      el.style.backgroundClip = "text";
+      el.style.color = "transparent";
+
+      // 确保tooltip事件已添加（防止某些元素缺少事件监听）
+      if (!el.dataset.tooltipEventsAdded) {
+        addTooltipEvents(el, word);
+        el.dataset.tooltipEventsAdded = "true";
+      }
+    }
+  });
+}
+
 /** 把单个 <mark.lucid-highlight> 展开成纯文本内容 */
 function unwrapHighlight(el: HTMLElement) {
   const parent = el.parentNode;
@@ -387,8 +522,8 @@ function unwrapHighlightsInRange(rng: Range) {
     {
       acceptNode: (node) =>
         node instanceof HTMLElement &&
-        node.classList.contains("lucid-highlight") &&
-        rng.intersectsNode(node)
+          node.classList.contains("lucid-highlight") &&
+          rng.intersectsNode(node)
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT,
     },
@@ -413,39 +548,51 @@ export async function applyWordHighlight(
   // 确保 flash 动效等全局样式已注入
   StyleManager.ensureStyles(document);
 
-  // 如果选区已处于现有高亮内部 → 仅更新计数与颜色，避免再包一层
+  // 如果选区已处于现有高亮内部 → 更新计数与颜色，并同步更新所有相同词汇的元素
   const ancestorMark = getAncestorHighlight(range.startContainer);
   if (
     ancestorMark &&
     ancestorMark.dataset.word === range.toString().trim().toLowerCase()
   ) {
-    // bump count
-    const prev = Number(ancestorMark.dataset.markCount ?? 0);
-    const newCount = Math.min(prev + 1, MAX_MARK_COUNT);
-    ancestorMark.dataset.markCount = newCount.toString();
+    const word = ancestorMark.dataset.word;
 
-    // 更新颜色
-    const { hex } = calculateHighlight(
-      ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR,
-      newCount,
-      isDarkText,
-    );
-    // Text gradient: from the current shade (hex) → baseColor-500
-    const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
-    const originHex = getEffectiveTextColor(ancestorMark.parentNode);
-    ancestorMark.style.background = buildTextGradient(
-      hex,
-      baseColor,
-      originHex,
-    );
-    ancestorMark.style.webkitBackgroundClip = "text";
-    ancestorMark.style.backgroundClip = "text";
-    ancestorMark.style.color = "transparent";
+    // 更新storage中的计数
+    try {
+      const data: ExtensionStorage = (await browser.storage.local.get([
+        "settings",
+        "wordMarkings",
+      ])) as ExtensionStorage;
+      const wordMarkings = data.wordMarkings || {};
 
-    // 闪烁提示
-    ancestorMark.classList.add("flash");
-    setTimeout(() => ancestorMark.classList.remove("flash"), 500);
-    return;
+      const prev = Number(ancestorMark.dataset.markCount ?? 0);
+      const newCount = Math.min(prev + 1, MAX_MARK_COUNT);
+
+      // 更新storage
+      wordMarkings[word] = newCount;
+      await browser.storage.local.set({ wordMarkings });
+
+      // 更新页面上所有相同词汇的高亮元素
+      const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
+      updateAllWordHighlights(word, newCount, baseColor, isDarkText);
+
+      // 闪烁提示当前选中的元素
+      ancestorMark.classList.add("flash");
+      setTimeout(() => ancestorMark.classList.remove("flash"), 500);
+
+      console.log(`[Lucid] Updated all "${word}" highlights to count ${newCount}`);
+      return;
+    } catch (error) {
+      console.error(`[Lucid] Error updating word markings for "${word}":`, error);
+      // 如果storage更新失败，仍然尝试更新DOM
+      const prev = Number(ancestorMark.dataset.markCount ?? 0);
+      const newCount = Math.min(prev + 1, MAX_MARK_COUNT);
+      const baseColor = ancestorMark.dataset.baseColor || DEFAULT_BASE_COLOR;
+      updateAllWordHighlights(word, newCount, baseColor, isDarkText);
+
+      ancestorMark.classList.add("flash");
+      setTimeout(() => ancestorMark.classList.remove("flash"), 500);
+      return;
+    }
   }
 
   if (!range || range.collapsed) {
@@ -512,6 +659,11 @@ export async function applyWordHighlight(
 
       const newHighlight = highlightElement.cloneNode(false) as HTMLElement;
       range.surroundContents(newHighlight);
+
+      // 为新创建的高亮元素添加tooltip事件
+      addTooltipEvents(newHighlight, word);
+      newHighlight.dataset.tooltipEventsAdded = "true";
+
       console.log(
         `[Lucid] Word "${word}" highlighted with smooth transition to color ${hex}`,
       );
