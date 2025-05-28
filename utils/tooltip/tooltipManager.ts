@@ -467,14 +467,12 @@ export class TooltipManager {
     tooltipContent: HTMLElement,
     actions: HTMLElement
   ): void {
-    // 预设初始状态
     actions.style.display = 'flex';
-    actions.style.opacity = '0';
-    actions.style.transform = 'translateX(-15px) scale(0.8)';
-
     tooltip.classList.add('lucid-tooltip-expanded');
 
-    // 添加扩展动画 - 更流畅的向右拉升效果
+    actions.style.opacity = '0';
+    actions.style.transform = 'translateX(15px) scale(0.8)';
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         actions.style.opacity = '1';
@@ -491,14 +489,16 @@ export class TooltipManager {
     tooltipContent: HTMLElement,
     actions: HTMLElement
   ): void {
-    // 收缩动画 - 向左滑动消失并缩小
     actions.style.opacity = '0';
     actions.style.transform = 'translateX(-15px) scale(0.8)';
 
+    tooltip.classList.remove('lucid-tooltip-expanded');
+
     setTimeout(() => {
-      tooltip.classList.remove('lucid-tooltip-expanded');
-      actions.style.display = 'none';
-    }, 300); // 等待动画完成
+      if (actions.style.opacity === '0') {
+        actions.style.display = 'none';
+      }
+    }, 400 + 50);
   }
 
   /**

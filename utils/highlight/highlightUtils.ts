@@ -368,7 +368,7 @@ const StyleManager = {
   display: flex;
   align-items: center;
   justify-content: flex-start; /* 确保内容左对齐 */
-  transition: all 400ms ease-out;
+  transition: width 300ms ease-out, padding-right 300ms ease-out;
   height: auto;
   /* min-height 由 JavaScript 动态设置 */
 }
@@ -401,15 +401,26 @@ const StyleManager = {
   display: none;
   align-items: center;
   gap: 4px;
-  margin-left: 8px;
+  margin-left: 0px;
   opacity: 0;
   transform: translateX(15px) scale(0.8);
-  transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1); /* 更流畅的弹性缓动 */
+  max-width: 0;
+  overflow-x: visible;
+  overflow-y: visible;
+  transition: opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), max-width 300ms ease-out, margin-left 300ms ease-out;
   /* height 由 JavaScript 动态设置 */
 }
 
 .lucid-tooltip-expanded .lucid-tooltip-content {
   padding-right: 6px;
+}
+
+.lucid-tooltip-expanded .lucid-tooltip-actions {
+  /* display: flex; will be set by JS in expandTooltip */
+  /* opacity: 1; will be set by JS in expandTooltip */
+  /* transform: translateX(0) scale(1); will be set by JS in expandTooltip */
+  max-width: 60px; /* Adjust this value based on actual content width. This triggers the transition. */
+  margin-left: 8px; /* ADDED/ENSURED: Source value for margin-left transition */
 }
 
 .lucid-tooltip-btn {
@@ -448,7 +459,7 @@ const StyleManager = {
 
 .lucid-tooltip-btn-liked:hover {
   background: rgba(255, 107, 107, 1) !important;
-  animation: heartbeat 1.2s ease-in-out infinite;
+  animation: heartbeat 4.2s ease-in-out infinite;
 }
 
 /* 心跳动画 */
