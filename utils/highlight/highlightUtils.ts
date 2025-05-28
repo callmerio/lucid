@@ -16,6 +16,17 @@ export interface ExtensionStorage {
 }
 
 /**
+ * @interface ToggleHighlightContext
+ * @description Provides context for the toggleWordHighlightState function.
+ * @property {Range} [range] - The user's selection range, if the action is based on a new selection.
+ * @property {HTMLElement} [sourceElement] - The HTML element that triggered the action or from which context can be derived (e.g., a <mark> element or a button within a tooltip).
+ */
+export interface ToggleHighlightContext {
+  range?: Range;
+  sourceElement?: HTMLElement;
+}
+
+/**
  * 在给定 `container` 中的文本节点里查找首个匹配 `word` 的片段，
  * 将其拆分并用 `<mark>` 包裹实现高亮。
  *
@@ -232,7 +243,7 @@ const COLOR_PALETTE: Record<string, Record<number, string>> = {
 } as const;
 
 /**
- * 构造“由左向右”的文本渐变字符串。
+ * 构造"由左向右"的文本渐变字符串。
  *
  * @param primaryHex 首颜色的十六进制值
  * @param baseColor  调色盘基色，用于取得 500 阶的终止色
@@ -573,7 +584,7 @@ function removeEmptyHighlights() {
  * @param baseColor 基础颜色
  * @param isDarkText 是否为深色文本
  */
-function updateAllWordHighlights(
+export function updateAllWordHighlights(
   word: string,
   newCount: number,
   baseColor: string,
@@ -615,6 +626,265 @@ function updateAllWordHighlights(
       }
     }
   });
+}
+
+/**
+ * 完全移除页面上所有相同词汇的高亮，并更新storage
+ * @param word 要移除高亮的词汇（小写）
+ */
+export async function removeWordHighlight(word: string): Promise<void> {
+  try {
+    // 更新storage，将计数设为0
+    const data: ExtensionStorage = (await browser.storage.local.get([
+      "wordMarkings",
+    ])) as ExtensionStorage;
+    const wordMarkings = data.wordMarkings || {};
+
+    // 从storage中删除该词汇的记录
+    delete wordMarkings[word];
+    await browser.storage.local.set({ wordMarkings });
+
+    // 移除页面上所有相同词汇的高亮元素
+    document.querySelectorAll<HTMLElement>(".lucid-highlight").forEach((el) => {
+      if (el.dataset.word === word) {
+        unwrapHighlight(el);
+      }
+    });
+
+    console.log(`[Lucid] Removed all highlights for word: "${word}"`);
+  } catch (error) {
+    console.error(`[Lucid] Error removing word highlights for "${word}":`, error);
+    // 如果storage更新失败，仍然尝试移除DOM中的高亮
+    document.querySelectorAll<HTMLElement>(".lucid-highlight").forEach((el) => {
+      if (el.dataset.word === word) {
+        unwrapHighlight(el);
+      }
+    });
+  }
+}
+
+/**
+ * 减少页面上所有相同词汇的高亮计数，并更新storage和样式
+ * @param word 要减少计数的词汇（小写）
+ * @param targetElement 触发操作的高亮元素
+ * @param isDarkText 是否为深色文本
+ */
+export async function decreaseWordHighlight(
+  word: string,
+  targetElement: HTMLElement,
+  isDarkText: boolean
+): Promise<void> {
+  try {
+    // 获取当前计数和基础颜色
+    const currentCount = parseInt(targetElement.dataset.markCount || '0');
+    const baseColor = targetElement.dataset.baseColor || DEFAULT_BASE_COLOR;
+    const newCount = Math.max(0, currentCount - 1);
+
+    if (newCount === 0) {
+      // 如果计数减到0，完全移除高亮
+      await removeWordHighlight(word);
+      return;
+    }
+
+    // 更新storage
+    const data: ExtensionStorage = (await browser.storage.local.get([
+      "wordMarkings",
+    ])) as ExtensionStorage;
+    const wordMarkings = data.wordMarkings || {};
+    wordMarkings[word] = newCount;
+    await browser.storage.local.set({ wordMarkings });
+
+    // 更新页面上所有相同词汇的高亮元素
+    updateAllWordHighlights(word, newCount, baseColor, isDarkText);
+
+    console.log(`[Lucid] Decreased highlight count for word: "${word}" to ${newCount}`);
+  } catch (error) {
+    console.error(`[Lucid] Error decreasing word highlight for "${word}":`, error);
+    // 如果storage更新失败，仍然尝试更新DOM
+    const currentCount = parseInt(targetElement.dataset.markCount || '0');
+    const baseColor = targetElement.dataset.baseColor || DEFAULT_BASE_COLOR;
+    const newCount = Math.max(0, currentCount - 1);
+
+    if (newCount === 0) {
+      document.querySelectorAll<HTMLElement>(".lucid-highlight").forEach((el) => {
+        if (el.dataset.word === word) {
+          unwrapHighlight(el);
+        }
+      });
+    } else {
+      updateAllWordHighlights(word, newCount, baseColor, isDarkText);
+    }
+  }
+}
+
+/**
+ * 专门用于高亮纯文本的函数，不跳过任何文本节点
+ * @param container 要搜索的容器元素
+ * @param word 要高亮的词汇
+ * @param count 高亮计数
+ * @param highlightClassName CSS类名
+ * @param hex 颜色值
+ * @param baseColor 基础颜色
+ * @returns 是否成功高亮了任何文本
+ */
+function highlightWordInContainerForceAll(
+  container: Element,
+  word: string,
+  count: number,
+  highlightClassName: string,
+  hex: string,
+  baseColor: string,
+): boolean {
+  // {{CHENGQI:
+  // Action: Added
+  // Timestamp: [2025-01-28 12:50:30 +08:00]
+  // Reason: 创建专门的纯文本高亮函数，解决addWordHighlight无法重新高亮被移除词汇的问题
+  // Principle_Applied: KISS - 简单直接的解决方案；单一职责 - 专门处理纯文本高亮
+  // Optimization: 移除了跳过已高亮节点的逻辑，确保能够高亮所有匹配的文本
+  // }}
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let node: Text | null;
+  const wordLower = word.toLowerCase();
+  const wordLen = wordLower.length;
+  let highlightedAny = false;
+
+  while ((node = walker.nextNode() as Text | null)) {
+    // 注意：这里不跳过已在高亮元素内的节点，因为我们要处理的是被移除高亮后的纯文本
+    if (!node.nodeValue) {
+      continue;
+    }
+
+    let text = node.nodeValue;
+    let lower = text.toLowerCase();
+    let searchFrom = 0;
+
+    while (true) {
+      const idx = lower.indexOf(wordLower, searchFrom);
+      if (idx === -1) {
+        break;
+      }
+
+      // strict word‑boundary check
+      if (!hasWordBoundary(lower, idx, wordLen)) {
+        searchFrom = idx + wordLen; // substring of a larger word – keep searching
+        continue;
+      }
+
+      /* ----- wrap the matched word ----- */
+      const beforeText = text.slice(0, idx);
+      const matchText = text.slice(idx, idx + word.length);
+      const afterText = text.slice(idx + word.length);
+
+      const parent = node.parentNode;
+      if (!parent) {
+        break;
+      }
+
+      const beforeNode = document.createTextNode(beforeText);
+      const originHex = getEffectiveTextColor(parent);
+      const matchNode = createHighlightElement(
+        word,
+        count,
+        highlightClassName,
+        hex,
+        baseColor,
+        originHex,
+      );
+      matchNode.textContent = matchText; // preserve original casing
+
+      const afterNode = document.createTextNode(afterText);
+
+      parent.insertBefore(beforeNode, node);
+      parent.insertBefore(matchNode, node);
+      parent.insertBefore(afterNode, node);
+      parent.removeChild(node);
+
+      highlightedAny = true;
+
+      /* Continue scanning the remainder of this text node */
+      node = afterNode;
+      text = afterText;
+      lower = afterText.toLowerCase();
+      searchFrom = 0;
+      walker.currentNode = afterNode;
+    }
+  }
+  return highlightedAny;
+}
+
+/**
+ * 为指定词汇添加高亮（设置计数为1），并更新storage和样式
+ * @param word 要添加高亮的词汇（小写）
+ * @param targetElement 包含该词汇的元素（用于确定基础颜色）
+ * @param isDarkText 是否为深色文本
+ */
+export async function addWordHighlight(
+  word: string,
+  targetElement: HTMLElement,
+  isDarkText: boolean
+): Promise<void> {
+  try {
+    // 获取基础颜色，优先使用目标元素的颜色，否则使用默认颜色
+    const baseColor = targetElement.dataset.baseColor || DEFAULT_BASE_COLOR;
+    const newCount = 1; // 新高亮设置为1
+
+    // 更新storage
+    const data: ExtensionStorage = (await browser.storage.local.get([
+      "wordMarkings",
+    ])) as ExtensionStorage;
+    const wordMarkings = data.wordMarkings || {};
+    wordMarkings[word] = newCount;
+    await browser.storage.local.set({ wordMarkings });
+
+    // 使用改进的高亮方法来高亮页面上的所有匹配词汇
+    const { className: highlightClassName, hex } = calculateHighlight(
+      baseColor,
+      newCount,
+      isDarkText,
+    );
+
+    // {{CHENGQI:
+    // Action: Modified
+    // Timestamp: [2025-01-28 12:50:30 +08:00]
+    // Reason: 使用新的highlightWordInContainerForceAll函数替代原有的highlightWordInContainer，确保能够高亮被移除高亮后的纯文本
+    // Principle_Applied: DRY - 复用高亮逻辑但改进实现；SOLID - 依赖于更适合的抽象
+    // Optimization: 解决了智能切换中无法重新高亮的核心问题
+    // }}
+    // 使用强制高亮所有匹配文本的方法
+    const highlighted = highlightWordInContainerForceAll(
+      document.body, // 搜索整个文档
+      word,
+      newCount,
+      highlightClassName,
+      hex,
+      baseColor,
+    );
+
+    if (highlighted) {
+      console.log(`[Lucid] Added highlight for word: "${word}" with count ${newCount}`);
+    } else {
+      console.warn(`[Lucid] No instances of word "${word}" found to highlight`);
+    }
+  } catch (error) {
+    console.error(`[Lucid] Error adding word highlight for "${word}":`, error);
+    // 如果storage更新失败，仍然尝试更新DOM
+    const baseColor = targetElement.dataset.baseColor || DEFAULT_BASE_COLOR;
+    const newCount = 1;
+    const { className: highlightClassName, hex } = calculateHighlight(
+      baseColor,
+      newCount,
+      isDarkText,
+    );
+
+    highlightWordInContainerForceAll(
+      document.body,
+      word,
+      newCount,
+      highlightClassName,
+      hex,
+      baseColor,
+    );
+  }
 }
 
 /** 把单个 <mark.lucid-highlight> 展开成纯文本内容 */
@@ -908,3 +1178,177 @@ export async function applyWordHighlight(
     // Handle other potential errors from storage access, etc.
   }
 }
+
+// {{CHENGQI:
+// Action: Added
+// Timestamp: [2024-07-30 10:45:00 +08:00]
+// Reason: Per P3-DEV-002 to implement the smart toggle logic for highlights, and P3-DOC-001 for JSDoc.
+// Principle_Applied: SRP - This function orchestrates highlight state changes. KISS - Clear conditional logic. DRY - Reuses existing highlight functions.
+// Optimization: Includes a fallback for color inference if primary context is missing.
+// Architectural_Note (AR): Implements the core toggle logic as per design.
+// Documentation_Note (DW): JSDoc added as per plan.
+// }}
+/**
+ * Toggles the highlight state of a given word.
+ * If the word is currently highlighted, all highlights for it will be removed.
+ * If the word is not highlighted, it will be highlighted.
+ *
+ * @async
+ * @export
+ * @param {string} word - The target word to toggle. Should be in lowercase.
+ * @param {boolean} isDarkText - Indicates if the current theme uses dark text, affecting color calculation.
+ * @param {ToggleHighlightContext} [context] - Optional context for the operation.
+ * @param {Range} [context.range] - If adding highlight based on a user selection.
+ * @param {HTMLElement} [context.sourceElement] - If action is triggered from a specific element (e.g., a tooltip button on a mark), used for color inference or context.
+ * @returns {Promise<void>}
+ * @throws {Error} Logs errors to the console if operations fail.
+ */
+export async function toggleWordHighlightState(
+  word: string,
+  isDarkText: boolean,
+  context?: ToggleHighlightContext
+): Promise<void> {
+  // {{CHENGQI:
+  // Action: Modified
+  // Timestamp: [2024-07-30 12:00:00 +08:00]
+  // Reason: Per P3-LOG-001 to add detailed debugging logs.
+  // Principle_Applied: Observability - Enhanced logging for better diagnostics.
+  // Optimization: None
+  // Architectural_Note (AR): Logs added to trace state and decisions within the function.
+  // Documentation_Note (DW): Logging points implemented as per plan.
+  // }}
+  // {{START MODIFICATIONS}}
+  const cleanedWord = word ? word.toLowerCase().trim() : ""; // Ensure lowercase and trimmed
+
+  let contextLog = "undefined";
+  if (context) {
+    const rangeStr = context.range ? `Range: "${context.range.toString().substring(0, 50)}..."` : "";
+    const elementStr = context.sourceElement ? `SourceElement: ${context.sourceElement.tagName}${context.sourceElement.id ? '#' + context.sourceElement.id : ''}${context.sourceElement.className ? '.' + context.sourceElement.className.trim().replace(/\s+/g, '.') : ''}` : "";
+    contextLog = `{ ${[rangeStr, elementStr].filter(Boolean).join(', ')} }`;
+  }
+  console.log(
+    `[Lucid DEBUG] toggleWordHighlightState called with: word="${word}", cleanedWord="${cleanedWord}", isDarkText=${isDarkText}, context=${contextLog}`
+  );
+
+  if (!cleanedWord) {
+    console.warn("[Lucid] toggleWordHighlightState: word is empty. Skipping.");
+    return;
+  }
+
+  try {
+    const data: ExtensionStorage = (await browser.storage.local.get([
+      "wordMarkings",
+    ])) as ExtensionStorage;
+    const wordMarkings = data.wordMarkings || {};
+    // Avoid logging the entire wordMarkings if it's huge. Log specific entry or a copy.
+    const wordMarkingsCopyForLog = wordMarkings ? { [cleanedWord]: wordMarkings[cleanedWord] } : {};
+    console.log(`[Lucid DEBUG] For word "${cleanedWord}" right after storage.get:`);
+    console.log(`[Lucid DEBUG] Relevant wordMarkings entry:`, JSON.parse(JSON.stringify(wordMarkingsCopyForLog)));
+    console.log(
+      `[Lucid DEBUG] Raw value for wordMarkings["${cleanedWord}"]:`,
+      wordMarkings ? wordMarkings[cleanedWord] : "wordMarkings is undefined"
+    );
+    const currentMarkCount = wordMarkings[cleanedWord] || 0;
+    console.log(
+      `[Lucid DEBUG] Calculated currentMarkCount for "${cleanedWord}": ${currentMarkCount}`
+    );
+
+    if (currentMarkCount > 0) {
+      // State: Highlighted -> Remove highlight
+      console.log(
+        `[Lucid DEBUG] Condition (currentMarkCount > 0) is TRUE for "${cleanedWord}" (count: ${currentMarkCount}). Preparing to remove highlight.`
+      );
+      console.log(
+        `[Lucid DEBUG] Word "${cleanedWord}" is highlighted (count: ${currentMarkCount}). Removing highlight.`
+      );
+      await removeWordHighlight(cleanedWord);
+    } else {
+      // State: Not highlighted (or count is 0) -> Add highlight
+      console.log(
+        `[Lucid DEBUG] Condition (currentMarkCount > 0) is FALSE for "${cleanedWord}" (count: ${currentMarkCount}). Preparing to add highlight.`
+      );
+      console.log(
+        `[Lucid DEBUG] Word "${cleanedWord}" is not highlighted (count: ${currentMarkCount}). Adding highlight.`
+      );
+      if (context?.range) {
+        // applyWordHighlight handles storage updates and applies to the specific range first, then others.
+        console.log(`[Lucid DEBUG] Adding highlight for "${cleanedWord}" using applyWordHighlight (due to context.range).`);
+        await applyWordHighlight(context.range, isDarkText);
+      } else if (context?.sourceElement) {
+        // addWordHighlight sets count to 1 and highlights all instances.
+        // sourceElement helps infer baseColor if the word is new.
+        console.log(`[Lucid DEBUG] Adding highlight for "${cleanedWord}" using addWordHighlight (due to context.sourceElement).`);
+        await addWordHighlight(cleanedWord, context.sourceElement, isDarkText);
+      } else {
+        // Fallback if no specific context (range or sourceElement) is provided
+        console.log(`[Lucid DEBUG] Adding highlight for "${cleanedWord}" using addWordHighlight (fallback logic).`);
+        console.warn(
+          `[Lucid] toggleWordHighlightState: Adding highlight for "${cleanedWord}" without specific range or sourceElement. Attempting with best guess for color context.`
+        );
+        // Try to find an existing highlight of the same word to infer color,
+        // otherwise, document.body will be used by addWordHighlight, which might not be ideal for color.
+        let elementForColorInference = document.querySelector<HTMLElement>(
+          `.lucid-highlight[data-word="${cleanedWord}"]`
+        );
+        if (!elementForColorInference) {
+          // If no existing highlight of this word, use document.body as a last resort.
+          // addWordHighlight's internal getEffectiveTextColor will try to get a sensible default.
+          elementForColorInference = document.body;
+        }
+        await addWordHighlight(cleanedWord, elementForColorInference, isDarkText);
+      }
+    }
+  } catch (error) {
+    console.error(
+      `[Lucid] Error in toggleWordHighlightState for word "${cleanedWord}":`,
+      error
+    );
+    // Depending on the error, specific recovery or UI feedback might be needed here.
+  }
+}
+
+// {{CHENGQI:
+// Action: Added
+// Timestamp: [2024-07-30 12:00:00 +08:00]
+// Reason: Per P3-GUID-001 to provide UI integration guidance for preventing race conditions.
+// Principle_Applied: Documentation - Providing clear instructions for consumers of the function.
+// Optimization: None
+// Architectural_Note (AR): Promotes correct usage of the async function from UI event handlers.
+// Documentation_Note (DW): Guidance added as planned.
+// }}
+// {{START MODIFICATIONS}}
+// ----- UI Integration Guidance for toggleWordHighlightState -----
+// To prevent race conditions from rapid user clicks on UI elements (e.g., a like button)
+// that trigger this function, it is crucial to manage the UI element's state (e.g., disabled state).
+//
+// Example for an event listener on a button:
+//
+// async function handleLikeButtonClick(event) {
+//   const button = event.currentTarget as HTMLButtonElement;
+//   const word = button.dataset.word; // Or however the word is obtained
+//   const isDarkText = /* ... determine theme ... */;
+//   const sourceElementForContext = /* ... determine source element, could be the button itself or the related mark ... */;
+//
+//   if (!word || button.disabled) {
+//     return;
+//   }
+//
+//   button.disabled = true; // Disable button immediately
+//   // Consider adding a visual "loading" state to the button here
+//
+//   try {
+//     await toggleWordHighlightState(word, isDarkText, { sourceElement: sourceElementForContext });
+//     // Optionally, refresh UI elements that depend on the highlight state here
+//   } catch (error) {
+//     console.error("Error toggling highlight state:", error);
+//     // Handle error in UI if necessary
+//   } finally {
+//     button.disabled = false; // Re-enable button in all cases
+//     // Remove "loading" state here
+//   }
+// }
+//
+// Make sure to adapt this logic to your specific UI framework and event handling.
+// The key is to disable the interactive element before the await call and re-enable it in a finally block.
+// ----- End of UI Integration Guidance -----
+// {{END MODIFICATIONS}}

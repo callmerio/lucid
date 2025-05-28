@@ -2,6 +2,16 @@
  * Tooltip管理器 - 处理高亮单词的hover解释显示
  */
 
+import {
+  calculateHighlight,
+  updateAllWordHighlights,
+  removeWordHighlight,
+  decreaseWordHighlight,
+  addWordHighlight,
+  toggleWordHighlightState,
+  type ToggleHighlightContext
+} from '../highlight/highlightUtils';
+
 // 模拟翻译数据 - 实际项目中应该从API获取
 const MOCK_TRANSLATIONS: Record<string, {
   word: string;
@@ -159,6 +169,72 @@ export class TooltipManager {
   }
 
   /**
+   * 获取当前单词的高亮状态信息
+   */
+  private getCurrentWordState(targetElement: HTMLElement): {
+    word: string;
+    markCount: number;
+    baseColor: string;
+    isHighlighted: boolean;
+    isDarkText: boolean;
+  } {
+    const word = targetElement.dataset.word || '';
+    const markCount = parseInt(targetElement.dataset.markCount || '0');
+    const baseColor = targetElement.dataset.baseColor || 'orange';
+    const isHighlighted = markCount > 0;
+
+    // 检测文本颜色模式
+    const computedColor = window.getComputedStyle(targetElement.parentElement || document.body).color;
+    const [r, g, b] = computedColor.match(/\d+/g)?.map(Number) || [0, 0, 0];
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    const isDarkText = brightness < 128;
+
+    return {
+      word,
+      markCount,
+      baseColor,
+      isHighlighted,
+      isDarkText
+    };
+  }
+
+  /**
+   * 计算按钮的颜色样式
+   */
+  private calculateButtonColors(wordState: {
+    markCount: number;
+    baseColor: string;
+    isHighlighted: boolean;
+    isDarkText: boolean;
+  }): {
+    downButtonColor: string;
+    likeButtonColor: string;
+    likeButtonBg: string;
+  } {
+    const { markCount, baseColor, isHighlighted, isDarkText } = wordState;
+
+    let downButtonColor = 'rgba(255, 255, 255, 0.8)'; // 默认颜色
+    let likeButtonColor = 'rgba(255, 255, 255, 0.8)';
+    let likeButtonBg = 'rgba(255, 255, 255, 0.1)';
+
+    if (isHighlighted && markCount > 0) {
+      // 使用高亮颜色计算逻辑
+      const { hex } = calculateHighlight(baseColor, markCount, isDarkText);
+      downButtonColor = hex;
+
+      // 爱心按钮在高亮状态下显示为红色
+      likeButtonColor = 'white';
+      likeButtonBg = 'rgba(255, 107, 107, 0.8)';
+    }
+
+    return {
+      downButtonColor,
+      likeButtonColor,
+      likeButtonBg
+    };
+  }
+
+  /**
    * 显示tooltip
    */
   showTooltip(targetElement: HTMLElement, word: string): void {
@@ -180,7 +256,7 @@ export class TooltipManager {
     const translation = getWordTranslation(word);
 
     // 创建tooltip元素
-    const tooltip = this.createTooltipElement(translation);
+    const tooltip = this.createTooltipElement(translation, targetElement);
     tooltip.dataset.word = word;
 
     // 设置动态字体大小（页面body p字体的90%）
@@ -276,14 +352,21 @@ export class TooltipManager {
   /**
    * 创建tooltip元素
    */
-  private createTooltipElement(translation: {
-    word: string;
-    phonetic?: string;
-    translation: string;
-    partOfSpeech?: string;
-  }): HTMLElement {
+  private createTooltipElement(
+    translation: {
+      word: string;
+      phonetic?: string;
+      translation: string;
+      partOfSpeech?: string;
+    },
+    targetElement: HTMLElement
+  ): HTMLElement {
     const tooltip = document.createElement('div');
     tooltip.className = 'lucid-tooltip';
+
+    // 获取当前单词状态
+    const wordState = this.getCurrentWordState(targetElement);
+    const buttonColors = this.calculateButtonColors(wordState);
 
     const content = `
       <div class="lucid-tooltip-content">
@@ -292,12 +375,12 @@ export class TooltipManager {
           <div class="lucid-tooltip-hover-zone"></div>
         </div>
         <div class="lucid-tooltip-actions">
-          <button class="lucid-tooltip-btn lucid-tooltip-btn-down" title="展开详情">
+          <button class="lucid-tooltip-btn lucid-tooltip-btn-down" title="减少高亮计数" style="color: ${buttonColors.downButtonColor};">
             <svg width="12" height="12" viewBox="0 0 1228 1024" fill="currentColor">
               <path d="M858.303391 402.567077a50.637368 50.637368 0 0 0-71.601239 0L607.648418 581.570174 428.594684 402.567077A50.637368 50.637368 0 0 0 356.993446 474.168316l214.854353 214.854353a50.637368 50.637368 0 0 0 71.601239 0l214.854353-214.854353a50.637368 50.637368 0 0 0 0-71.601239z"/>
             </svg>
           </button>
-          <button class="lucid-tooltip-btn lucid-tooltip-btn-like" title="收藏单词">
+          <button class="lucid-tooltip-btn lucid-tooltip-btn-like ${wordState.isHighlighted ? 'lucid-tooltip-btn-liked' : ''}" title="${wordState.isHighlighted ? '移除所有高亮' : '添加高亮'}" style="color: ${buttonColors.likeButtonColor}; background-color: ${buttonColors.likeButtonBg};">
             <svg width="12" height="12" viewBox="0 0 1024 1024" fill="currentColor">
               <path d="M533.504 268.288q33.792-41.984 71.68-75.776 32.768-27.648 74.24-50.176t86.528-19.456q63.488 5.12 105.984 30.208t67.584 63.488 34.304 87.04 6.144 99.84-17.92 97.792-36.864 87.04-48.64 74.752-53.248 61.952q-40.96 41.984-85.504 78.336t-84.992 62.464-73.728 41.472-51.712 15.36q-20.48 1.024-52.224-14.336t-69.632-41.472-79.872-61.952-82.944-75.776q-26.624-25.6-57.344-59.392t-57.856-74.24-46.592-87.552-21.504-100.352 11.264-99.84 39.936-83.456 65.536-61.952 88.064-35.328q24.576-5.12 49.152-1.536t48.128 12.288 45.056 22.016 40.96 27.648q45.056 33.792 86.016 80.896z"/>
             </svg>
@@ -331,7 +414,7 @@ export class TooltipManager {
     this.setupTooltipExpansion(tooltip, tooltipContent, hoverZone, actions);
 
     // 添加按钮事件
-    this.setupButtonEvents(downBtn, likeBtn, translation);
+    this.setupButtonEvents(downBtn, likeBtn, translation, targetElement, wordState);
 
     return tooltip;
   }
@@ -424,23 +507,105 @@ export class TooltipManager {
   private setupButtonEvents(
     downBtn: HTMLElement,
     likeBtn: HTMLElement,
-    translation: { word: string; phonetic?: string; translation: string; partOfSpeech?: string; }
+    translation: { word: string; phonetic?: string; translation: string; partOfSpeech?: string; },
+    targetElement: HTMLElement,
+    wordState: { word: string; markCount: number; baseColor: string; isHighlighted: boolean; isDarkText: boolean; }
   ): void {
-    // 下三角按钮 - 展开详情
-    downBtn.addEventListener('click', (e) => {
+    // 下三角按钮 - 减少高亮计数
+    downBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      console.log(`[Lucid] 展开详情: ${translation.word}`);
-      // TODO: 实现详情展开功能
-      this.showDetailedInfo(translation);
+      console.log(`[Lucid] 减少高亮计数: ${wordState.word}, 当前计数: ${wordState.markCount}`);
+
+      if (wordState.isHighlighted && wordState.markCount > 0) {
+        try {
+          await decreaseWordHighlight(wordState.word, targetElement, wordState.isDarkText);
+          // 刷新tooltip以反映最新状态，而不是隐藏
+          this.refreshTooltip(targetElement, wordState.word);
+        } catch (error) {
+          console.error(`[Lucid] Error decreasing highlight for "${wordState.word}":`, error);
+        }
+      }
     });
 
-    // 大拇指按钮 - 收藏单词
-    likeBtn.addEventListener('click', (e) => {
+    // 爱心按钮 - 切换高亮状态
+    likeBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      console.log(`[Lucid] 收藏单词: ${translation.word}`);
-      // TODO: 实现收藏功能
-      this.toggleWordFavorite(translation.word, likeBtn);
+      const button = e.currentTarget as HTMLButtonElement;
+
+      if (button.disabled) {
+        return;
+      }
+
+      button.disabled = true;
+
+      const currentWord = wordState.word;
+      const currentIsDarkText = wordState.isDarkText;
+      const context: ToggleHighlightContext = { sourceElement: targetElement };
+
+      try {
+        await toggleWordHighlightState(currentWord, currentIsDarkText, context);
+        this.refreshTooltip(targetElement, currentWord);
+      } catch (error) {
+        console.error(`[Lucid] Error in likeBtn click for "${currentWord}" (via toggleWordHighlightState):`, error);
+      } finally {
+        button.disabled = false;
+      }
     });
+  }
+
+  /**
+   * 刷新tooltip以反映最新的高亮状态
+   */
+  private refreshTooltip(targetElement: HTMLElement, word: string): void {
+    if (!this.currentTooltip) {
+      return;
+    }
+
+    // 获取最新的单词状态
+    // 如果高亮被移除，targetElement 可能不再有正确的 dataset，所以我们需要查找页面上的其他实例
+    let wordState;
+    const remainingHighlights = document.querySelectorAll<HTMLElement>('.lucid-highlight');
+    const sameWordHighlight = Array.from(remainingHighlights).find(el => el.dataset.word === word);
+
+    if (sameWordHighlight) {
+      // 如果还有相同词汇的高亮存在，使用它的状态
+      wordState = this.getCurrentWordState(sameWordHighlight);
+    } else {
+      // 如果没有高亮了，创建一个默认的未高亮状态
+      wordState = {
+        word: word,
+        markCount: 0,
+        baseColor: 'orange',
+        isHighlighted: false,
+        isDarkText: false
+      };
+    }
+
+    const buttonColors = this.calculateButtonColors(wordState);
+
+    // 更新按钮颜色和状态
+    const downBtn = this.currentTooltip.querySelector('.lucid-tooltip-btn-down') as HTMLElement;
+    const likeBtn = this.currentTooltip.querySelector('.lucid-tooltip-btn-like') as HTMLElement;
+
+    if (downBtn) {
+      downBtn.style.color = buttonColors.downButtonColor;
+      downBtn.title = wordState.isHighlighted ? '减少高亮计数' : '无高亮可减少';
+    }
+
+    if (likeBtn) {
+      likeBtn.style.color = buttonColors.likeButtonColor;
+      likeBtn.style.backgroundColor = buttonColors.likeButtonBg;
+      likeBtn.title = wordState.isHighlighted ? '移除所有高亮' : '添加高亮';
+
+      // 更新爱心按钮的状态类
+      if (wordState.isHighlighted) {
+        likeBtn.classList.add('lucid-tooltip-btn-liked');
+      } else {
+        likeBtn.classList.remove('lucid-tooltip-btn-liked');
+      }
+    }
+
+    console.log(`[Lucid] Tooltip refreshed for word: "${word}", new state:`, wordState);
   }
 
   /**
