@@ -1,123 +1,88 @@
+// HTTP/1.1 200 OK
+// content-type: application/json
+// Date: Thu,
+// 29 May 2025 04: 46: 37 GMT
+// Connection: close
+// Transfer-Encoding: chunked
 {
     "success": true,
     "data": {
         "words": [
             {
-                "word": "did",
+                "word": "escalade",
                 "explain": [
                     {
-                        "pos": "verb",
+                        "pos": "n.",
                         "definitions": [
                             {
-                                "definition": "(past tense of do) performed an action, activity, or task.",
-                                "chinese": "（do的过去式）做；从事。",
-                                "chinese_short": "做（过去式）"
-                            },
-                            {
-                                "definition": "used as an auxiliary verb to form questions or negative statements in the past tense.",
-                                "chinese": "（用于构成疑问句或否定句）助动词过去式。",
-                                "chinese_short": "助动词（过去）"
+                                "definition": "An act of scaling a wall or rampart.",
+                                "chinese": "攀登；梯攻",
+                                "chinese_short": "攀登"
                             }
                         ]
                     },
                     {
-                        "pos": "auxiliary verb",
+                        "pos": "v.",
                         "definitions": [
                             {
-                                "definition": "used to form the past tense of negative statements, questions, and emphatic statements.",
-                                "chinese": "用于构成疑问句、否定句或强调句的过去式。",
-                                "chinese_short": "（助动词）"
+                                "definition": "To climb or scale, especially a wall or fortification.",
+                                "chinese": "攀登；梯攻",
+                                "chinese_short": "攀登"
                             }
                         ]
                     }
                 ],
                 "wordFormats": [
                     {
-                        "name": "过去式",
-                        "form": "did"
-                    },
-                    {
-                        "name": "过去式",
-                        "form": "did"
-                    },
-                    {
-                        "name": "过去式",
-                        "form": "did"
-                    },
-                    {
-                        "name": "过去式",
-                        "form": "did"
-                    },
-                    {
-                        "name": "过去式",
-                        "form": "did"
+                        "name": "原型",
+                        "form": "escalade"
                     }
                 ],
                 "phonetic": {
-                    "us": "dɪd",
-                    "uk": "dɪd"
+                    "us": "/ˌɛskəˈleɪd/",
+                    "uk": "/ˈɛskəleɪd/"
                 }
             }
         ],
         "wordCount": 1,
         "wordList": [
-            "did"
+            "escalade"
         ],
-        "wordRelationships": [
+        "wordForms": [
             {
-                "baseForm": "did",
-                "baseFormId": 90,
-                "allForms": [
-                    {
-                        "id": 90,
-                        "name": "过去式",
-                        "form": "did",
-                        "isMainForm": true
-                    },
-                    {
-                        "id": 1365,
-                        "name": "过去式",
-                        "form": "did",
-                        "isMainForm": true
-                    },
-                    {
-                        "id": 2007,
-                        "name": "过去式",
-                        "form": "did",
-                        "isMainForm": true
-                    },
-                    {
-                        "id": 2598,
-                        "name": "过去式",
-                        "form": "did",
-                        "isMainForm": true
-                    },
-                    {
-                        "id": 3191,
-                        "name": "过去式",
-                        "form": "did",
-                        "isMainForm": true
-                    }
-                ],
-                "totalFormsCount": 5
+                "name": "原型",
+                "form": "escalade"
+            },
+            {
+                "name": "复数",
+                "form": "escalades"
+            },
+            {
+                "name": "现在分词",
+                "form": "escalading"
+            },
+            {
+                "name": "第三人称单数",
+                "form": "escalades"
+            },
+            {
+                "name": "过去分词",
+                "form": "escaladed"
+            },
+            {
+                "name": "过去式",
+                "form": "escaladed"
             }
         ],
         "queryMetadata": {
-            "searchTerm": "did",
-            "matchedForm": "did",
+            "searchTerm": "escalade",
+            "matchedForm": "escalade",
             "searchStrategy": "exact_vocabulary",
             "isBaseFormQuery": true,
-            "processingTimeMs": 800,
+            "processingTimeMs": 268,
             "databaseQueries": 1,
             "cacheHit": false
-        },
-        "relatedSuggestions": [
-            "didn",
-            "splendid",
-            "candidate",
-            "candidates",
-            "sordid"
-        ]
+        }
     },
-    "timestamp": "2025-05-28T08:19:17.841Z"
+    "timestamp": "2025-05-29T04:46:37.675Z"
 }

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolpopup Debug Page</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+
+        .lucid-toolpopup-container {
+            background: rgba(30, 30, 30, 0.8); /* Semi-transparent background */
+            backdrop-filter: blur(20px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(20px); /* Safari support */
+            border-radius: 12px;
+            padding: 20px;
+            width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lucid-toolpopup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .lucid-toolpopup-word {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+
+        .lucid-toolpopup-header-icons svg {
+            width: 24px;
+            height: 24px;
+            margin-left: 12px;
+            cursor: pointer;
+            fill: rgba(255, 255, 255, 0.7);
+            filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+        }
+         .lucid-toolpopup-header-icons svg.icon-heart {
+            fill: #ff6b6b; /* Heart icon color */
+        }
+
+        .lucid-toolpopup-header-icons svg.icon {
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 8;
+            filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+        }
+
+
+        .lucid-toolpopup-phonetic {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: fit-content;
+            transition: all 0.3s ease;
+        }
+
+        .lucid-toolpopup-phonetic-group {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .lucid-toolpopup-phonetic-region {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            color: #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .lucid-toolpopup-phonetic-text {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lucid-toolpopup-phonetic-text:hover {
+            color: #fff;
+        }
+
+        /* 默认只显示US音标，UK音标隐藏在右侧 */
+        .lucid-toolpopup-phonetic-group.uk-phonetic {
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            margin-left: 0;
+        }
+
+        /* 悬浮时扩展显示UK音标 */
+        .lucid-toolpopup-phonetic:hover .lucid-toolpopup-phonetic-group.uk-phonetic {
+            opacity: 1;
+            max-width: 200px;
+            margin-left: 15px;
+        }
+
+        .lucid-toolpopup-explain-group {
+            margin-bottom: 15px;
+        }
+
+        .lucid-toolpopup-pos {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            color: #ccc;
+            display: inline-block;
+            transition: all 0.3s ease;
+            align-items: center;
+            position: relative;
+        }
+
+
+        .lucid-toolpopup-definition {
+            display: flex;
+            align-items: center; /* Vertically center align POS tag with the text */
+            margin-bottom: 8px;
+        }
+
+        .lucid-toolpopup-definition-text-chinese {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.6;
+            /* padding-left: 8px;  */
+        }
+
+
+        .lucid-toolpopup-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lucid-toolpopup-history {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .lucid-toolpopup-history svg {
+            width: 16px;
+            height: 16px;
+            fill: rgba(255, 255, 255, 0.7);
+            margin-right: 6px;
+            filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+        }
+        .lucid-toolpopup-history-count {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .lucid-toolpopup-actions svg {
+            width: 18px;
+            height: 18px;
+            margin-left: 15px;
+            cursor: pointer;
+            fill: rgba(255, 255, 255, 0.7);
+            filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+        }
+    </style>
+</head>
+<body>
+    <div class="lucid-toolpopup-container">
+        <div class="lucid-toolpopup-header">
+            <span class="lucid-toolpopup-word">escalade</span>
+            <div class="lucid-toolpopup-header-icons">
+                <!-- Checkmark Icon -->
+                <svg t="1748503165621" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3121"><path d="M325.973333 833.28h-38.826666a106.666667 106.666667 0 0 1-106.666667-106.666667V441.173333a106.666667 106.666667 0 0 1 106.666667-106.666666h38.826666a21.333333 21.333333 0 0 1 21.333334 21.333333v456.106667a21.333333 21.333333 0 0 1-21.333334 21.333333z m-38.826666-456.106667a64 64 0 0 0-64 64v285.44a64 64 0 0 0 64 64h17.493333V377.173333z" p-id="3122"></path><path d="M758.613333 832H325.973333a21.333333 21.333333 0 0 1-21.333333-21.333333V355.84a21.333333 21.333333 0 0 1 21.333333-21.333333h8.96l99.413334-158.933334A85.333333 85.333333 0 0 1 595.84 213.333333v121.6h166.826667a100.906667 100.906667 0 0 1 75.52 34.346667 104.96 104.96 0 0 1 25.386666 82.986667l-43.946666 325.973333A62.08 62.08 0 0 1 758.613333 832z m-411.306666-42.666667h411.306666a19.413333 19.413333 0 0 0 18.773334-17.28L821.333333 448a62.293333 62.293333 0 0 0-15.146666-49.28 57.386667 57.386667 0 0 0-42.666667-19.84h-188.586667a21.333333 21.333333 0 0 1-21.333333-21.333333V213.333333a42.666667 42.666667 0 0 0-80.64-17.493333l-1.28 2.346667-106.666667 170.666666a21.333333 21.333333 0 0 1-17.493333 10.026667z" p-id="3123"></path></svg>
+                <!-- Heart Icon -->
+                <svg class="icon-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+            </div>
+        </div>
+
+        <div class="lucid-toolpopup-phonetic">
+            <div class="lucid-toolpopup-phonetic-group us-phonetic" onclick="playPronunciation('us')">
+                <span class="lucid-toolpopup-phonetic-region">US</span>
+                <span class="lucid-toolpopup-phonetic-text">/ˌɛskəˈleɪd/</span>
+            </div>
+            <div class="lucid-toolpopup-phonetic-group uk-phonetic" onclick="playPronunciation('uk')">
+                <span class="lucid-toolpopup-phonetic-region">UK</span>
+                <span class="lucid-toolpopup-phonetic-text">/ˈɛskəleɪd/</span>
+            </div>
+        </div>
+
+        <div class="lucid-toolpopup-definitions-area">
+            <!-- Definition Group 1: n. -->
+            <div class="lucid-toolpopup-explain-group">
+                <div class="lucid-toolpopup-definition">
+                    <span class="lucid-toolpopup-pos pos-n">n.</span>
+                    <span class="lucid-toolpopup-definition-text-chinese">攀登</span>
+                </div>
+            </div>
+            <!-- Definition Group 2: v. -->
+            <div class="lucid-toolpopup-explain-group">
+                 <div class="lucid-toolpopup-definition">
+                    <span class="lucid-toolpopup-pos pos-v">v.</span>
+                    <span class="lucid-toolpopup-definition-text-chinese">攀登</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lucid-toolpopup-footer">
+            <div class="lucid-toolpopup-history">
+                <!-- History Clock Icon -->
+                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg>
+                <span class="lucid-toolpopup-history-count">1</span>
+            </div>
+            <div class="lucid-toolpopup-actions">
+                <!-- Placeholder Icon 1 (e.g., Copy) -->
+                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
+                <!-- Placeholder Icon 2 (e.g., Settings/More) -->
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function playPronunciation(region) {
+            // 这里可以添加实际的发音功能
+            // 例如使用 Web Speech API 或调用外部发音服务
+            console.log(`Playing ${region.toUpperCase()} pronunciation for "escalade"`);
+
+            // 示例：使用 Web Speech API (如果浏览器支持)
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('escalade');
+                utterance.lang = region === 'us' ? 'en-US' : 'en-GB';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>

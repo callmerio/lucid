@@ -11,6 +11,7 @@ import {
   toggleWordHighlightState,
   type ToggleHighlightContext
 } from '../highlight/highlightUtils';
+import { ToolpopupManager } from './toolpopupManager'; // Import the new ToolpopupManager
 
 // 模拟翻译数据 - 实际项目中应该从API获取
 const MOCK_TRANSLATIONS: Record<string, {
@@ -130,6 +131,7 @@ export class TooltipManager {
   private static instance: TooltipManager;
   private currentTooltip: HTMLElement | null = null;
   private hideTimeout: number | null = null;
+  private shiftKeyDownListener: ((event: KeyboardEvent) => void) | null = null; // Listener reference
 
   private constructor() { }
 
@@ -296,6 +298,7 @@ export class TooltipManager {
     // 显示动画
     requestAnimationFrame(() => {
       tooltip.classList.add('lucid-tooltip-visible');
+      this.addShiftKeyListener(targetElement, word); // Add listener when tooltip is shown
     });
   }
 
@@ -323,6 +326,7 @@ export class TooltipManager {
         this.currentTooltip.remove();
         this.currentTooltip = null;
       }
+      this.removeShiftKeyListener(); // Remove listener when tooltip is hidden
       this.hideTimeout = null;
       return;
     }
@@ -338,6 +342,7 @@ export class TooltipManager {
         }
 
         this.currentTooltip.classList.remove('lucid-tooltip-visible');
+        this.removeShiftKeyListener(); // Remove listener when tooltip is hidden
         setTimeout(() => {
           if (this.currentTooltip) {
             this.currentTooltip.remove();
@@ -669,5 +674,42 @@ export class TooltipManager {
     // 设置位置
     tooltip.style.left = `${left + window.scrollX}px`;
     tooltip.style.top = `${top + window.scrollY}px`;
+  }
+
+  /**
+   * Adds a keydown listener to check for Shift key press.
+   */
+  private addShiftKeyListener(targetElement: HTMLElement, word: string): void {
+    if (this.shiftKeyDownListener) {
+      this.removeShiftKeyListener(); // Remove any existing listener first
+    }
+
+    this.shiftKeyDownListener = async (event: KeyboardEvent) => {
+      if (event.key === 'Shift' && this.currentTooltip) {
+        event.preventDefault(); // Prevent any default Shift behavior
+        console.log('[Lucid] Shift key pressed. Hiding tooltip and showing toolpopup.');
+
+        const currentWord = this.currentTooltip.dataset.word || word;
+        // Ensure targetElement is still valid or find a suitable one if needed
+        // For simplicity, we use the original targetElement passed to showTooltip
+        const currentTargetElement = targetElement;
+
+        this.hideTooltip(0); // Hide current tooltip immediately
+        // Ensure ToolpopupManager is available and show the popup
+        ToolpopupManager.getInstance().showToolpopup(currentWord, currentTargetElement);
+      }
+    };
+
+    document.addEventListener('keydown', this.shiftKeyDownListener);
+  }
+
+  /**
+   * Removes the keydown listener for Shift key.
+   */
+  private removeShiftKeyListener(): void {
+    if (this.shiftKeyDownListener) {
+      document.removeEventListener('keydown', this.shiftKeyDownListener);
+      this.shiftKeyDownListener = null;
+    }
   }
 }
