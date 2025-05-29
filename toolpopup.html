@@ -141,8 +141,75 @@
             color: #ddd;
             line-height: 1.6;
             /* padding-left: 8px;  */
+            position: relative; /* Added for tooltip positioning */
         }
 
+        /* New styles for the English tooltip */
+        .lucid-toolpopup-definition-text-english-tooltip {
+            position: absolute;
+            bottom: 20%; /* Position above the Chinese text */
+            left: 0;
+            margin-bottom: 5px; /* Add small margin to push it up slightly */
+            background-color: transparent; /* User requested no background */
+            border: none; /* User requested no border */
+            /* padding: 8px; Initially, padding will be animated */
+            padding: 8px 0; /* Vertical padding only, horizontal will be animated */
+            color: #fff; /* White text */
+            font-size: 13px; /* Slightly smaller than Chinese text */
+            z-index: 100; /* Ensure it's on top */
+            opacity: 0;
+            visibility: hidden;
+            max-width: 0; /* Start with no width for the stretch effect */
+            overflow: hidden; /* Hide content that overflows during animation */
+            white-space: nowrap; /* Prevent wrapping during animation for a smoother stretch */
+            /* transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out; */
+            transition: opacity 0.3s ease, visibility 0.3s ease, max-width 0.3s ease, padding 0.3s ease;
+            pointer-events: auto; /* Allow tooltip to capture mouse events for hover persistence */
+            /* width: max-content; /* Will be controlled by max-width */
+            /* max-width: 300px; /* This will be the target max-width on hover */
+            box-shadow: none; /* User explicitly asked for no border/background, shadow might be implied */
+            border-radius: 4px; /* Slightly rounded corners for aesthetics */
+            /* User requested no background or border, so ensure these are not overridden */
+            color: #aaa;
+        }
+
+        /* Show tooltip when hovering over Chinese text */
+        .lucid-toolpopup-definition-text-chinese:hover .lucid-toolpopup-definition-text-english-tooltip {
+            opacity: 1;
+            visibility: visible;
+            max-width: 300px; /* Expand to this width */
+            padding: 8px; /* Restore full padding */
+            /* white-space: normal; /* Allow text to wrap once fully visible, if needed. Let's test without first. */
+        }
+
+        /* Keep tooltip visible when hovering over the tooltip itself */
+        .lucid-toolpopup-definition-text-english-tooltip:hover {
+            opacity: 1;
+            visibility: visible;
+            max-width: 300px;
+            padding: 8px;
+        }
+
+        /* Styles for individual words in English tooltip */
+        .lucid-toolpopup-definition-word {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: inherit; /* Inherit the #aaa color from parent */
+            display: inline; /* Ensure words stay inline */
+            margin-right: 0.2em; /* Small space between words */
+            user-select: none; /* Disable text selection */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+        }
+
+        .lucid-toolpopup-definition-word:hover {
+            color: #fff; /* Change to white on hover, same as phonetic text */
+        }
+
+        .lucid-toolpopup-definition-word:active {
+            color: #ccc; /* Slightly different color when clicked */
+        }
 
         .lucid-toolpopup-footer {
             display: flex;
@@ -211,14 +278,20 @@
             <div class="lucid-toolpopup-explain-group">
                 <div class="lucid-toolpopup-definition">
                     <span class="lucid-toolpopup-pos pos-n">n.</span>
-                    <span class="lucid-toolpopup-definition-text-chinese">攀登</span>
+                    <span class="lucid-toolpopup-definition-text-chinese">
+                        攀登
+                        <span class="lucid-toolpopup-definition-text-english-tooltip">An act of scaling a wall or rampart.</span>
+                    </span>
                 </div>
             </div>
             <!-- Definition Group 2: v. -->
             <div class="lucid-toolpopup-explain-group">
                  <div class="lucid-toolpopup-definition">
                     <span class="lucid-toolpopup-pos pos-v">v.</span>
-                    <span class="lucid-toolpopup-definition-text-chinese">攀登</span>
+                    <span class="lucid-toolpopup-definition-text-chinese">
+                        攀登
+                        <span class="lucid-toolpopup-definition-text-english-tooltip">To climb or scale, especially a wall or fortification.</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -251,6 +324,81 @@
                 utterance.rate = 0.8;
                 speechSynthesis.speak(utterance);
             }
+        }
+
+        // Function to split text into clickable words
+        function splitTextIntoWords(text) {
+            // Split by spaces but keep punctuation with the preceding word
+            // This regex splits on spaces but keeps punctuation attached to words
+            const words = text.split(/(\s+)/).filter(word => word.trim() !== '');
+
+            return words.map(word => {
+                // Skip pure whitespace
+                if (/^\s+$/.test(word)) {
+                    return word;
+                }
+
+                // Create span for each word
+                const span = document.createElement('span');
+                span.className = 'lucid-toolpopup-definition-word';
+                span.textContent = word;
+                span.addEventListener('click', function() {
+                    handleWordClick(word.replace(/[^\w]/g, '')); // Remove punctuation for the click handler
+                });
+                return span;
+            });
+        }
+
+        // Function to handle word clicks
+        function handleWordClick(word) {
+            console.log(`Word clicked: "${word}"`);
+            // Here you can add functionality like:
+            // - Looking up the word definition
+            // - Adding to vocabulary list
+            // - Playing word pronunciation
+            // - Opening dictionary
+
+            // Example: You could trigger a word lookup or pronunciation
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Function to initialize word splitting for all English tooltips
+        function initializeWordSplitting() {
+            const tooltips = document.querySelectorAll('.lucid-toolpopup-definition-text-english-tooltip');
+
+            tooltips.forEach(tooltip => {
+                const originalText = tooltip.textContent;
+                tooltip.innerHTML = ''; // Clear original content
+
+                const words = splitTextIntoWords(originalText);
+                words.forEach(wordElement => {
+                    if (typeof wordElement === 'string') {
+                        // It's whitespace, add as text node
+                        tooltip.appendChild(document.createTextNode(wordElement));
+                    } else {
+                        // It's a span element, append it
+                        tooltip.appendChild(wordElement);
+                    }
+                });
+            });
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWordSplitting();
+        });
+
+        // Also initialize immediately in case DOMContentLoaded has already fired
+        if (document.readyState === 'loading') {
+            // Document is still loading, wait for DOMContentLoaded
+        } else {
+            // Document has already loaded
+            initializeWordSplitting();
         }
     </script>
 </body>

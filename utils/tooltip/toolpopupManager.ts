@@ -228,9 +228,9 @@ export class ToolpopupManager {
             }
 
             const defs = group.definitions.map(def => {
-                const defText = `<span class="lucid-toolpopup-definition-text-chinese">${def.chinese}</span>`;
+                const defText = `<span class="lucid-toolpopup-definition-text-chinese">${def.chinese_short || def.chinese}<span class="lucid-toolpopup-definition-text-english-tooltip">${def.definition}</span></span>`;
                 // Optionally, include the English definition if needed, or the short form
-                // defText += `<span class="lucid-toolpopup-definition-text-english">${def.definition}</span>`; 
+                // defText += `<span class="lucid-toolpopup-definition-text-english">${def.definition}</span>`;
                 return defText;
             }).join("<br>");
 
