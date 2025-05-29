@@ -23,7 +23,8 @@
   "dependencies": {
     "lodash-es": "^4.17.21",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "syllable": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
