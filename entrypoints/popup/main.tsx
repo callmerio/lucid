@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./style.css";
-import DevToolbar from "../../src/components/DevToolbar";
+import DevToolbar from "../../src/components/features/DevToolbar";
 import { StagewiseToolbar } from "@stagewise/toolbar-react";
 
 // Stagewise Toolbar Configuration

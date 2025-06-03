@@ -25,6 +25,7 @@
             width: 350px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            user-select: none;
         }
 
         .lucid-toolpopup-header {
@@ -61,9 +62,37 @@
             cursor: pointer;
             fill: rgba(255, 255, 255, 0.7);
             filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+            transition: all 0.3s ease;
         }
-         .lucid-toolpopup-header-icons svg.icon-heart {
+
+        /* 呼吸动画关键帧 */
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+            }
+            50% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+            }
+        }
+
+        /* Checkmark图标hover效果 */
+        .lucid-toolpopup-header-icons svg.icon:hover {
+            animation: breathe 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+        }
+
+        /* Heart图标样式 */
+        .lucid-toolpopup-header-icons svg.icon-heart {
             fill: #ff6b6b; /* Heart icon color */
+        }
+
+        /* Heart图标hover效果 */
+        .lucid-toolpopup-header-icons svg.icon-heart:hover {
+            animation: breathe 1.5s ease-in-out infinite;
+            fill: #ff4757; /* 稍微深一点的红色 */
+            filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.8));
         }
 
         .lucid-toolpopup-header-icons svg.icon {
@@ -196,7 +225,7 @@
 
         /* Sliding text content */
         .lucid-tooltip-text-content {
-            transition: transform 0.3s ease-out;
+            transition: transform 1s ease-out;
             white-space: nowrap;
             display: inline-block;
             position: relative;
@@ -207,7 +236,7 @@
         .lucid-tooltip-hover-zone {
             position: absolute;
             top: 0;
-            width: 20%; /* 1/5 area */
+            width: 10%; /* 1/10 area */
             height: 100%;
             z-index: 102; /* Above content */
             cursor: pointer;
@@ -627,7 +656,7 @@
 
                 const scrollHint = document.createElement('div');
                 scrollHint.className = 'lucid-tooltip-scroll-hint';
-                scrollHint.textContent = '···';
+                scrollHint.textContent = '';
 
                 // Clear original content and set up new structure
                 tooltip.innerHTML = '';
@@ -730,8 +759,8 @@
                 const containerWidth = rect.width;
 
                 // Calculate which zone the mouse is in
-                const rightZoneStart = containerWidth * 0.8; // Right 20%
-                const leftZoneEnd = containerWidth * 0.2;   // Left 20%
+                const rightZoneStart = containerWidth * 0.9; // Right 10%
+                const leftZoneEnd = containerWidth * 0.1;   // Left 10%
 
                 if (x >= rightZoneStart) {
                     // Mouse is in right zone
