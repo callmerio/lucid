@@ -92,10 +92,14 @@ function createHighlightElement(
 function addTooltipEvents(element: HTMLElement, word: string): void {
   const tooltipManager = TooltipManager.getInstance();
 
-  element.addEventListener('mouseenter', () => {
+  element.addEventListener('mouseenter', async () => {
     // 鼠标进入高亮元素时，取消任何隐藏操作并显示tooltip
     tooltipManager.cancelHide();
-    tooltipManager.showTooltip(element, word);
+    try {
+      await tooltipManager.showTooltip(element, word);
+    } catch (error) {
+      console.error('[Lucid] Error showing tooltip:', error);
+    }
   });
 
   element.addEventListener('mouseleave', () => {
@@ -332,7 +336,7 @@ const StyleManager = {
 /* Tooltip Styles */
 .lucid-tooltip {
   position: absolute;
-  z-index: 10000;
+  z-index: 2147483646; /* 比toolpopup低一级，确保过渡时不会挤占 */
   opacity: 0;
   transform: translateY(-2px);
   transition: opacity 150ms ease-out, transform 150ms ease-out;
@@ -352,7 +356,7 @@ const StyleManager = {
 
 .lucid-tooltip-content {
   /* 简洁的毛玻璃效果 - 灰黑色 */
-  background: rgba(40, 40, 40, 0.4);
+  background: rgba(40, 40, 40, 0.5);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 6px;
@@ -514,26 +518,61 @@ const StyleManager = {
 .lucid-toolpopup-container {
   position: absolute;
   z-index: 2147483647;
-  background: rgba(30, 30, 30, 0.8); /* Semi-transparent background */
-  backdrop-filter: blur(20px); /* Frosted glass effect */
-  -webkit-backdrop-filter: blur(20px); /* Safari support */
-  border-radius: 12px;
+  /* 使用与tooltip相同的毛玻璃效果 - 灰黑色 */
+  background: rgba(40, 40, 40, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 12px; /* 与tooltip相同的圆角 */
   padding: 20px;
   width: 350px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* 与tooltip相同的阴影 */
+  border: none; /* 移除边框，与tooltip保持一致 */
   user-select: none;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.95); /* 与tooltip相同的文字颜色 */
   /* 初始状态为隐藏，用于动画 */
   opacity: 0;
-  transform: scale(0.95);
-  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  transform: scaleY(0) translateY(-10px);
+  transform-origin: top center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .lucid-toolpopup-container.lucid-toolpopup-visible {
   opacity: 1;
-  transform: scale(1);
+  transform: scaleY(1) translateY(0);
+}
+
+/* 添加进入动画关键帧 - 由上到下展开 */
+@keyframes lucid-toolpopup-enter {
+  0% {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+}
+
+/* 添加退出动画关键帧 - 由下到上收缩 */
+@keyframes lucid-toolpopup-exit {
+  0% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+}
+
+/* 当toolpopup显示在目标元素上方时的样式 */
+.lucid-toolpopup-container.lucid-toolpopup-above {
+  /* 可以添加特殊样式，比如阴影方向调整等 */
 }
 
 .lucid-toolpopup-header {
@@ -544,7 +583,7 @@ const StyleManager = {
 }
 
 .lucid-toolpopup-word {
-  font-size: 24px;
+  /* font-size 由 JavaScript 动态设置为 tooltip 字体的2倍 */
   font-weight: 600;
   color: #f0f0f0;
   user-select: none;
@@ -691,9 +730,8 @@ const StyleManager = {
 }
 
 .lucid-toolpopup-definition-text-chinese {
-  font-size: 14px;
+  /* font-size 和 line-height 由 JavaScript 动态设置，与 tooltip 字体大小保持一致 */
   color: #ddd;
-  line-height: 1.6;
   position: relative;
 }
 
@@ -872,13 +910,16 @@ const StyleManager = {
   filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
 }
 
-/* Light theme toolpopup */
+/* Light theme toolpopup - 与tooltip保持一致 */
 @media (prefers-color-scheme: light) {
   .lucid-toolpopup-container {
-    background: rgba(240, 240, 240, 0.8);
+    /* 亮色主题的毛玻璃效果 - 与tooltip相同 */
+    background: rgba(240, 240, 240, 0.4);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    color: #333;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 
   .lucid-toolpopup-word {

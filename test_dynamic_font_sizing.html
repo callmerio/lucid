@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态字体大小测试 - Tooltip & Toolpopup</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .test-section h2 {
+            color: #34495e;
+            margin-top: 0;
+        }
+
+        .font-size-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .font-size-controls button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .font-size-controls button:hover {
+            background: #2980b9;
+        }
+
+        .current-font-size {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        /* 不同字体大小的测试段落 */
+        .small-text {
+            font-size: 12px;
+        }
+
+        .medium-text {
+            font-size: 16px;
+        }
+
+        .large-text {
+            font-size: 20px;
+        }
+
+        .extra-large-text {
+            font-size: 24px;
+        }
+
+        /* 高亮词汇样式 */
+        .test-word {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            padding: 2px 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .instructions {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+
+        .debug-info {
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔤 动态字体大小测试</h1>
+        
+        <div class="instructions">
+            <h3>📋 测试说明</h3>
+            <ul>
+                <li><strong>鼠标悬停</strong>：在高亮词汇上悬停查看 tooltip</li>
+                <li><strong>Shift + 悬停</strong>：按住 Shift 键悬停查看 toolpopup</li>
+                <li><strong>字体大小</strong>：使用下方按钮调整页面字体大小，观察 tooltip 和 toolpopup 的动态适配</li>
+                <li><strong>预期效果</strong>：
+                    <ul>
+                        <li>tooltip 字体 = 页面 p 元素字体 × 0.9</li>
+                        <li>toolpopup word 字体 = tooltip 字体 × 2</li>
+                        <li>toolpopup definition 字体 = tooltip 字体</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="font-size-controls">
+            <span>调整页面字体大小：</span>
+            <button onclick="setFontSize(12)">小 (12px)</button>
+            <button onclick="setFontSize(16)">中 (16px)</button>
+            <button onclick="setFontSize(20)">大 (20px)</button>
+            <button onclick="setFontSize(24)">特大 (24px)</button>
+            <span class="current-font-size">当前: <span id="currentSize">16px</span></span>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 测试文本区域</h2>
+            
+            <div class="small-text">
+                <p><strong>小字体段落 (12px)：</strong>This is a <span class="test-word">beautiful</span> day for testing our <span class="test-word">dynamic</span> font sizing system. The <span class="test-word">tooltip</span> should adapt to this smaller text size.</p>
+            </div>
+
+            <div class="medium-text">
+                <p><strong>中等字体段落 (16px)：</strong>Here we have some <span class="test-word">wonderful</span> words to test with. Try hovering over <span class="test-word">amazing</span> and <span class="test-word">fantastic</span> to see the tooltip scaling.</p>
+            </div>
+
+            <div class="large-text">
+                <p><strong>大字体段落 (20px)：</strong>The <span class="test-word">incredible</span> system should scale the <span class="test-word">tooltip</span> and <span class="test-word">toolpopup</span> proportionally to this larger text.</p>
+            </div>
+
+            <div class="extra-large-text">
+                <p><strong>特大字体段落 (24px)：</strong>Even with this <span class="test-word">enormous</span> text size, our <span class="test-word">system</span> should maintain perfect <span class="test-word">proportions</span>.</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 重点测试词汇</h2>
+            <p>以下词汇专门用于测试 tooltip 和 toolpopup 的字体大小适配：</p>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                <span class="test-word">beautiful</span>
+                <span class="test-word">wonderful</span>
+                <span class="test-word">amazing</span>
+                <span class="test-word">fantastic</span>
+                <span class="test-word">incredible</span>
+                <span class="test-word">system</span>
+                <span class="test-word">dynamic</span>
+                <span class="test-word">tooltip</span>
+                <span class="test-word">toolpopup</span>
+                <span class="test-word">proportions</span>
+            </div>
+        </div>
+
+        <div class="debug-info">
+            <h3>🔍 调试信息</h3>
+            <div id="debugInfo">
+                <p>页面加载完成，等待字体大小检测...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 设置页面字体大小
+        function setFontSize(size) {
+            document.querySelectorAll('p').forEach(p => {
+                p.style.fontSize = size + 'px';
+            });
+            document.getElementById('currentSize').textContent = size + 'px';
+            updateDebugInfo();
+        }
+
+        // 更新调试信息
+        function updateDebugInfo() {
+            const bodyP = document.querySelector('body p');
+            const bodyPFontSize = bodyP ? window.getComputedStyle(bodyP).fontSize : 'N/A';
+            const bodyFontSize = window.getComputedStyle(document.body).fontSize;
+            
+            const expectedTooltipSize = bodyP ? (parseFloat(bodyPFontSize) * 0.9).toFixed(1) + 'px' : 'N/A';
+            const expectedWordSize = bodyP ? (parseFloat(bodyPFontSize) * 0.9 * 2).toFixed(1) + 'px' : 'N/A';
+            
+            document.getElementById('debugInfo').innerHTML = `
+                <p><strong>Body 字体大小:</strong> ${bodyFontSize}</p>
+                <p><strong>Body P 字体大小:</strong> ${bodyPFontSize}</p>
+                <p><strong>预期 Tooltip 字体:</strong> ${expectedTooltipSize} (body p × 0.9)</p>
+                <p><strong>预期 Toolpopup Word 字体:</strong> ${expectedWordSize} (tooltip × 2)</p>
+                <p><strong>预期 Toolpopup Definition 字体:</strong> ${expectedTooltipSize} (与 tooltip 相同)</p>
+                <p><em>悬停在高亮词汇上测试实际效果</em></p>
+            `;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDebugInfo();
+            
+            // 模拟高亮词汇的点击事件（如果需要）
+            document.querySelectorAll('.test-word').forEach(word => {
+                word.addEventListener('click', function() {
+                    console.log('Clicked word:', this.textContent);
+                });
+            });
+        });
+
+        // 监听字体大小变化
+        const observer = new MutationObserver(updateDebugInfo);
+        observer.observe(document.body, {
+            attributes: true,
+            subtree: true,
+            attributeFilter: ['style']
+        });
+    </script>
+</body>
+</html>

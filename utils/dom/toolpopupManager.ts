@@ -2,6 +2,11 @@
  * ToolpopupManager - Handles the display of detailed word information.
  */
 
+import { formatPhonetic } from '../text/phoneticUtils';
+
+// 避免循环导入，使用延迟导入
+let TooltipManager: any = null;
+
 // Define a type for the detailed word data, based on dictionary.json structure
 export interface WordDefinition {
     definition: string;
@@ -47,11 +52,56 @@ export class ToolpopupManager {
     }
 
     /**
+     * 从mock数据文件获取单词的详细信息
+     */
+    private async loadMockData(): Promise<any> {
+        try {
+            // 在浏览器插件环境中，需要使用正确的URL路径
+            let mockDataUrl = './mock-data/tooltip-mock-data.json';
+
+            // 如果是在插件环境中，使用runtime.getURL
+            if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getURL) {
+                mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json' as any);
+            } else if (typeof (chrome as any) !== 'undefined' && (chrome as any).runtime && (chrome as any).runtime.getURL) {
+                mockDataUrl = (chrome as any).runtime.getURL('mock-data/tooltip-mock-data.json');
+            }
+
+            console.log('[ToolpopupManager] Attempting to load mock data from:', mockDataUrl);
+            const response = await fetch(mockDataUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to load mock data: ${response.status} ${response.statusText}`);
+            }
+            const data = await response.json();
+            console.log('[ToolpopupManager] Mock data loaded successfully:', data);
+            return data;
+        } catch (error) {
+            console.warn('[ToolpopupManager] Failed to load mock data file, falling back to hardcoded data:', error);
+            return null;
+        }
+    }
+
+    /**
      * Simulates fetching detailed word data.
      * In a real application, this would involve an API call.
      */
     private async getWordDetailedInfo(word: string): Promise<DetailedWordData | null> {
         console.log(`[ToolpopupManager] Fetching detailed info for: ${word}`);
+
+        // 首先尝试从mock数据文件加载
+        const mockData = await this.loadMockData();
+        if (mockData && mockData.words && mockData.words.length > 0) {
+            // 使用mock数据文件中的数据（无论查询什么单词都返回相同数据）
+            const wordData = mockData.words[0];
+            console.log('[ToolpopupManager] Using mock data file for:', word, wordData);
+
+            return {
+                word: wordData.word,
+                phonetic: wordData.phonetic,
+                explain: wordData.explain,
+                wordFormats: wordData.wordFormats || [],
+                relatedSuggestions: mockData.relatedSuggestions || []
+            };
+        }
 
         if (word.toLowerCase() === 'escalade') {
             return {
@@ -250,6 +300,8 @@ export class ToolpopupManager {
         return syllables.length > 0 ? syllables : [word];
     }
 
+
+
     /**
      * 显示音节分割的单词
      */
@@ -296,18 +348,20 @@ export class ToolpopupManager {
         // 创建音标HTML
         let phoneticHTML = '';
         if (wordDetails.phonetic?.us) {
+            const formattedUSPhonetic = formatPhonetic(wordDetails.phonetic.us);
             phoneticHTML += `
                 <div class="lucid-toolpopup-phonetic-group us-phonetic" onclick="this.dispatchEvent(new CustomEvent('playPronunciation', {detail: {word: '${wordDetails.word}', region: 'us'}, bubbles: true}))">
                     <span class="lucid-toolpopup-phonetic-region">US</span>
-                    <span class="lucid-toolpopup-phonetic-text">/${wordDetails.phonetic.us}/</span>
+                    <span class="lucid-toolpopup-phonetic-text">${formattedUSPhonetic}</span>
                 </div>
             `;
         }
         if (wordDetails.phonetic?.uk && wordDetails.phonetic.us !== wordDetails.phonetic.uk) {
+            const formattedUKPhonetic = formatPhonetic(wordDetails.phonetic.uk);
             phoneticHTML += `
                 <div class="lucid-toolpopup-phonetic-group uk-phonetic" onclick="this.dispatchEvent(new CustomEvent('playPronunciation', {detail: {word: '${wordDetails.word}', region: 'uk'}, bubbles: true}))">
                     <span class="lucid-toolpopup-phonetic-region">UK</span>
-                    <span class="lucid-toolpopup-phonetic-text">/${wordDetails.phonetic.uk}/</span>
+                    <span class="lucid-toolpopup-phonetic-text">${formattedUKPhonetic}</span>
                 </div>
             `;
         }
@@ -602,42 +656,75 @@ export class ToolpopupManager {
 
     /**
      * Positions the toolpopup on the screen.
-     * For now, it will position it near the center, or near the targetElement if provided.
+     * 使用与tooltip相同的定位逻辑，确保位置一致
      */
     private positionToolpopup(toolpopupEl: HTMLElement, referenceEl?: HTMLElement): void {
-        const popupRect = toolpopupEl.getBoundingClientRect();
-        let top, left;
-
-        if (referenceEl) {
-            const refRect = referenceEl.getBoundingClientRect();
-            top = refRect.bottom + 10 + window.scrollY; // Below the reference element
-            left = refRect.left + window.scrollX;
-
-            // Adjust if it goes off screen horizontally
-            if (left + popupRect.width > window.innerWidth - 10) {
-                left = window.innerWidth - popupRect.width - 10;
-            }
-            if (left < 10) {
-                left = 10;
-            }
-            // Adjust if it goes off screen vertically (prefer showing below, then above)
-            if (top + popupRect.height > window.innerHeight - 10) {
-                top = refRect.top - popupRect.height - 10 + window.scrollY;
-                if (top < 10 + window.scrollY) { // If still off-screen (e.g. reference is tall)
-                    top = window.innerHeight / 2 - popupRect.height / 2 + window.scrollY; // Center vertically
-                }
-            }
-
-        } else {
-            // Default to center of the viewport
-            top = (window.innerHeight / 2) - (popupRect.height / 2) + window.scrollY;
-            left = (window.innerWidth / 2) - (popupRect.width / 2) + window.scrollX;
+        if (!referenceEl) {
+            // 如果没有参考元素，居中显示
+            const top = (window.innerHeight / 2) - (toolpopupEl.offsetHeight / 2) + window.scrollY;
+            const left = (window.innerWidth / 2) - (toolpopupEl.offsetWidth / 2) + window.scrollX;
+            toolpopupEl.style.position = 'absolute';
+            toolpopupEl.style.top = `${top}px`;
+            toolpopupEl.style.left = `${left}px`;
+            toolpopupEl.style.zIndex = '2147483647';
+            return;
         }
 
+        const targetRect = referenceEl.getBoundingClientRect();
+        const toolpopupRect = toolpopupEl.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // 使用与tooltip相同的定位逻辑：目标元素下方左对齐，更靠近
+        let left = targetRect.left;
+        let top = targetRect.bottom + 4; // 与tooltip相同的间距
+
+        // 水平边界检查 - 与tooltip相同的逻辑
+        if (left < 8) {
+            left = 8;
+        } else if (left + toolpopupRect.width > viewportWidth - 8) {
+            left = viewportWidth - toolpopupRect.width - 8;
+        }
+
+        // 垂直边界检查 - 与tooltip相同的逻辑
+        if (top + toolpopupRect.height > viewportHeight - 8) {
+            top = targetRect.top - toolpopupRect.height - 4;
+            toolpopupEl.classList.add('lucid-toolpopup-above');
+        }
+
+        // 设置位置 - 与tooltip相同的方式
         toolpopupEl.style.position = 'absolute';
-        toolpopupEl.style.top = `${top}px`;
-        toolpopupEl.style.left = `${left}px`;
-        toolpopupEl.style.zIndex = '2147483647'; // Max z-index
+        toolpopupEl.style.left = `${left + window.scrollX}px`;
+        toolpopupEl.style.top = `${top + window.scrollY}px`;
+        toolpopupEl.style.zIndex = '2147483647';
+    }
+
+    /**
+     * 获取页面body p元素的字体大小（与TooltipManager保持一致）
+     */
+    private getBodyPFontSize(): number {
+        // 尝试获取body p元素的字体大小
+        const bodyP = document.querySelector('body p');
+        if (bodyP) {
+            const computedStyle = window.getComputedStyle(bodyP);
+            const fontSize = parseFloat(computedStyle.fontSize);
+            if (!isNaN(fontSize)) {
+                return fontSize;
+            }
+        }
+
+        // 如果没有找到body p，尝试获取body的字体大小
+        const body = document.body;
+        if (body) {
+            const computedStyle = window.getComputedStyle(body);
+            const fontSize = parseFloat(computedStyle.fontSize);
+            if (!isNaN(fontSize)) {
+                return fontSize;
+            }
+        }
+
+        // 默认返回16px
+        return 16;
     }
 
     /**
@@ -651,6 +738,14 @@ export class ToolpopupManager {
             this.hideToolpopup();
         }
 
+        // 🔧 修复：显示toolpopup时自动隐藏tooltip，避免同时显示两个弹窗
+        if (!TooltipManager) {
+            // 延迟导入避免循环依赖
+            const { TooltipManager: TM } = await import('./tooltipManager');
+            TooltipManager = TM;
+        }
+        TooltipManager.getInstance().hideTooltip(0); // 立即隐藏tooltip
+
         const wordDetails = await this.getWordDetailedInfo(word);
         if (!wordDetails) {
             console.warn(`[ToolpopupManager] No detailed info found for: ${word}`);
@@ -659,22 +754,47 @@ export class ToolpopupManager {
 
         this.currentToolpopup = this.createToolpopupElement(wordDetails);
 
-        // 如果是从tooltip过渡而来，实现平滑过渡动画
-        if (fromTooltip && referenceElement) {
-            this.performSmoothTransition(fromTooltip, this.currentToolpopup, referenceElement);
-        } else {
-            // 标准显示动画
-            document.body.appendChild(this.currentToolpopup);
+        // 设置动态字体大小（与tooltip保持一致的逻辑）
+        const bodyPFontSize = this.getBodyPFontSize();
+        const tooltipFontSize = bodyPFontSize * 0.9; // tooltip字体大小
+        const wordFontSize = tooltipFontSize * 2; // word字体大小为tooltip的2倍
 
-            // Position after it's added to DOM and rendered to get correct dimensions
-            requestAnimationFrame(() => {
-                if (this.currentToolpopup) {
-                    this.positionToolpopup(this.currentToolpopup, referenceElement);
-                    // 添加显示动画
-                    this.currentToolpopup.classList.add('lucid-toolpopup-visible');
-                }
-            });
+        // 获取关键元素
+        const toolpopupWord = this.currentToolpopup.querySelector('.lucid-toolpopup-word') as HTMLElement;
+        const definitionTexts = this.currentToolpopup.querySelectorAll('.lucid-toolpopup-definition-text-chinese') as NodeListOf<HTMLElement>;
+
+        // 设置word元素字体大小（tooltip的2倍）
+        if (toolpopupWord) {
+            toolpopupWord.style.fontSize = `${wordFontSize}px`;
+            toolpopupWord.style.lineHeight = `${wordFontSize * 1.2}px`;
         }
+
+        // 设置definition文本字体大小（与tooltip相同）
+        definitionTexts.forEach(element => {
+            element.style.fontSize = `${tooltipFontSize}px`;
+            element.style.lineHeight = `${tooltipFontSize * 1.2}px`;
+        });
+
+        // 标准显示动画（简化过渡逻辑，避免重叠问题）
+        document.body.appendChild(this.currentToolpopup);
+
+        // Position after it's added to DOM and rendered to get correct dimensions
+        requestAnimationFrame(() => {
+            if (this.currentToolpopup) {
+                this.positionToolpopup(this.currentToolpopup, referenceElement);
+
+                // 添加进入动画
+                this.currentToolpopup.style.animation = 'lucid-toolpopup-enter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+
+                // 同时添加visible类以确保最终状态正确
+                setTimeout(() => {
+                    if (this.currentToolpopup) {
+                        this.currentToolpopup.classList.add('lucid-toolpopup-visible');
+                        this.currentToolpopup.style.animation = ''; // 清除动画，使用CSS transition接管
+                    }
+                }, 300);
+            }
+        });
     }
 
     /**
@@ -736,33 +856,34 @@ export class ToolpopupManager {
     }
 
     /**
-     * 计算toolpopup的最佳位置
+     * 计算toolpopup的最佳位置 - 与tooltip定位逻辑保持一致
      */
     private calculateOptimalPosition(toolpopupEl: HTMLElement, referenceEl: HTMLElement): { left: number; top: number } {
-        const refRect = referenceEl.getBoundingClientRect();
-        const popupWidth = 350; // toolpopup的标准宽度
-        const popupHeight = 400; // 估算高度
+        const targetRect = referenceEl.getBoundingClientRect();
+        const toolpopupRect = toolpopupEl.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-        let left = refRect.left + window.scrollX;
-        let top = refRect.bottom + 10 + window.scrollY;
+        // 使用与tooltip相同的定位逻辑
+        let left = targetRect.left;
+        let top = targetRect.bottom + 4; // 与tooltip相同的间距
 
-        // 水平边界检查
-        if (left + popupWidth > window.innerWidth - 10) {
-            left = window.innerWidth - popupWidth - 10;
-        }
-        if (left < 10) {
-            left = 10;
-        }
-
-        // 垂直边界检查
-        if (top + popupHeight > window.innerHeight - 10) {
-            top = refRect.top - popupHeight - 10 + window.scrollY;
-            if (top < 10 + window.scrollY) {
-                top = window.innerHeight / 2 - popupHeight / 2 + window.scrollY;
-            }
+        // 水平边界检查 - 与tooltip相同的逻辑
+        if (left < 8) {
+            left = 8;
+        } else if (left + toolpopupRect.width > viewportWidth - 8) {
+            left = viewportWidth - toolpopupRect.width - 8;
         }
 
-        return { left, top };
+        // 垂直边界检查 - 与tooltip相同的逻辑
+        if (top + toolpopupRect.height > viewportHeight - 8) {
+            top = targetRect.top - toolpopupRect.height - 4;
+        }
+
+        return {
+            left: left + window.scrollX,
+            top: top + window.scrollY
+        };
     }
 
     /**
@@ -770,17 +891,18 @@ export class ToolpopupManager {
      */
     public hideToolpopup(): void {
         if (this.currentToolpopup) {
-            // Add a class for exit animation if desired
-            this.currentToolpopup.style.transition = 'opacity 0.15s ease-in, transform 0.15s ease-in';
-            this.currentToolpopup.style.opacity = '0';
-            this.currentToolpopup.style.transform = 'scale(0.95)';
+            // 添加退出动画
+            this.currentToolpopup.style.animation = 'lucid-toolpopup-exit 0.2s ease-in forwards';
+
+            // 移除visible类
+            this.currentToolpopup.classList.remove('lucid-toolpopup-visible');
 
             setTimeout(() => {
                 if (this.currentToolpopup) {
                     this.currentToolpopup.remove();
                     this.currentToolpopup = null;
                 }
-            }, 150); // Match transition time
+            }, 200); // 匹配动画时间
         }
     }
 }
