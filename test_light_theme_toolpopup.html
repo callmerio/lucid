@@ -116,14 +116,17 @@
         }
 
         .mock-toolpopup.dark-theme {
+            /* 默认主题（暗色）- 与实际 toolpopup 一致 */
             background: rgba(40, 40, 40, 0.9);
             -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             color: rgba(255, 255, 255, 0.95);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: none;
         }
 
         .mock-toolpopup.light-theme {
+            /* 亮色主题 - 与实际 toolpopup 一致 */
             background: rgba(240, 240, 240, 0.4);
             -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
@@ -172,8 +175,9 @@
                 <li><strong>Shift + 悬停</strong>：按住 Shift 键悬停查看 toolpopup</li>
                 <li><strong>预期效果</strong>：
                     <ul>
-                        <li>亮色主题：浅色毛玻璃背景 rgba(240, 240, 240, 0.4)</li>
-                        <li>暗色主题：深色毛玻璃背景 rgba(40, 40, 40, 0.9)</li>
+                        <li><strong>默认主题（暗色）</strong>：深色毛玻璃背景 rgba(40, 40, 40, 0.9)</li>
+                        <li><strong>亮色主题</strong>：浅色毛玻璃背景 rgba(240, 240, 240, 0.4)</li>
+                        <li>两个主题独立定义，类似 .lucid-tooltip-content 的结构</li>
                     </ul>
                 </li>
             </ul>
@@ -210,13 +214,15 @@
                 <div class="mock-toolpopup dark-theme">
                     <div class="mock-word dark-theme">beautiful</div>
                     <div class="mock-definition dark-theme">adj. 美丽的，漂亮的</div>
-                    <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">暗色主题效果</div>
+                    <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">默认主题（暗色）</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.5);">rgba(40, 40, 40, 0.9)</div>
                 </div>
 
                 <div class="mock-toolpopup light-theme">
                     <div class="mock-word light-theme">beautiful</div>
                     <div class="mock-definition light-theme">adj. 美丽的，漂亮的</div>
-                    <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">亮色主题效果</div>
+                    <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">亮色主题</div>
+                    <div style="font-size: 11px; color: rgba(0,0,0,0.5);">rgba(240, 240, 240, 0.4)</div>
                 </div>
             </div>
         </div>

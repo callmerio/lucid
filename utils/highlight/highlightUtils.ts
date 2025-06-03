@@ -511,6 +511,18 @@ const StyleManager = {
     background: rgba(255, 107, 107, 0.8) !important;
     color: white !important;
   }
+
+  /* Light theme toolpopup */
+  .lucid-toolpopup-container {
+    /* 亮色主题的毛玻璃效果 */
+    background: rgba(240, 240, 240, 0.4);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgba(20, 20, 20, 0.9);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+}
 }
 
 /* ===== TOOLPOPUP STYLES (从 toolpopup.html 集成) ===== */
@@ -518,18 +530,18 @@ const StyleManager = {
 .lucid-toolpopup-container {
   position: absolute;
   z-index: 2147483647;
-  /* 使用与tooltip相同的毛玻璃效果 - 灰黑色 */
+  /* 默认主题的毛玻璃效果 - 灰黑色 */
   background: rgba(40, 40, 40, 0.9);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border-radius: 12px; /* 与tooltip相同的圆角 */
+  border-radius: 12px;
   padding: 20px;
   width: 350px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* 与tooltip相同的阴影 */
-  border: none; /* 移除边框，与tooltip保持一致 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: none;
   user-select: none;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  color: rgba(255, 255, 255, 0.95); /* 与tooltip相同的文字颜色 */
+  color: rgba(255, 255, 255, 0.95);
   /* 初始状态为隐藏，用于动画 */
   opacity: 0;
   transform: scaleY(0) translateY(-10px);
@@ -569,6 +581,8 @@ const StyleManager = {
     transform-origin: top center;
   }
 }
+
+
 
 /* 当toolpopup显示在目标元素上方时的样式 */
 .lucid-toolpopup-container.lucid-toolpopup-above {
