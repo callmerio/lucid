@@ -723,8 +723,8 @@ export class ToolpopupManager {
             }
         }
 
-        // 默认返回16px
-        return 16;
+        // 默认返回20px
+        return 20;
     }
 
     /**
@@ -756,8 +756,8 @@ export class ToolpopupManager {
 
         // 设置动态字体大小（与tooltip保持一致的逻辑）
         const bodyPFontSize = this.getBodyPFontSize();
-        const tooltipFontSize = bodyPFontSize * 0.9; // tooltip字体大小
-        const wordFontSize = tooltipFontSize * 2; // word字体大小为tooltip的2倍
+        const tooltipFontSize = bodyPFontSize; // tooltip字体大小
+        const wordFontSize = tooltipFontSize * 1.6; // word字体大小为tooltip的2倍
 
         // 获取关键元素
         const toolpopupWord = this.currentToolpopup.querySelector('.lucid-toolpopup-word') as HTMLElement;

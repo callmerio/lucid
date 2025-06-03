@@ -24,6 +24,12 @@ export default defineConfig({
     host_permissions: [
       // API 权限将在后续添加
     ],
+    web_accessible_resources: [
+      {
+        resources: ["mock-data/*.json"],
+        matches: ["<all_urls>"]
+      }
+    ],
   },
   dev: {
     server: {

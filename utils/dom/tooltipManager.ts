@@ -114,9 +114,67 @@ const MOCK_TRANSLATIONS: Record<string, {
 };
 
 /**
- * 获取单词的翻译信息
+ * 从mock数据文件获取单词的翻译信息
  */
-export function getWordTranslation(word: string) {
+async function loadMockData(): Promise<any> {
+  try {
+    // 在浏览器插件环境中，需要使用正确的URL路径
+    let mockDataUrl = './mock-data/tooltip-mock-data.json';
+
+    // 如果是在插件环境中，使用runtime.getURL
+    if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getURL) {
+      mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json');
+    } else if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
+      mockDataUrl = chrome.runtime.getURL('mock-data/tooltip-mock-data.json');
+    }
+
+    console.log('[Lucid] Attempting to load mock data from:', mockDataUrl);
+    const response = await fetch(mockDataUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to load mock data: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log('[Lucid] Mock data loaded successfully:', data);
+    return data;
+  } catch (error) {
+    console.warn('[Lucid] Failed to load mock data file, falling back to hardcoded data:', error);
+    return null;
+  }
+}
+
+/**
+ * 获取单词的翻译信息 - 优先使用mock数据文件，回退到硬编码数据
+ */
+export async function getWordTranslation(word: string) {
+  // 尝试加载mock数据文件
+  const mockData = await loadMockData();
+
+  if (mockData && mockData.words && mockData.words.length > 0) {
+    // 使用mock数据文件中的数据（无论查询什么单词都返回相同数据）
+    const wordData = mockData.words[0];
+    const firstDefinition = wordData.explain?.[0]?.definitions?.[0];
+
+    return {
+      word: wordData.word,
+      phonetic: wordData.phonetic?.us || wordData.phonetic?.uk,
+      translation: firstDefinition?.chinese_short || firstDefinition?.chinese || "暂无翻译",
+      partOfSpeech: wordData.explain?.[0]?.pos || "unknown"
+    };
+  }
+
+  // 回退到硬编码数据
+  const normalizedWord = word.toLowerCase().trim();
+  return MOCK_TRANSLATIONS[normalizedWord] || {
+    word: word,
+    translation: "暂无翻译",
+    partOfSpeech: "unknown"
+  };
+}
+
+/**
+ * 同步版本的获取翻译信息（为了兼容现有代码）
+ */
+export function getWordTranslationSync(word: string) {
   const normalizedWord = word.toLowerCase().trim();
   return MOCK_TRANSLATIONS[normalizedWord] || {
     word: word,
@@ -243,9 +301,9 @@ export class TooltipManager {
   /**
    * 显示tooltip
    */
-  showTooltip(targetElement: HTMLElement, word: string): void {
+  async showTooltip(targetElement: HTMLElement, word: string): Promise<void> {
     // 使用安全执行包装
-    SimpleEventManager.safeExecute(() => {
+    await SimpleEventManager.safeExecute(async () => {
       // 清除之前的隐藏定时器
       if (this.hideTimeout) {
         clearTimeout(this.hideTimeout);
@@ -260,8 +318,11 @@ export class TooltipManager {
       // 移除现有tooltip
       this.hideTooltip(0); // 立即隐藏，不延迟
 
-      // 获取翻译信息
-      const translation = getWordTranslation(word);
+      // 🔧 修复：显示tooltip时自动隐藏toolpopup，避免同时显示两个弹窗
+      ToolpopupManager.getInstance().hideToolpopup();
+
+      // 获取翻译信息（异步）
+      const translation = await getWordTranslation(word);
 
       // 创建tooltip元素
       const tooltip = this.createTooltipElement(translation, targetElement);
@@ -703,16 +764,11 @@ export class TooltipManager {
         const currentTargetElement = this.currentTargetElement || targetElement;
         const currentTooltipElement = this.currentTooltip;
 
-        // 不立即隐藏tooltip，而是传递给ToolpopupManager进行平滑过渡
-        // this.hideTooltip(0); // 注释掉立即隐藏
+        // 立即隐藏tooltip，避免与toolpopup重叠
+        this.hideTooltip(0);
 
         // 调用新的showToolpopup方法，传递当前tooltip元素用于平滑过渡
         ToolpopupManager.getInstance().showToolpopup(currentWord, currentTargetElement, currentTooltipElement);
-
-        // 延迟隐藏tooltip，给过渡动画时间
-        setTimeout(() => {
-          this.hideTooltip(0);
-        }, 100);
       }
     };
 

@@ -1,0 +1,111 @@
+{
+  "words": [
+    {
+      "word": "escalade",
+      "explain": [
+        {
+          "pos": "noun",
+          "definitions": [
+            {
+              "definition": "An act of scaling a wall or rampart",
+              "chinese": "攀登，攀爬墙壁或城墙的行为",
+              "chinese_short": "攀登"
+            }
+          ]
+        },
+        {
+          "pos": "verb",
+          "definitions": [
+            {
+              "definition": "To climb or scale, especially a wall or fortification",
+              "chinese": "攀登，攀爬，特别是墙壁或防御工事",
+              "chinese_short": "攀登"
+            }
+          ]
+        }
+      ],
+      "wordFormats": [
+        {
+          "name": "原型",
+          "form": "escalade"
+        },
+        {
+          "name": "第三人称单数",
+          "form": "escalades"
+        },
+        {
+          "name": "过去式",
+          "form": "escaladed"
+        },
+        {
+          "name": "过去分词",
+          "form": "escaladed"
+        },
+        {
+          "name": "现在分词",
+          "form": "escalading"
+        }
+      ],
+      "phonetic": {
+        "us": "/ˌɛskəˈleɪd/",
+        "uk": "/ˈɛskəleɪd/"
+      }
+    }
+  ],
+  "wordCount": 1,
+  "wordList": [
+    "escalade"
+  ],
+  "wordRelationships": [
+    {
+      "baseForm": "escalade",
+      "baseFormId": 789,
+      "allForms": [
+        {
+          "id": 789,
+          "name": "原型",
+          "form": "escalade",
+          "isMainForm": true
+        },
+        {
+          "id": 790,
+          "name": "第三人称单数",
+          "form": "escalades",
+          "isMainForm": false
+        },
+        {
+          "id": 791,
+          "name": "过去式",
+          "form": "escaladed",
+          "isMainForm": false
+        },
+        {
+          "id": 792,
+          "name": "过去分词",
+          "form": "escaladed",
+          "isMainForm": false
+        },
+        {
+          "id": 793,
+          "name": "现在分词",
+          "form": "escalading",
+          "isMainForm": false
+        }
+      ],
+      "totalFormsCount": 5
+    }
+  ],
+  "queryMetadata": {
+    "searchTerm": "escalade",
+    "matchedForm": "escalade",
+    "searchStrategy": "exact_vocabulary",
+    "isBaseFormQuery": true,
+    "processingTimeMs": 42
+  },
+  "relatedSuggestions": [
+    "climb",
+    "scale",
+    "ascend",
+    "mount"
+  ]
+}

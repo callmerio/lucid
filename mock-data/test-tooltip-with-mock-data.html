@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tooltip Mock Data Test</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 40px;
+            margin: 0;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .word-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .word-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px 24px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .word-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .word-button.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .tooltip-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        /* 引入tooltip样式 */
+        .lucid-toolpopup-container {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 20px;
+            width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            user-select: none;
+        }
+
+        .lucid-toolpopup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .lucid-toolpopup-word {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+
+        .lucid-toolpopup-syllable-separator {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+            margin: 0 1px;
+        }
+
+        .lucid-toolpopup-phonetic {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .lucid-toolpopup-phonetic-group {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lucid-toolpopup-phonetic-region {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            color: #ccc;
+        }
+
+        .lucid-toolpopup-explain-group {
+            margin-bottom: 15px;
+        }
+
+        .lucid-toolpopup-definition {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .lucid-toolpopup-pos {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+            color: #ccc;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .lucid-toolpopup-definition-text-chinese {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        .data-info {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .data-info h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+
+        .data-info pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            color: #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 通用Mock数据测试页面</h1>
+
+        <div class="word-buttons">
+            <button class="word-button active" data-word="apple">apple (苹果)</button>
+            <button class="word-button" data-word="computer">computer (电脑)</button>
+            <button class="word-button" data-word="beautiful">beautiful (美丽)</button>
+            <button class="word-button" data-word="任何中文">任何中文</button>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 20px; color: rgba(255,255,255,0.8);">
+            <p>💡 <strong>演示说明</strong>：无论点击哪个按钮，都会返回相同的mock数据 (escalade)</p>
+        </div>
+
+        <div class="tooltip-container">
+            <div class="lucid-toolpopup-container" id="tooltip-container">
+                <div class="lucid-toolpopup-header">
+                    <span class="lucid-toolpopup-word" id="word-display">Loading...</span>
+                </div>
+                <div class="lucid-toolpopup-phonetic" id="phonetic-display"></div>
+                <div class="lucid-toolpopup-definitions-area" id="definitions-display"></div>
+            </div>
+        </div>
+
+        <div class="data-info">
+            <h3>📊 当前单词数据结构</h3>
+            <pre id="data-display">Loading mock data...</pre>
+        </div>
+    </div>
+
+    <script>
+        let mockData = {};
+        let currentWord = 'apple';
+
+        // 模拟API查询函数 - 无论查询什么单词都返回相同数据
+        async function mockWordQuery(word) {
+            try {
+                console.log(`🔍 查询单词: "${word}"`);
+                const response = await fetch('./tooltip-mock-data.json');
+                const data = await response.json();
+                console.log('📦 返回固定mock数据 (escalade):', data);
+                return data;
+            } catch (error) {
+                console.error('Failed to load mock data:', error);
+                throw error;
+            }
+        }
+
+        // 更新tooltip显示
+        async function updateTooltip(queryWord) {
+            try {
+                // 模拟查询API，无论查什么都返回相同数据
+                const data = await mockWordQuery(queryWord);
+
+                // 显示查询的单词和实际返回的数据
+                document.getElementById('data-display').textContent =
+                    `查询单词: "${queryWord}"\n返回数据: ${JSON.stringify(data, null, 2)}`;
+
+                const wordData = data.words[0];
+            
+            // 更新单词显示
+            document.getElementById('word-display').textContent = wordData.word;
+            
+            // 更新音标显示
+            const phoneticDisplay = document.getElementById('phonetic-display');
+            phoneticDisplay.innerHTML = `
+                <div class="lucid-toolpopup-phonetic-group">
+                    <span class="lucid-toolpopup-phonetic-region">US</span>
+                    <span class="lucid-toolpopup-phonetic-text">${wordData.phonetic.us}</span>
+                </div>
+                <div class="lucid-toolpopup-phonetic-group">
+                    <span class="lucid-toolpopup-phonetic-region">UK</span>
+                    <span class="lucid-toolpopup-phonetic-text">${wordData.phonetic.uk}</span>
+                </div>
+            `;
+            
+            // 更新定义显示
+            const definitionsDisplay = document.getElementById('definitions-display');
+            definitionsDisplay.innerHTML = '';
+            
+            wordData.explain.forEach(explainGroup => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'lucid-toolpopup-explain-group';
+                
+                explainGroup.definitions.forEach(def => {
+                    const defDiv = document.createElement('div');
+                    defDiv.className = 'lucid-toolpopup-definition';
+                    defDiv.innerHTML = `
+                        <span class="lucid-toolpopup-pos">${explainGroup.pos}.</span>
+                        <span class="lucid-toolpopup-definition-text-chinese">${def.chinese_short}</span>
+                    `;
+                    groupDiv.appendChild(defDiv);
+                });
+                
+                definitionsDisplay.appendChild(groupDiv);
+            });
+            
+            // 更新数据显示 - 显示查询单词和返回数据的对比
+            document.getElementById('data-display').textContent =
+                `查询单词: "${queryWord}"\n\n返回的mock数据:\n${JSON.stringify(data, null, 2)}`;
+
+            } catch (error) {
+                console.error('Error updating tooltip:', error);
+                document.getElementById('data-display').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // 按钮点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.word-button');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 更新按钮状态
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // 更新当前单词并查询
+                    currentWord = this.dataset.word;
+                    updateTooltip(currentWord);
+                });
+            });
+
+            // 加载初始数据
+            updateTooltip(currentWord);
+        });
+    </script>
+</body>
+</html>

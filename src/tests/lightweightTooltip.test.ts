@@ -136,14 +136,14 @@ describe('轻量级Tooltip系统测试', () => {
   });
 
   describe('TooltipManager核心功能', () => {
-    test('应该能够显示和隐藏tooltip', () => {
+    test('应该能够显示和隐藏tooltip', async () => {
       const testElement = document.createElement('span');
       testElement.textContent = 'test word';
       testElement.dataset.word = 'test';
       document.body.appendChild(testElement);
 
       // 显示tooltip
-      tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip(testElement, 'test');
 
       // 验证tooltip已创建
       const tooltip = document.querySelector('.lucid-tooltip') as HTMLElement;
@@ -173,7 +173,7 @@ describe('轻量级Tooltip系统测试', () => {
       };
 
       // 显示tooltip
-      tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip(testElement, 'test');
 
       // 等待tooltip完全显示
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -200,7 +200,7 @@ describe('轻量级Tooltip系统测试', () => {
       document.body.appendChild(testElement);
 
       // 显示tooltip
-      tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip(testElement, 'test');
 
       // 等待tooltip完全显示和事件监听器添加
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -220,7 +220,7 @@ describe('轻量级Tooltip系统测试', () => {
   });
 
   describe('集成测试', () => {
-    test('应该支持多个tooltip的正确切换', () => {
+    test('应该支持多个tooltip的正确切换', async () => {
       const element1 = document.createElement('span');
       element1.textContent = 'word1';
       element1.dataset.word = 'word1';
@@ -233,12 +233,12 @@ describe('轻量级Tooltip系统测试', () => {
       document.body.appendChild(element2);
 
       // 显示第一个tooltip
-      tooltipManager.showTooltip(element1, 'word1');
+      await tooltipManager.showTooltip(element1, 'word1');
       let tooltip = document.querySelector('.lucid-tooltip') as HTMLElement;
       expect(tooltip?.dataset.word).toBe('word1');
 
       // 切换到第二个tooltip
-      tooltipManager.showTooltip(element2, 'word2');
+      await tooltipManager.showTooltip(element2, 'word2');
       tooltip = document.querySelector('.lucid-tooltip') as HTMLElement;
       expect(tooltip?.dataset.word).toBe('word2');
 

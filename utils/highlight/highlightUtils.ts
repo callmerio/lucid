@@ -356,7 +356,7 @@ const StyleManager = {
 
 .lucid-tooltip-content {
   /* 简洁的毛玻璃效果 - 灰黑色 */
-  background: rgba(40, 40, 40, 0.5);
+  background: rgba(40, 40, 40, 0.8);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 6px;
@@ -485,45 +485,7 @@ const StyleManager = {
   }
 }
 
-/* Light theme tooltip */
-@media (prefers-color-scheme: light) {
-  .lucid-tooltip-content {
-    /* 亮色主题的毛玻璃效果 */
-    background: rgba(240, 240, 240, 0.4);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: rgba(20, 20, 20, 0.9);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
 
-  .lucid-tooltip-btn {
-    background: rgba(0, 0, 0, 0.1);
-    color: rgba(20, 20, 20, 0.8);
-  }
-
-  .lucid-tooltip-btn:hover {
-    background: rgba(0, 0, 0, 0.2);
-    color: rgba(20, 20, 20, 1);
-  }
-
-  .lucid-tooltip-btn-liked {
-    background: rgba(255, 107, 107, 0.8) !important;
-    color: white !important;
-  }
-
-  /* Light theme toolpopup */
-  .lucid-toolpopup-container {
-    /* 亮色主题的毛玻璃效果 */
-    background: rgba(240, 240, 240, 0.4);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: rgba(20, 20, 20, 0.9);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-}
-}
 
 /* ===== TOOLPOPUP STYLES (从 toolpopup.html 集成) ===== */
 
@@ -531,7 +493,7 @@ const StyleManager = {
   position: absolute;
   z-index: 2147483647;
   /* 默认主题的毛玻璃效果 - 灰黑色 */
-  background: rgba(40, 40, 40, 0.9);
+  background: rgba(40, 40, 40, 0.8);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 12px;
@@ -581,8 +543,6 @@ const StyleManager = {
     transform-origin: top center;
   }
 }
-
-
 
 /* 当toolpopup显示在目标元素上方时的样式 */
 .lucid-toolpopup-container.lucid-toolpopup-above {
