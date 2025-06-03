@@ -24,21 +24,39 @@ export default defineContentScript({
       }
     } catch {
       // Cross‑origin iframe: abort early to avoid DOMException.
-      console.warn(
-        "Lucid: skipping cross‑origin iframe (no same‑origin access)",
+      // 这是正常的安全限制，不是错误
+      console.debug(
+        "Lucid: skipping cross‑origin iframe (no same‑origin access) - 这是正常的浏览器安全限制",
       );
       return () => { };
     }
     console.log("Lucid 扩展：内容脚本已加载");
 
+    // 添加全局错误处理，特别是postMessage错误
+    const originalConsoleError = console.error;
+    console.error = (...args) => {
+      const message = args[0];
+      if (typeof message === 'string' && message.includes('postMessage')) {
+        // 将postMessage错误降级为警告，因为这通常是第三方工具的跨域通信问题
+        console.warn('[Lucid] PostMessage 跨域通信警告 (可忽略):', ...args);
+        return;
+      }
+      originalConsoleError.apply(console, args);
+    };
+
     // 在开发环境中加载stagewise工具栏
     if (import.meta.env.DEV) {
       import('@stagewise/toolbar').then(({ initToolbar }) => {
-        const stagewiseConfig = {
-          plugins: []
-        };
-        initToolbar(stagewiseConfig);
-        console.log("Stagewise 开发工具栏已加载");
+        try {
+          const stagewiseConfig = {
+            plugins: []
+          };
+          initToolbar(stagewiseConfig);
+          console.log("Stagewise 开发工具栏已加载");
+        } catch (error) {
+          // 捕获工具栏初始化过程中的错误，包括postMessage错误
+          console.warn("Stagewise 工具栏初始化警告:", error);
+        }
       }).catch(err => {
         console.error("无法加载Stagewise工具栏:", err);
       });

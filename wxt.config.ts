@@ -39,11 +39,13 @@ export default defineConfig({
   },
   // 确保stagewise包只在开发环境中被包含
   outDir: process.env.NODE_ENV === "development" ? ".output" : undefined,
-  build: {
-    minify: process.env.NODE_ENV === "production",
-    sourcemap: process.env.NODE_ENV === "development",
-    externalDeps: process.env.NODE_ENV === "production"
-      ? ["@stagewise/toolbar", "@stagewise/toolbar-react"]
-      : [],
-  },
+  vite: () => ({
+    build: {
+      minify: process.env.NODE_ENV === "production",
+      sourcemap: process.env.NODE_ENV === "development",
+    },
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    },
+  }),
 });
