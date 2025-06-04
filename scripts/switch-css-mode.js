@@ -12,12 +12,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MAIN_CSS_PATH = path.join(__dirname, '../src/styles/main.css');
+const MAIN_CSS_PATH = path.join(__dirname, '../src/styles/global/main.css');
 
 const FULL_VERSION = `/* ===== Lucid Extension 设计系统 ===== */
-@import './design-tokens.css';
-@import './components.css';
-@import './animations.css';
+@import '../theme/design-tokens.css';
+@import '../components.css';
+@import '../animations/animations.css';
 
 @tailwind base;
 @tailwind components;

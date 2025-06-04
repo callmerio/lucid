@@ -1,5 +1,5 @@
 import { debounce } from "lodash-es";
-import "@styles/main.css"; // 引入 Tailwind CSS
+import "@styles/global/main.css"; // 引入 Tailwind CSS
 import { expandSelectionToFullWord } from "@utils/text/selectionUtils";
 import { applyWordHighlight } from "@utils/highlight/highlightUtils";
 

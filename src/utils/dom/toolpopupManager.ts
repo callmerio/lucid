@@ -123,28 +123,17 @@ export class ToolpopupManager {
     }
 
     /**
-     * 从mock数据文件获取单词的详细信息
+     * 从mock数据服务获取单词的详细信息
      */
     private async loadMockData(): Promise<any> {
         try {
-            // 在浏览器插件环境中，需要使用正确的URL路径
-            let mockDataUrl = './mock-data/tooltip-mock-data.json';
-
-            // 如果是在插件环境中，使用runtime.getURL
-            if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getURL) {
-                mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json' as any);
-            }
-
-            console.log('[ToolpopupManager] Attempting to load mock data from:', mockDataUrl);
-            const response = await fetch(mockDataUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to load mock data: ${response.status} ${response.statusText}`);
-            }
-            const data = await response.json();
-            console.log('[ToolpopupManager] Mock data loaded successfully:', data);
+            // 使用新的 mock data 服务
+            const { mockDataService } = await import('@services/mock/mockDataService');
+            const data = await mockDataService.getTooltipData();
+            console.log('[ToolpopupManager] Mock data loaded successfully from service:', data);
             return data;
         } catch (error) {
-            console.warn('[ToolpopupManager] Failed to load mock data file, falling back to hardcoded data:', error);
+            console.warn('[ToolpopupManager] Failed to load mock data from service, falling back to hardcoded data:', error);
             return null;
         }
     }

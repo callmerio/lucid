@@ -12,7 +12,7 @@ export default defineConfig({
   alias: {
     "@": resolve(__dirname, "src"),
     "@components": resolve(__dirname, "src/components"),
-    "@utils": resolve(__dirname, "utils"),
+    "@utils": resolve(__dirname, "src/utils"),
     "@services": resolve(__dirname, "src/services"),
     "@types": resolve(__dirname, "src/types"),
     "@hooks": resolve(__dirname, "src/hooks"),
@@ -29,10 +29,8 @@ export default defineConfig({
       // API 权限将在后续添加
     ],
     web_accessible_resources: [
-      {
-        resources: ["mock-data/*.json"],
-        matches: ["<all_urls>"]
-      }
+      // Mock数据已移动到src/tests/mock-data，不再需要web_accessible_resources
+      // 如果将来需要在content script中访问assets资源，可以在这里添加
     ],
   },
   dev: {

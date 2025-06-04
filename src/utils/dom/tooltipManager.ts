@@ -113,64 +113,45 @@ const MOCK_TRANSLATIONS: Record<string, {
   }
 };
 
-/**
- * 从mock数据文件获取单词的翻译信息
- */
-async function loadMockData(): Promise<any> {
-  try {
-    // 在浏览器插件环境中，需要使用正确的URL路径
-    let mockDataUrl = './mock-data/tooltip-mock-data.json';
-
-    // 如果是在插件环境中，使用runtime.getURL
-    if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getURL) {
-      mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json' as any);
-    }
-
-    console.log('[Lucid] Attempting to load mock data from:', mockDataUrl);
-    const response = await fetch(mockDataUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to load mock data: ${response.status} ${response.statusText}`);
-    }
-    const data = await response.json();
-    console.log('[Lucid] Mock data loaded successfully:', data);
-    return data;
-  } catch (error) {
-    console.warn('[Lucid] Failed to load mock data file, falling back to hardcoded data:', error);
-    return null;
-  }
-}
+// 导入新的 mock data 服务
+import { mockDataService } from '@services/mock/mockDataService';
 
 /**
- * 获取单词的翻译信息 - 优先使用mock数据文件，回退到硬编码数据
+ * 获取单词的翻译信息 - 使用新的 mock data 服务
  */
 export async function getWordTranslation(word: string) {
-  // 尝试加载mock数据文件
-  const mockData = await loadMockData();
+  // 使用新的 mock data 服务
+  try {
+    const mockData = await mockDataService.getTooltipData(word);
 
-  if (mockData && mockData.words && mockData.words.length > 0) {
-    // 尝试根据单词名称匹配mock数据
-    const wordData = mockData.words.find((w: any) =>
-      w.word.toLowerCase() === word.toLowerCase()
-    ) || mockData.words[0]; // 如果找不到匹配的，使用第一个作为fallback
+    if (mockData && mockData.words && mockData.words.length > 0) {
+      // 尝试根据单词名称匹配mock数据
+      const wordData = mockData.words.find((w: any) =>
+        w.word.toLowerCase() === word.toLowerCase()
+      ) || mockData.words[0]; // 如果找不到匹配的，使用第一个作为fallback
 
-    // 收集所有词性的中文翻译，优先使用chinese_short
-    const allTranslations = wordData.explain?.map((explainGroup: any) =>
-      explainGroup.definitions?.map((def: any) =>
-        def.chinese_short || def.chinese
-      ).filter(Boolean)
-    ).flat().filter(Boolean) || [];
+      // 收集所有词性的中文翻译，优先使用chinese_short
+      const allTranslations = wordData.explain?.map((explainGroup: any) =>
+        explainGroup.definitions?.map((def: any) =>
+          def.chinese_short || def.chinese
+        ).filter(Boolean)
+      ).flat().filter(Boolean) || [];
 
-    // 使用第一个翻译作为主要翻译，如果有多个则用分号连接
-    const translation = allTranslations.length > 0
-      ? allTranslations.slice(0, 2).join('；') // 最多显示前两个翻译
-      : "暂无翻译";
+      // 使用第一个翻译作为主要翻译，如果有多个则用分号连接
+      const translation = allTranslations.length > 0
+        ? allTranslations.slice(0, 2).join('；') // 最多显示前两个翻译
+        : "暂无翻译";
 
-    return {
-      word: wordData.word,
-      phonetic: wordData.phonetic?.us || wordData.phonetic?.uk,
-      translation: translation,
-      partOfSpeech: wordData.explain?.[0]?.pos || "unknown"
-    };
+      return {
+        word: wordData.word,
+        phonetic: wordData.phonetic?.us || wordData.phonetic?.uk,
+        translation: translation,
+        partOfSpeech: wordData.explain?.[0]?.pos || "unknown"
+      };
+    }
+
+  } catch (error) {
+    console.warn('[Lucid] Failed to load mock data from service, falling back to hardcoded data:', error);
   }
 
   // 回退到硬编码数据

@@ -1,0 +1,165 @@
+/**
+ * Lucid Extension Design Tokens
+ * 统一的设计变量系统，支持主题切换和组件复用
+ */
+
+:root {
+  /* ===== 颜色系统 ===== */
+
+  /* 毛玻璃背景色 */
+  --lucid-bg-glass-primary: rgba(40, 40, 40, 0.7);
+  --lucid-bg-glass-secondary: rgba(30, 30, 30, 0.8);
+  --lucid-bg-glass-light: rgba(255, 255, 255, 0.1);
+
+  /* 文字颜色 */
+  --lucid-text-primary: rgba(255, 255, 255, 0.95);
+  --lucid-text-secondary: rgba(255, 255, 255, 0.8);
+  --lucid-text-tertiary: rgba(255, 255, 255, 0.7);
+  --lucid-text-muted: #aaa;
+  --lucid-text-disabled: #ccc;
+
+  /* 边框颜色 */
+  --lucid-border-subtle: rgba(255, 255, 255, 0.0);
+  --lucid-border-light: rgba(255, 255, 255, 0.1);
+  --lucid-border-medium: rgba(255, 255, 255, 0.2);
+
+  /* 交互颜色 */
+  --lucid-accent-primary: #ff6b6b;
+  --lucid-accent-primary-hover: #ff4757;
+  --lucid-accent-secondary: rgba(255, 255, 255, 0.1);
+  --lucid-accent-secondary-hover: rgba(255, 255, 255, 0.2);
+
+  /* 状态颜色 */
+  --lucid-success: #4caf50;
+  --lucid-warning: #ff9800;
+  --lucid-error: #f44336;
+  --lucid-info: #2196f3;
+
+  /* ===== 字体系统 ===== */
+
+  /* 字体栈 */
+  --lucid-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* 字体大小 */
+  --lucid-font-size-xs: 10px;
+  --lucid-font-size-sm: 12px;
+  --lucid-font-size-base: 13px;
+  --lucid-font-size-md: 14px;
+  --lucid-font-size-lg: 16px;
+  --lucid-font-size-xl: 18px;
+  --lucid-font-size-2xl: 24px;
+
+  /* 行高 */
+  --lucid-line-height-tight: 1.2;
+  --lucid-line-height-normal: 1.3;
+  --lucid-line-height-relaxed: 1.6;
+
+  /* 字重 */
+  --lucid-font-weight-normal: 400;
+  --lucid-font-weight-medium: 500;
+  --lucid-font-weight-semibold: 600;
+
+  /* 字间距 */
+  --lucid-letter-spacing-tight: -0.025em;
+  --lucid-letter-spacing-normal: 0;
+  --lucid-letter-spacing-wide: 0.2px;
+
+  /* ===== 间距系统 ===== */
+
+  --lucid-spacing-0: 0;
+  --lucid-spacing-1: 2px;
+  --lucid-spacing-2: 4px;
+  --lucid-spacing-3: 6px;
+  --lucid-spacing-4: 8px;
+  --lucid-spacing-5: 12px;
+  --lucid-spacing-6: 15px;
+  --lucid-spacing-8: 20px;
+  --lucid-spacing-10: 24px;
+  --lucid-spacing-12: 32px;
+
+  /* ===== 圆角系统 ===== */
+
+  --lucid-radius-none: 0;
+  --lucid-radius-sm: 4px;
+  --lucid-radius-md: 6px;
+  --lucid-radius-lg: 8px;
+  --lucid-radius-xl: 12px;
+  --lucid-radius-full: 9999px;
+
+  /* ===== 阴影系统 ===== */
+
+  --lucid-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --lucid-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --lucid-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --lucid-shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.4);
+
+  /* ===== 模糊效果 ===== */
+
+  --lucid-blur-sm: blur(4px);
+  --lucid-blur-md: blur(10px);
+  --lucid-blur-lg: blur(20px);
+
+  /* ===== 过渡动画 ===== */
+
+  --lucid-transition-fast: 150ms ease-out;
+  --lucid-transition-normal: 300ms ease-out;
+  --lucid-transition-slow: 400ms ease-out;
+
+  /* 缓动函数 */
+  --lucid-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --lucid-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --lucid-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --lucid-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ===== Z-Index 层级 ===== */
+
+  --lucid-z-dropdown: 1000;
+  --lucid-z-sticky: 1020;
+  --lucid-z-fixed: 1030;
+  --lucid-z-modal-backdrop: 1040;
+  --lucid-z-modal: 1050;
+  --lucid-z-popover: 1060;
+  --lucid-z-tooltip: 2147483646;
+  --lucid-z-toolpopup: 2147483647;
+
+  /* ===== 尺寸系统 ===== */
+
+  /* 组件最小/最大宽度 */
+  --lucid-width-tooltip-min: 120px;
+  --lucid-width-tooltip-max: 280px;
+  --lucid-width-toolpopup: 320px;
+
+  /* 组件高度 */
+  --lucid-height-button-sm: 20px;
+  --lucid-height-button-md: 24px;
+  --lucid-height-button-lg: 32px;
+}
+
+/* ===== 暗色主题变量 (默认) ===== */
+[data-theme="dark"], :root {
+  /* 继承上面的默认值 */
+}
+
+/* ===== 亮色主题变量 ===== */
+[data-theme="light"] {
+  /* 毛玻璃背景色 - 亮色主题 */
+  --lucid-bg-glass-primary: rgba(255, 255, 255, 0.8);
+  --lucid-bg-glass-secondary: rgba(248, 248, 248, 0.9);
+  --lucid-bg-glass-light: rgba(0, 0, 0, 0.05);
+
+  /* 文字颜色 - 亮色主题 */
+  --lucid-text-primary: rgba(0, 0, 0, 0.9);
+  --lucid-text-secondary: rgba(0, 0, 0, 0.7);
+  --lucid-text-tertiary: rgba(0, 0, 0, 0.6);
+  --lucid-text-muted: #666;
+  --lucid-text-disabled: #999;
+
+  /* 边框颜色 - 亮色主题 */
+  --lucid-border-subtle: rgba(0, 0, 0, 0.1);
+  --lucid-border-light: rgba(0, 0, 0, 0.15);
+  --lucid-border-medium: rgba(0, 0, 0, 0.2);
+
+  /* 交互颜色 - 亮色主题 */
+  --lucid-accent-secondary: rgba(0, 0, 0, 0.05);
+  --lucid-accent-secondary-hover: rgba(0, 0, 0, 0.1);
+}
