@@ -1,10 +1,22 @@
+/* ===== Lucid Extension 精简版设计系统 ===== */
+@import './essential.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* You can add custom base styles here if needed */
+/* ===== 基础样式重置 ===== */
 
-/* effect-shine */
+/* 确保所有 Lucid 组件使用统一的字体系统 */
+.lucid-tooltip,
+.lucid-toolpopup-container,
+.lucid-highlight {
+  font-family: var(--lucid-font-family);
+}
+
+/* ===== 高亮效果 ===== */
+
+/* 使用精简版动画系统 */
 .lucid-highlight:hover {
   -webkit-mask-image: linear-gradient(
     -75deg,
@@ -13,15 +25,5 @@
     rgba(0, 0, 0, 0.6) 70%
   );
   -webkit-mask-size: 200%;
-  animation: shine 2s infinite;
-}
-
-@-webkit-keyframes shine {
-  from {
-    -webkit-mask-position: 150%;
-  }
-
-  to {
-    -webkit-mask-position: -50%;
-  }
+  animation: lucid-shine 2s infinite;
 }

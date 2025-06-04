@@ -1,0 +1,260 @@
+/**
+ * Lucid Extension 可复用组件样式
+ * 基于design-tokens.css的组件级样式定义
+ */
+
+/* ===== 基础毛玻璃表面 ===== */
+
+.lucid-glass-surface {
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border: 1px solid var(--lucid-border-subtle);
+}
+
+.lucid-glass-primary {
+  background: var(--lucid-bg-glass-primary);
+}
+
+.lucid-glass-secondary {
+  background: var(--lucid-bg-glass-secondary);
+}
+
+.lucid-glass-light {
+  background: var(--lucid-bg-glass-light);
+}
+
+/* ===== 文字样式工具类 ===== */
+
+.lucid-text-primary {
+  color: var(--lucid-text-primary);
+}
+
+.lucid-text-secondary {
+  color: var(--lucid-text-secondary);
+}
+
+.lucid-text-tertiary {
+  color: var(--lucid-text-tertiary);
+}
+
+.lucid-text-muted {
+  color: var(--lucid-text-muted);
+}
+
+/* ===== 字体系统工具类 ===== */
+
+.lucid-font-system {
+  font-family: var(--lucid-font-family);
+}
+
+.lucid-text-xs {
+  font-size: var(--lucid-font-size-xs);
+}
+
+.lucid-text-sm {
+  font-size: var(--lucid-font-size-sm);
+}
+
+.lucid-text-base {
+  font-size: var(--lucid-font-size-base);
+}
+
+.lucid-text-md {
+  font-size: var(--lucid-font-size-md);
+}
+
+.lucid-text-lg {
+  font-size: var(--lucid-font-size-lg);
+}
+
+.lucid-text-xl {
+  font-size: var(--lucid-font-size-xl);
+}
+
+.lucid-text-2xl {
+  font-size: var(--lucid-font-size-2xl);
+}
+
+/* ===== 按钮组件 ===== */
+
+.lucid-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--lucid-radius-sm);
+  background: var(--lucid-accent-secondary);
+  color: var(--lucid-text-secondary);
+  cursor: pointer;
+  transition: all var(--lucid-transition-fast);
+  padding: 0;
+  font-family: var(--lucid-font-family);
+  user-select: none;
+}
+
+.lucid-btn:hover {
+  background: var(--lucid-accent-secondary-hover);
+  color: var(--lucid-text-primary);
+}
+
+.lucid-btn:active {
+  transform: scale(0.95);
+}
+
+.lucid-btn-sm {
+  width: var(--lucid-height-button-sm);
+  height: var(--lucid-height-button-sm);
+}
+
+.lucid-btn-md {
+  width: var(--lucid-height-button-md);
+  height: var(--lucid-height-button-md);
+}
+
+.lucid-btn-lg {
+  width: var(--lucid-height-button-lg);
+  height: var(--lucid-height-button-lg);
+}
+
+/* 特殊按钮样式 */
+.lucid-btn-like {
+  background: var(--lucid-accent-primary);
+  color: white;
+}
+
+.lucid-btn-like:hover {
+  background: var(--lucid-accent-primary-hover);
+}
+
+/* ===== 弹窗基础样式 ===== */
+
+.lucid-popup-base {
+  position: absolute;
+  font-family: var(--lucid-font-family);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--lucid-transition-fast), transform var(--lucid-transition-fast);
+}
+
+.lucid-popup-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== Tooltip 特定样式 ===== */
+
+.lucid-tooltip-container {
+  z-index: var(--lucid-z-tooltip);
+  transform: translateY(-2px);
+  font-size: var(--lucid-font-size-base);
+  line-height: var(--lucid-line-height-normal);
+  max-width: var(--lucid-width-tooltip-max);
+  min-width: var(--lucid-width-tooltip-min);
+}
+
+.lucid-tooltip-container.lucid-popup-visible {
+  transform: translateY(0);
+}
+
+.lucid-tooltip-content {
+  border-radius: var(--lucid-radius-md);
+  box-shadow: var(--lucid-shadow-md);
+  font-size: var(--lucid-font-size-md);
+  white-space: nowrap;
+  text-align: left;
+  font-weight: var(--lucid-font-weight-normal);
+  letter-spacing: var(--lucid-letter-spacing-wide);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: width var(--lucid-transition-normal), padding-right var(--lucid-transition-normal);
+  height: auto;
+}
+
+/* ===== ToolPopup 特定样式 ===== */
+
+.lucid-toolpopup-container {
+  z-index: var(--lucid-z-toolpopup);
+  border-radius: var(--lucid-radius-xl);
+  padding: var(--lucid-spacing-8);
+  width: var(--lucid-width-toolpopup);
+  box-shadow: var(--lucid-shadow-lg);
+  transform: scaleY(0) translateY(-10px);
+  transform-origin: top center;
+  transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
+}
+
+.lucid-toolpopup-container.lucid-popup-visible {
+  transform: scaleY(1) translateY(0);
+}
+
+/* ===== 动画工具类 ===== */
+
+.lucid-animate-fade-in {
+  animation: lucid-fade-in var(--lucid-transition-fast) ease-out forwards;
+}
+
+.lucid-animate-fade-out {
+  animation: lucid-fade-out var(--lucid-transition-fast) ease-in forwards;
+}
+
+.lucid-animate-scale-in {
+  animation: lucid-scale-in var(--lucid-transition-normal) var(--lucid-ease-bounce) forwards;
+}
+
+.lucid-animate-scale-out {
+  animation: lucid-scale-out 200ms ease-in forwards;
+}
+
+/* ===== 布局工具类 ===== */
+
+.lucid-flex {
+  display: flex;
+}
+
+.lucid-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lucid-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lucid-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 间距工具类 ===== */
+
+.lucid-p-0 { padding: var(--lucid-spacing-0); }
+.lucid-p-1 { padding: var(--lucid-spacing-1); }
+.lucid-p-2 { padding: var(--lucid-spacing-2); }
+.lucid-p-3 { padding: var(--lucid-spacing-3); }
+.lucid-p-4 { padding: var(--lucid-spacing-4); }
+.lucid-p-5 { padding: var(--lucid-spacing-5); }
+.lucid-p-6 { padding: var(--lucid-spacing-6); }
+.lucid-p-8 { padding: var(--lucid-spacing-8); }
+
+.lucid-m-0 { margin: var(--lucid-spacing-0); }
+.lucid-m-1 { margin: var(--lucid-spacing-1); }
+.lucid-m-2 { margin: var(--lucid-spacing-2); }
+.lucid-m-3 { margin: var(--lucid-spacing-3); }
+.lucid-m-4 { margin: var(--lucid-spacing-4); }
+.lucid-m-5 { margin: var(--lucid-spacing-5); }
+.lucid-m-6 { margin: var(--lucid-spacing-6); }
+.lucid-m-8 { margin: var(--lucid-spacing-8); }
+
+/* ===== 圆角工具类 ===== */
+
+.lucid-rounded-none { border-radius: var(--lucid-radius-none); }
+.lucid-rounded-sm { border-radius: var(--lucid-radius-sm); }
+.lucid-rounded-md { border-radius: var(--lucid-radius-md); }
+.lucid-rounded-lg { border-radius: var(--lucid-radius-lg); }
+.lucid-rounded-xl { border-radius: var(--lucid-radius-xl); }
+.lucid-rounded-full { border-radius: var(--lucid-radius-full); }

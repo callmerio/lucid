@@ -42,6 +42,45 @@ export class ToolpopupManager {
     private static instance: ToolpopupManager;
     private currentToolpopup: HTMLElement | null = null;
 
+    /**
+     * 从CSS变量获取设计系统的值，避免硬编码
+     */
+    private getCSSVariable(variableName: string, fallback: string = ''): string {
+        // 创建一个临时元素来获取CSS变量值
+        const tempElement = document.createElement('div');
+        tempElement.style.display = 'none';
+        document.body.appendChild(tempElement);
+
+        const computedStyle = getComputedStyle(tempElement);
+        const value = computedStyle.getPropertyValue(variableName).trim();
+
+        document.body.removeChild(tempElement);
+
+        return value || fallback;
+    }
+
+    /**
+     * 获取ToolPopup的标准宽度（从CSS变量）
+     */
+    private getToolpopupWidth(): string {
+        return this.getCSSVariable('--lucid-width-toolpopup', '300px');
+    }
+
+    /**
+     * 获取Tooltip的最大宽度（从CSS变量）
+     */
+    private getTooltipMaxWidth(): string {
+        return this.getCSSVariable('--lucid-width-tooltip-max', '300px');
+    }
+
+    /**
+     * 获取英文tooltip的最大宽度（比popup宽度小20px）
+     */
+    private getEnglishTooltipMaxWidth(): string {
+        const toolpopupWidth = parseInt(this.getToolpopupWidth());
+        return `${toolpopupWidth - 20}px`; // 留20px边距
+    }
+
     private constructor() { }
 
     public static getInstance(): ToolpopupManager {
@@ -90,8 +129,11 @@ export class ToolpopupManager {
         // 首先尝试从mock数据文件加载
         const mockData = await this.loadMockData();
         if (mockData && mockData.words && mockData.words.length > 0) {
-            // 使用mock数据文件中的数据（无论查询什么单词都返回相同数据）
-            const wordData = mockData.words[0];
+            // 尝试根据单词名称匹配mock数据
+            const wordData = mockData.words.find((w: any) =>
+                w.word.toLowerCase() === word.toLowerCase()
+            ) || mockData.words[0]; // 如果找不到匹配的，使用第一个作为fallback
+
             console.log('[ToolpopupManager] Using mock data file for:', word, wordData);
 
             return {
@@ -103,132 +145,26 @@ export class ToolpopupManager {
             };
         }
 
-        if (word.toLowerCase() === 'escalade') {
-            return {
-                word: "escalade",
-                phonetic: {
-                    us: "ˌɛskəˈleɪd", // Slashes for display are handled in createToolpopupElement
-                    uk: "ˈɛskəleɪd"
-                },
-                explain: [
-                    {
-                        pos: "n.",
-                        definitions: [
-                            {
-                                definition: "An act of scaling a wall or rampart.",
-                                chinese: "攀登；梯攻",
-                                chinese_short: "攀登"
-                            }
-                        ]
-                    },
-                    {
-                        pos: "v.",
-                        definitions: [
-                            {
-                                definition: "To climb or scale, especially a wall or fortification.",
-                                chinese: "攀登；梯攻",
-                                chinese_short: "攀登"
-                            }
-                        ]
-                    }
-                ],
-                wordFormats: [
-                    { "name": "原型", "form": "escalade" }
-                ]
-                // wordForms from the new JSON could be added here if DetailedWordData is extended
-            };
-        }
+        // 移除硬编码的escalade数据，完全依赖mock数据文件
 
-        // Mock data based on dictionary.json structure for "did"
-        if (word.toLowerCase() === 'did') {
-            return {
-                word: "did",
-                phonetic: {
-                    us: "dɪd",
-                    uk: "dɪd"
-                },
-                explain: [
-                    {
-                        pos: "verb",
-                        definitions: [
-                            {
-                                definition: "(past tense of do) performed an action, activity, or task.",
-                                chinese: "（do的过去式）做；从事。",
-                                chinese_short: "做（过去式）"
-                            },
-                            {
-                                definition: "used as an auxiliary verb to form questions or negative statements in the past tense.",
-                                chinese: "（用于构成疑问句或否定句）助动词过去式。",
-                                chinese_short: "助动词（过去）"
-                            }
-                        ]
-                    },
-                    {
-                        pos: "auxiliary verb",
-                        definitions: [
-                            {
-                                definition: "used to form the past tense of negative statements, questions, and emphatic statements.",
-                                chinese: "用于构成疑问句、否定句或强调句的过去式。",
-                                chinese_short: "（助动词）"
-                            }
-                        ]
-                    }
-                ],
-                wordFormats: [
-                    { "name": "过去式", "form": "did" },
-                    { "name": "过去式", "form": "did" },
-                    { "name": "过去式", "form": "did" },
-                    { "name": "过去式", "form": "did" },
-                    { "name": "过去式", "form": "did" }
-                ]
-            };
-        }
-        // Fallback for other words (e.g. "Project" if you still want to test it)
-        if (word.toLowerCase() === 'project') {
-            return {
-                word: "Project",
-                phonetic: {
-                    us: "/'pra:dʒekt/",
-                },
-                explain: [
-                    {
-                        pos: "n.",
-                        definitions: [
-                            { definition: "An individual or collaborative enterprise that is carefully planned to achieve a particular aim.", chinese: "工程；方案；计划" }
-                        ]
-                    },
-                    {
-                        pos: "v.",
-                        definitions: [
-                            { definition: "Estimate or forecast (something) on the basis of present trends or data.", chinese: "计划；规划；投影" }
-                        ]
-                    },
-                    {
-                        pos: "web.",
-                        definitions: [
-                            { definition: "A specific task or assignment, especially in academic or professional contexts.", chinese: "专案；课题；" }
-                        ]
-                    },
-                    {
-                        pos: "n.",
-                        definitions: [
-                            { definition: "A project, plan, scheme, or proposal (multi-meaning, translated differently based on context)", chinese: "项目, 计划, 工程, 方案 (多义, 根据上下文不同译为不同意思)" }
-                        ]
-                    }
-                ]
-            };
-        }
+        // 当mock数据中找不到对应单词时的fallback
+        console.log(`[ToolpopupManager] No data found for word: ${word}, using fallback`);
         return {
             word: word,
             explain: [
                 {
                     pos: "unknown",
                     definitions: [
-                        { definition: "Detailed information not available for this word yet.", chinese: "暂无详细释义" }
+                        {
+                            definition: `Detailed information not available for "${word}" yet. Please check mock data file.`,
+                            chinese: "暂无详细释义",
+                            chinese_short: "暂无释义"
+                        }
                     ]
                 }
             ],
-            phonetic: { us: "N/A" }
+            phonetic: { us: "N/A" },
+            wordFormats: []
         };
     }
 
@@ -578,13 +514,16 @@ export class ToolpopupManager {
             const hasHeight = tooltip.offsetHeight > 0;
             const notHidden = styles.visibility !== 'hidden';
             const hasOpacity = parseFloat(styles.opacity) > 0.5;
-            const hasMaxWidth = styles.maxWidth !== '0px';
+            const hasMaxWidth = styles.maxWidth !== '0px' && styles.maxWidth !== 'none';
 
             const isVisible = hasWidth && hasHeight && notHidden && hasOpacity && hasMaxWidth;
 
             if (isVisible) {
-                const containerWidth = tooltip.offsetWidth;
+                // 使用container的宽度而不是tooltip的宽度
+                const containerWidth = container.offsetWidth || parseInt(styles.maxWidth) || 280;
                 const contentWidth = content.scrollWidth;
+
+                console.log(`[SmartSlide] Checking scrollable: containerWidth=${containerWidth}, contentWidth=${contentWidth}`);
 
                 if (contentWidth > containerWidth) {
                     if (!tooltip.classList.contains('scrollable')) {
@@ -609,7 +548,9 @@ export class ToolpopupManager {
                 slideDistance = currentSlideDistance;
                 content.style.transform = `translateX(-${slideDistance}px)`;
                 container.classList.add('slid');
-                console.log(`[SmartSlide] Sliding ${slideDistance}px to show hidden content`);
+                // 添加模糊效果
+                tooltip.classList.add('lucid-slide-blur-left', 'active');
+                console.log(`[SmartSlide] Sliding ${slideDistance}px to show hidden content with blur effect`);
             }
         };
 
@@ -619,7 +560,13 @@ export class ToolpopupManager {
                 isSliding = false;
                 content.style.transform = originalTransform;
                 container.classList.remove('slid');
-                console.log('[SmartSlide] Sliding back to original position');
+                // 移除模糊效果
+                tooltip.classList.remove('active');
+                // 延迟移除模糊类，让过渡动画完成
+                setTimeout(() => {
+                    tooltip.classList.remove('lucid-slide-blur-left');
+                }, 300);
+                console.log('[SmartSlide] Sliding back to original position, removing blur effect');
             }
         };
 
@@ -650,8 +597,26 @@ export class ToolpopupManager {
             }, 100);
         });
 
-        // 初始检查
-        setTimeout(checkScrollable, 200);
+        // 监听tooltip的显示状态变化
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' &&
+                    (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                    const styles = getComputedStyle(tooltip);
+                    if (styles.opacity !== '0' && styles.visibility !== 'hidden') {
+                        setTimeout(checkScrollable, 100);
+                    }
+                }
+            });
+        });
+
+        observer.observe(tooltip, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+
+        // 初始检查（延迟更长时间确保DOM完全渲染）
+        setTimeout(checkScrollable, 500);
     }
 
     /**
@@ -838,7 +803,7 @@ export class ToolpopupManager {
                 // 过渡到最终状态
                 this.currentToolpopup.style.left = `${finalPosition.left}px`;
                 this.currentToolpopup.style.top = `${finalPosition.top}px`;
-                this.currentToolpopup.style.width = '350px'; // toolpopup的标准宽度
+                this.currentToolpopup.style.setProperty('width', this.getToolpopupWidth(), 'important'); // toolpopup的标准宽度（从CSS变量获取）
                 this.currentToolpopup.style.height = 'auto';
                 this.currentToolpopup.style.overflow = 'visible';
 
@@ -909,4 +874,4 @@ export class ToolpopupManager {
 
 // Example usage (for testing directly in console or another script):
 // ToolpopupManager.getInstance().showToolpopup("Project");
-// setTimeout(() => ToolpopupManager.getInstance().hideToolpopup(), 5000); 
+// setTimeout(() => ToolpopupManager.getInstance().hideToolpopup(), 5000);

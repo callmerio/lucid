@@ -333,19 +333,20 @@ const StyleManager = {
   50%     { background-color:currentColor!important; color:#ffffff!important; }
 }
 
-/* Tooltip Styles */
+/* ===== TOOLTIP STYLES (使用设计系统) ===== */
 .lucid-tooltip {
+  /* 继承基础弹窗样式 */
   position: absolute;
-  z-index: 2147483646; /* 比toolpopup低一级，确保过渡时不会挤占 */
+  z-index: var(--lucid-z-tooltip);
   opacity: 0;
   transform: translateY(-2px);
-  transition: opacity 150ms ease-out, transform 150ms ease-out;
+  transition: opacity var(--lucid-transition-fast), transform var(--lucid-transition-fast);
   pointer-events: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-size: 13px;
-  line-height: 1.3;
-  max-width: 320px;
-  min-width: 120px;
+  font-family: var(--lucid-font-family);
+  font-size: var(--lucid-font-size-base);
+  line-height: var(--lucid-line-height-normal);
+  max-width: var(--lucid-width-tooltip-max);
+  min-width: var(--lucid-width-tooltip-min);
 }
 
 .lucid-tooltip-visible {
@@ -355,24 +356,25 @@ const StyleManager = {
 }
 
 .lucid-tooltip-content {
-  /* 简洁的毛玻璃效果 - 灰黑色 */
-  background: rgba(40, 40, 40, 0.8);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-radius: 6px;
+  /* 使用设计系统的毛玻璃效果 */
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-md);
+  border: 1px solid var(--lucid-border-subtle);
   /* padding 由 JavaScript 动态设置 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  color: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--lucid-shadow-md);
+  color: var(--lucid-text-primary);
   position: relative;
-  font-size: 14px; /* 默认大小，会被JavaScript动态覆盖 */
+  font-size: var(--lucid-font-size-md); /* 默认大小，会被JavaScript动态覆盖 */
   white-space: nowrap;
   text-align: left;
-  font-weight: 400;
-  letter-spacing: 0.2px;
+  font-weight: var(--lucid-font-weight-normal);
+  letter-spacing: var(--lucid-letter-spacing-wide);
   display: flex;
   align-items: center;
   justify-content: flex-start; /* 确保内容左对齐 */
-  transition: width 300ms ease-out, padding-right 300ms ease-out;
+  transition: width var(--lucid-transition-normal), padding-right var(--lucid-transition-normal);
   height: auto;
   /* min-height 由 JavaScript 动态设置 */
 }
@@ -404,19 +406,19 @@ const StyleManager = {
 .lucid-tooltip-actions {
   display: none;
   align-items: center;
-  gap: 4px;
+  gap: var(--lucid-spacing-2);
   margin-left: 0px;
   opacity: 0;
   transform: translateX(15px) scale(0.8);
   max-width: 0;
   overflow-x: visible;
   overflow-y: visible;
-  transition: opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), max-width 300ms ease-out, margin-left 300ms ease-out;
+  transition: opacity 400ms var(--lucid-ease-bounce), transform 400ms var(--lucid-ease-bounce), max-width var(--lucid-transition-normal), margin-left var(--lucid-transition-normal);
   /* height 由 JavaScript 动态设置 */
 }
 
 .lucid-tooltip-expanded .lucid-tooltip-content {
-  padding-right: 6px;
+  padding-right: var(--lucid-spacing-3);
 }
 
 .lucid-tooltip-expanded .lucid-tooltip-actions {
@@ -424,28 +426,31 @@ const StyleManager = {
   /* opacity: 1; will be set by JS in expandTooltip */
   /* transform: translateX(0) scale(1); will be set by JS in expandTooltip */
   max-width: 60px; /* Adjust this value based on actual content width. This triggers the transition. */
-  margin-left: 8px; /* ADDED/ENSURED: Source value for margin-left transition */
+  margin-left: var(--lucid-spacing-4); /* ADDED/ENSURED: Source value for margin-left transition */
 }
 
 .lucid-tooltip-btn {
+  /* 使用设计系统的按钮样式 */
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: var(--lucid-height-button-sm);
+  height: var(--lucid-height-button-sm);
   border: none;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
+  border-radius: var(--lucid-radius-sm);
+  background: var(--lucid-accent-secondary);
+  color: var(--lucid-text-secondary);
   cursor: pointer;
-  transition: all 150ms ease-out;
+  transition: all var(--lucid-transition-fast);
   padding: 0;
+  font-family: var(--lucid-font-family);
+  user-select: none;
 }
 
 .lucid-tooltip-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 1);
-  animation: heartbeat 4.2s ease-in-out infinite;
+  background: var(--lucid-accent-secondary-hover);
+  color: var(--lucid-text-primary);
+  animation: lucid-heartbeat 4.2s ease-in-out infinite;
 }
 
 .lucid-tooltip-btn:active {
@@ -457,58 +462,41 @@ const StyleManager = {
 }
 
 .lucid-tooltip-btn-liked {
-  background: rgba(255, 107, 107, 0.8) !important;
+  background: var(--lucid-accent-primary) !important;
   color: white !important;
 }
 
 .lucid-tooltip-btn-liked:hover {
-  background: rgba(255, 107, 107, 1) !important;
-  animation: heartbeat 4.2s ease-in-out infinite;
+  background: var(--lucid-accent-primary-hover) !important;
+  animation: lucid-heartbeat 4.2s ease-in-out infinite;
 }
 
-/* 心跳动画 */
-@keyframes heartbeat {
-  0% {
-    transform: scale(1);
-  }
-  14% {
-    transform: scale(1.15);
-  }
-  28% {
-    transform: scale(1);
-  }
-  42% {
-    transform: scale(1.15);
-  }
-  70% {
-    transform: scale(1);
-  }
-}
+/* 心跳动画已移至 animations.css 统一管理 */
 
 
 
-/* ===== TOOLPOPUP STYLES (从 toolpopup.html 集成) ===== */
+/* ===== TOOLPOPUP STYLES (使用设计系统) ===== */
 
 .lucid-toolpopup-container {
   position: absolute;
-  z-index: 2147483647;
-  /* 默认主题的毛玻璃效果 - 灰黑色 */
-  background: rgba(40, 40, 40, 0.8);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 20px;
-  width: 350px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border: none;
+  z-index: var(--lucid-z-toolpopup);
+  /* 使用设计系统的毛玻璃效果 */
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-xl);
+  border: 1px solid var(--lucid-border-subtle);
+  padding: var(--lucid-spacing-8);
+  width: var(--lucid-width-toolpopup);
+  box-shadow: var(--lucid-shadow-lg);
   user-select: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  color: rgba(255, 255, 255, 0.95);
+  font-family: var(--lucid-font-family);
+  color: var(--lucid-text-primary);
   /* 初始状态为隐藏，用于动画 */
   opacity: 0;
   transform: scaleY(0) translateY(-10px);
   transform-origin: top center;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
 }
 
 .lucid-toolpopup-container.lucid-toolpopup-visible {
@@ -516,33 +504,7 @@ const StyleManager = {
   transform: scaleY(1) translateY(0);
 }
 
-/* 添加进入动画关键帧 - 由上到下展开 */
-@keyframes lucid-toolpopup-enter {
-  0% {
-    opacity: 0;
-    transform: scaleY(0) translateY(-10px);
-    transform-origin: top center;
-  }
-  100% {
-    opacity: 1;
-    transform: scaleY(1) translateY(0);
-    transform-origin: top center;
-  }
-}
-
-/* 添加退出动画关键帧 - 由下到上收缩 */
-@keyframes lucid-toolpopup-exit {
-  0% {
-    opacity: 1;
-    transform: scaleY(1) translateY(0);
-    transform-origin: top center;
-  }
-  100% {
-    opacity: 0;
-    transform: scaleY(0) translateY(-10px);
-    transform-origin: top center;
-  }
-}
+/* 动画关键帧已移至 animations.css 统一管理 */
 
 /* 当toolpopup显示在目标元素上方时的样式 */
 .lucid-toolpopup-container.lucid-toolpopup-above {
@@ -553,13 +515,13 @@ const StyleManager = {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: var(--lucid-spacing-6);
 }
 
 .lucid-toolpopup-word {
   /* font-size 由 JavaScript 动态设置为 tooltip 字体的2倍 */
-  font-weight: 600;
-  color: #f0f0f0;
+  font-weight: var(--lucid-font-weight-semibold);
+  color: var(--lucid-text-primary);
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -571,8 +533,8 @@ const StyleManager = {
 }
 
 .lucid-toolpopup-syllable-separator {
-  color: rgba(255, 255, 255, 0.4);
-  font-weight: 300;
+  color: var(--lucid-text-tertiary);
+  font-weight: var(--lucid-font-weight-normal);
   margin: 0 1px;
 }
 
@@ -582,43 +544,33 @@ const StyleManager = {
 }
 
 .lucid-toolpopup-header-icons svg {
-  width: 24px;
-  height: 24px;
-  margin-left: 12px;
+  width: var(--lucid-height-button-md);
+  height: var(--lucid-height-button-md);
+  margin-left: var(--lucid-spacing-5);
   cursor: pointer;
-  fill: rgba(255, 255, 255, 0.7);
+  fill: var(--lucid-text-tertiary);
   filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
-  transition: all 0.3s ease;
+  transition: all var(--lucid-transition-normal);
 }
 
-/* 呼吸动画关键帧 */
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
-  }
-  50% {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
-  }
-}
+/* 呼吸动画已移至 animations.css 统一管理 */
 
 /* Checkmark图标hover效果 */
 .lucid-toolpopup-header-icons svg.icon:hover {
-  animation: breathe 1.5s ease-in-out infinite;
+  animation: lucid-breathe 1.5s ease-in-out infinite;
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
 }
 
 /* Heart图标样式 */
 .lucid-toolpopup-header-icons svg.icon-heart {
-  fill: #ff6b6b;
+  fill: var(--lucid-accent-primary);
 }
 
 /* Heart图标hover效果 */
 .lucid-toolpopup-header-icons svg.icon-heart:hover {
-  animation: breathe 1.5s ease-in-out infinite;
-  fill: #ff4757;
-  filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.8));
+  animation: lucid-breathe 1.5s ease-in-out infinite;
+  fill: var(--lucid-accent-primary-hover);
+  filter: drop-shadow(0 0 8px var(--lucid-accent-primary));
 }
 
 .lucid-toolpopup-header-icons svg.icon {
@@ -628,41 +580,41 @@ const StyleManager = {
 }
 
 .lucid-toolpopup-phonetic {
-  font-size: 14px;
-  color: #aaa;
-  margin-bottom: 20px;
+  font-size: var(--lucid-font-size-md);
+  color: var(--lucid-text-muted);
+  margin-bottom: var(--lucid-spacing-8);
   display: flex;
   align-items: center;
   position: relative;
   width: fit-content;
-  transition: all 0.3s ease;
+  transition: all var(--lucid-transition-normal);
 }
 
 .lucid-toolpopup-phonetic-group {
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--lucid-transition-normal);
   white-space: nowrap;
 }
 
 .lucid-toolpopup-phonetic-region {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-right: 8px;
-  color: #ccc;
-  transition: all 0.3s ease;
+  background-color: var(--lucid-accent-secondary);
+  padding: var(--lucid-spacing-1) var(--lucid-spacing-3);
+  border-radius: var(--lucid-radius-sm);
+  font-size: var(--lucid-font-size-sm);
+  margin-right: var(--lucid-spacing-4);
+  color: var(--lucid-text-disabled);
+  transition: all var(--lucid-transition-normal);
 }
 
 .lucid-toolpopup-phonetic-text {
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--lucid-transition-normal);
 }
 
 .lucid-toolpopup-phonetic-text:hover {
-  color: #fff;
+  color: var(--lucid-text-primary);
 }
 
 /* 默认只显示US音标，UK音标隐藏在右侧 */
@@ -812,16 +764,18 @@ const StyleManager = {
 .lucid-toolpopup-definition-text-chinese:hover .lucid-toolpopup-definition-text-english-tooltip {
   opacity: 1;
   visibility: visible;
-  max-width: 300px;
+  max-width: calc(var(--lucid-width-toolpopup) - 40px); /* 动态计算：popup宽度减去40px边距 */
   padding: 8px;
+  /* 保持 white-space: nowrap 以支持滑动逻辑 */
 }
 
 /* Keep tooltip visible when hovering over the tooltip itself */
 .lucid-toolpopup-definition-text-english-tooltip:hover {
   opacity: 1;
   visibility: visible;
-  max-width: 300px;
+  max-width: calc(var(--lucid-width-toolpopup) - 40px); /* 动态计算：popup宽度减去40px边距 */
   padding: 8px;
+  /* 保持 white-space: nowrap 以支持滑动逻辑 */
 }
 
 /* Styles for individual words in English tooltip */

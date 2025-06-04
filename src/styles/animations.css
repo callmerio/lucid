@@ -1,0 +1,316 @@
+/**
+ * Lucid Extension 动画效果库
+ * 统一的动画定义，支持组件复用
+ */
+
+/* ===== 基础动画关键帧 ===== */
+
+@keyframes lucid-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lucid-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes lucid-scale-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+}
+
+@keyframes lucid-scale-out {
+  from {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+}
+
+@keyframes lucid-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lucid-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ===== Tooltip 专用动画 ===== */
+
+@keyframes lucid-tooltip-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lucid-tooltip-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+
+/* ===== ToolPopup 专用动画 ===== */
+
+@keyframes lucid-toolpopup-enter {
+  0% {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+}
+
+@keyframes lucid-toolpopup-exit {
+  0% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+}
+
+/* ===== 交互动画 ===== */
+
+@keyframes lucid-heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.15);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+@keyframes lucid-breathe {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+  }
+}
+
+@keyframes lucid-flash {
+  0%, 100% {
+    color: inherit !important;
+  }
+  50% {
+    background-color: currentColor !important;
+    color: #ffffff !important;
+  }
+}
+
+@keyframes lucid-shine {
+  from {
+    -webkit-mask-position: 150%;
+  }
+  to {
+    -webkit-mask-position: -50%;
+  }
+}
+
+/* ===== 动画工具类 ===== */
+
+.lucid-animate-heartbeat {
+  animation: lucid-heartbeat 4.2s ease-in-out infinite;
+}
+
+.lucid-animate-breathe {
+  animation: lucid-breathe 1.5s ease-in-out infinite;
+}
+
+.lucid-animate-flash {
+  animation: lucid-flash 2s infinite;
+}
+
+.lucid-animate-shine {
+  -webkit-mask-image: linear-gradient(
+    -75deg,
+    rgba(0, 0, 0, 0.6) 30%,
+    #000 50%,
+    rgba(0, 0, 0, 0.6) 70%
+  );
+  -webkit-mask-size: 200%;
+  animation: lucid-shine 2s infinite;
+}
+
+/* ===== 悬停效果 ===== */
+
+.lucid-hover-scale {
+  transition: transform var(--lucid-transition-fast);
+}
+
+.lucid-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.lucid-hover-glow {
+  transition: filter var(--lucid-transition-fast);
+}
+
+.lucid-hover-glow:hover {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+}
+
+.lucid-hover-lift {
+  transition: transform var(--lucid-transition-fast), box-shadow var(--lucid-transition-fast);
+}
+
+.lucid-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lucid-shadow-lg);
+}
+
+/* ===== 状态动画 ===== */
+
+.lucid-loading {
+  animation: lucid-spin 1s linear infinite;
+}
+
+@keyframes lucid-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lucid-pulse {
+  animation: lucid-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes lucid-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ===== 过渡效果工具类 ===== */
+
+.lucid-transition-all {
+  transition: all var(--lucid-transition-normal);
+}
+
+.lucid-transition-colors {
+  transition: color var(--lucid-transition-fast), background-color var(--lucid-transition-fast), border-color var(--lucid-transition-fast);
+}
+
+.lucid-transition-opacity {
+  transition: opacity var(--lucid-transition-fast);
+}
+
+.lucid-transition-transform {
+  transition: transform var(--lucid-transition-fast);
+}
+
+/* ===== 缓动函数工具类 ===== */
+
+.lucid-ease-in {
+  transition-timing-function: var(--lucid-ease-in);
+}
+
+.lucid-ease-out {
+  transition-timing-function: var(--lucid-ease-out);
+}
+
+/* ===== 滑动模糊效果 ===== */
+
+.lucid-slide-blur-left {
+  position: relative;
+}
+
+.lucid-slide-blur-left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--lucid-transition-normal) ease-out;
+}
+
+.lucid-slide-blur-left.active::before {
+  opacity: 1;
+}
+
+.lucid-ease-in-out {
+  transition-timing-function: var(--lucid-ease-in-out);
+}
+
+.lucid-ease-bounce {
+  transition-timing-function: var(--lucid-ease-bounce);
+}

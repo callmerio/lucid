@@ -123,9 +123,7 @@ async function loadMockData(): Promise<any> {
 
     // 如果是在插件环境中，使用runtime.getURL
     if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getURL) {
-      mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json');
-    } else if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
-      mockDataUrl = chrome.runtime.getURL('mock-data/tooltip-mock-data.json');
+      mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json' as any);
     }
 
     console.log('[Lucid] Attempting to load mock data from:', mockDataUrl);
@@ -150,14 +148,27 @@ export async function getWordTranslation(word: string) {
   const mockData = await loadMockData();
 
   if (mockData && mockData.words && mockData.words.length > 0) {
-    // 使用mock数据文件中的数据（无论查询什么单词都返回相同数据）
-    const wordData = mockData.words[0];
-    const firstDefinition = wordData.explain?.[0]?.definitions?.[0];
+    // 尝试根据单词名称匹配mock数据
+    const wordData = mockData.words.find((w: any) =>
+      w.word.toLowerCase() === word.toLowerCase()
+    ) || mockData.words[0]; // 如果找不到匹配的，使用第一个作为fallback
+
+    // 收集所有词性的中文翻译，优先使用chinese_short
+    const allTranslations = wordData.explain?.map((explainGroup: any) =>
+      explainGroup.definitions?.map((def: any) =>
+        def.chinese_short || def.chinese
+      ).filter(Boolean)
+    ).flat().filter(Boolean) || [];
+
+    // 使用第一个翻译作为主要翻译，如果有多个则用分号连接
+    const translation = allTranslations.length > 0
+      ? allTranslations.slice(0, 2).join('；') // 最多显示前两个翻译
+      : "暂无翻译";
 
     return {
       word: wordData.word,
       phonetic: wordData.phonetic?.us || wordData.phonetic?.uk,
-      translation: firstDefinition?.chinese_short || firstDefinition?.chinese || "暂无翻译",
+      translation: translation,
       partOfSpeech: wordData.explain?.[0]?.pos || "unknown"
     };
   }

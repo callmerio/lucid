@@ -4,7 +4,11 @@ import { resolve } from "path";
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ["@wxt-dev/module-react"],
-  browser: "chrome",
+  browser: "arc",
+  // Chrome 137兼容性配置 - 禁用web-ext自动启动
+  // webExt: {
+  //   disabled: true, // 禁用自动浏览器启动，需要手动加载扩展
+  // },
   alias: {
     "@": resolve(__dirname, "src"),
     "@components": resolve(__dirname, "src/components"),
@@ -33,7 +37,8 @@ export default defineConfig({
   },
   dev: {
     server: {
-      port: 3000,
+      port: 3000, // 使用默认端口3000
+      host: 'localhost',
     },
     // 使用类型断言来允许 browserFlags
     ...({

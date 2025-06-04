@@ -1,0 +1,232 @@
+/**
+ * Lucid Extension 精简版样式系统
+ * 只包含Tooltip和ToolPopup实际需要的样式
+ * 预计大小: ~3-4kB (相比完整版16kB减少75%)
+ */
+
+/* ===== 核心设计变量 ===== */
+:root {
+  /* 毛玻璃背景色 */
+  --lucid-bg-glass-primary: rgba(40, 40, 40, 0.7);
+
+  /* 文字颜色 */
+  --lucid-text-primary: rgba(255, 255, 255, 0.95);
+  --lucid-text-secondary: rgba(255, 255, 255, 0.8);
+  --lucid-text-tertiary: rgba(255, 255, 255, 0.7);
+  --lucid-text-muted: #aaa;
+  --lucid-text-disabled: #ccc;
+
+  /* 边框颜色 */
+  --lucid-border-subtle: rgba(255, 255, 255, 0.1);
+
+  /* 交互颜色 */
+  --lucid-accent-primary: #ff6b6b;
+  --lucid-accent-primary-hover: #ff4757;
+  --lucid-accent-secondary: rgba(255, 255, 255, 0.1);
+  --lucid-accent-secondary-hover: rgba(255, 255, 255, 0.2);
+
+  /* 字体系统 */
+  --lucid-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --lucid-font-size-sm: 12px;
+  --lucid-font-size-base: 13px;
+  --lucid-font-size-md: 14px;
+  --lucid-font-size-2xl: 24px;
+  --lucid-font-weight-normal: 400;
+  --lucid-font-weight-semibold: 600;
+  --lucid-line-height-normal: 1.3;
+  --lucid-letter-spacing-wide: 0.2px;
+
+  /* 核心间距 */
+  --lucid-spacing-2: 4px;
+  --lucid-spacing-3: 6px;
+  --lucid-spacing-4: 8px;
+  --lucid-spacing-5: 12px;
+  --lucid-spacing-6: 15px;
+  --lucid-spacing-8: 20px;
+
+  /* 圆角 */
+  --lucid-radius-sm: 4px;
+  --lucid-radius-md: 6px;
+  --lucid-radius-xl: 12px;
+
+  /* 阴影 */
+  --lucid-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --lucid-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* 模糊效果 */
+  --lucid-blur-md: blur(10px);
+
+  /* 过渡动画 */
+  --lucid-transition-fast: 150ms ease-out;
+  --lucid-transition-normal: 300ms ease-out;
+  --lucid-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-Index */
+  --lucid-z-tooltip: 2147483646;
+  --lucid-z-toolpopup: 2147483647;
+
+  /* 组件尺寸 */
+  --lucid-width-tooltip-min: 120px;
+  --lucid-width-tooltip-max: 280px;
+  --lucid-width-toolpopup: 320px;
+  --lucid-height-button-sm: 20px;
+  --lucid-height-button-md: 24px;
+}
+
+/* ===== 亮色主题 ===== */
+[data-theme="light"] {
+  --lucid-bg-glass-primary: rgba(255, 255, 255, 0.8);
+  --lucid-text-primary: rgba(0, 0, 0, 0.9);
+  --lucid-text-secondary: rgba(0, 0, 0, 0.7);
+  --lucid-text-tertiary: rgba(0, 0, 0, 0.6);
+  --lucid-text-muted: #666;
+  --lucid-text-disabled: #999;
+  --lucid-border-subtle: rgba(0, 0, 0, 0.1);
+  --lucid-accent-secondary: rgba(0, 0, 0, 0.05);
+  --lucid-accent-secondary-hover: rgba(0, 0, 0, 0.1);
+}
+
+/* ===== 核心动画 ===== */
+@keyframes lucid-heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.15); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.15); }
+  70% { transform: scale(1); }
+}
+
+@keyframes lucid-breathe {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+  }
+}
+
+@keyframes lucid-toolpopup-enter {
+  0% {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+}
+
+@keyframes lucid-toolpopup-exit {
+  0% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    transform-origin: top center;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    transform-origin: top center;
+  }
+}
+
+@keyframes lucid-shine {
+  from { -webkit-mask-position: 150%; }
+  to { -webkit-mask-position: -50%; }
+}
+
+/* ===== 基础组件样式 ===== */
+
+/* 确保所有 Lucid 组件使用统一的字体系统 */
+.lucid-tooltip,
+.lucid-toolpopup-container,
+.lucid-highlight {
+  font-family: var(--lucid-font-family);
+}
+
+/* ===== Tooltip 样式 ===== */
+.lucid-tooltip {
+  position: absolute;
+  z-index: var(--lucid-z-tooltip);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity var(--lucid-transition-fast), transform var(--lucid-transition-fast);
+  pointer-events: none;
+  font-family: var(--lucid-font-family);
+  font-size: var(--lucid-font-size-base);
+  line-height: var(--lucid-line-height-normal);
+  max-width: var(--lucid-width-tooltip-max);
+  min-width: var(--lucid-width-tooltip-min);
+}
+
+.lucid-tooltip-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.lucid-tooltip-content {
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-md);
+  border: 1px solid var(--lucid-border-subtle);
+  box-shadow: var(--lucid-shadow-md);
+  color: var(--lucid-text-primary);
+  position: relative;
+  font-size: var(--lucid-font-size-md);
+  white-space: nowrap;
+  text-align: left;
+  font-weight: var(--lucid-font-weight-normal);
+  letter-spacing: var(--lucid-letter-spacing-wide);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: width var(--lucid-transition-normal), padding-right var(--lucid-transition-normal);
+  height: auto;
+}
+
+/* ===== ToolPopup 样式 ===== */
+.lucid-toolpopup-container {
+  position: absolute;
+  z-index: var(--lucid-z-toolpopup);
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-xl);
+  border: 1px solid var(--lucid-border-subtle);
+  padding: var(--lucid-spacing-8);
+  width: var(--lucid-width-toolpopup);
+  box-shadow: var(--lucid-shadow-lg);
+  user-select: none;
+  font-family: var(--lucid-font-family);
+  color: var(--lucid-text-primary);
+  opacity: 0;
+  transform: scaleY(0) translateY(-10px);
+  transform-origin: top center;
+  transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
+}
+
+.lucid-toolpopup-container.lucid-toolpopup-visible {
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
+}
+
+/* 高亮效果 */
+.lucid-highlight:hover {
+  -webkit-mask-image: linear-gradient(
+    -75deg,
+    rgba(0, 0, 0, 0.6) 30%,
+    #000 50%,
+    rgba(0, 0, 0, 0.6) 70%
+  );
+  -webkit-mask-size: 200%;
+  animation: lucid-shine 2s infinite;
+}
+
+@keyframes lucid-shine {
+  from { -webkit-mask-position: 150%; }
+  to { -webkit-mask-position: -50%; }
+}
