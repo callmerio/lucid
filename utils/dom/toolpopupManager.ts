@@ -67,6 +67,38 @@ export class ToolpopupManager {
     }
 
     /**
+     * 获取单词的标记次数
+     * 优先从页面上的高亮元素获取，如果没有则从storage获取
+     */
+    private async getWordMarkCount(word: string): Promise<number> {
+        // 首先尝试从页面上的高亮元素获取
+        const highlightElements = document.querySelectorAll<HTMLElement>('.lucid-highlight');
+        for (const element of highlightElements) {
+            if (element.dataset.word === word.toLowerCase()) {
+                const markCount = parseInt(element.dataset.markCount || '0');
+                console.log(`[ToolpopupManager] Found mark count from DOM for "${word}": ${markCount}`);
+                return markCount;
+            }
+        }
+
+        // 如果页面上没有找到，从storage获取
+        try {
+            if (typeof browser !== 'undefined' && browser.storage && browser.storage.local) {
+                const data = await browser.storage.local.get(['wordMarkings']);
+                const wordMarkings = data.wordMarkings || {};
+                const markCount = wordMarkings[word.toLowerCase()] || 0;
+                console.log(`[ToolpopupManager] Found mark count from storage for "${word}": ${markCount}`);
+                return markCount;
+            }
+        } catch (error) {
+            console.warn(`[ToolpopupManager] Error getting mark count from storage for "${word}":`, error);
+        }
+
+        console.log(`[ToolpopupManager] No mark count found for "${word}", defaulting to 0`);
+        return 0;
+    }
+
+    /**
      * 获取Tooltip的最大宽度（从CSS变量）
      */
     private getTooltipMaxWidth(): string {
@@ -101,8 +133,6 @@ export class ToolpopupManager {
             // 如果是在插件环境中，使用runtime.getURL
             if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getURL) {
                 mockDataUrl = browser.runtime.getURL('mock-data/tooltip-mock-data.json' as any);
-            } else if (typeof (chrome as any) !== 'undefined' && (chrome as any).runtime && (chrome as any).runtime.getURL) {
-                mockDataUrl = (chrome as any).runtime.getURL('mock-data/tooltip-mock-data.json');
             }
 
             console.log('[ToolpopupManager] Attempting to load mock data from:', mockDataUrl);
@@ -140,8 +170,7 @@ export class ToolpopupManager {
                 word: wordData.word,
                 phonetic: wordData.phonetic,
                 explain: wordData.explain,
-                wordFormats: wordData.wordFormats || [],
-                relatedSuggestions: mockData.relatedSuggestions || []
+                wordFormats: wordData.wordFormats || []
             };
         }
 
@@ -277,7 +306,7 @@ export class ToolpopupManager {
     /**
      * Creates the HTML element for the toolpopup.
      */
-    private createToolpopupElement(wordDetails: DetailedWordData): HTMLElement {
+    private createToolpopupElement(wordDetails: DetailedWordData, markCount: number = 0): HTMLElement {
         const popup = document.createElement('div');
         popup.className = 'lucid-toolpopup-container'; // Use styles from toolpopup.html
 
@@ -361,7 +390,7 @@ export class ToolpopupManager {
             <div class="lucid-toolpopup-footer">
                 <div class="lucid-toolpopup-history">
                     <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg>
-                    <span class="lucid-toolpopup-history-count">1</span>
+                    <span class="lucid-toolpopup-history-count">${markCount}</span>
                 </div>
                 <div class="lucid-toolpopup-actions">
                     <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
@@ -472,24 +501,214 @@ export class ToolpopupManager {
     }
 
     /**
+     * 判断单词是否为功能词（介词、冠词、连词等）
+     */
+    private isFunctionWord(word: string): boolean {
+        const functionWords = new Set([
+            'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+            'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below',
+            'between', 'among', 'under', 'over', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may',
+            'might', 'must', 'can', 'shall', 'this', 'that', 'these', 'those', 'i', 'you', 'he',
+            'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his',
+            'her', 'its', 'our', 'their'
+        ]);
+        return functionWords.has(word.toLowerCase().replace(/[^\w]/g, ''));
+    }
+
+    /**
+     * 寻找最优的单词边界位置（智能滑动）
+     */
+    private findOptimalWordBoundary(content: HTMLElement, currentOffset: number, containerWidth: number, direction: 'next' | 'prev'): number {
+        const text = content.textContent || '';
+        if (!text) return currentOffset;
+
+        // 创建临时测量元素
+        const measurer = document.createElement('span');
+        measurer.style.visibility = 'hidden';
+        measurer.style.position = 'absolute';
+        measurer.style.whiteSpace = 'nowrap';
+        measurer.style.font = window.getComputedStyle(content).font;
+        document.body.appendChild(measurer);
+
+        try {
+            // 按单词分割文本（保留空格和标点）
+            const words = text.split(/(\s+)/);
+            const totalContentWidth = content.scrollWidth;
+            const maxOffset = totalContentWidth - containerWidth;
+
+            if (direction === 'next') {
+                // 向前滑动：寻找合适的停止点
+                const idealSlideDistance = containerWidth * 0.8; // 理想滑动距离为容器宽度的80%
+                const targetOffset = currentOffset + idealSlideDistance;
+
+                console.log(`[SmartSlide] Next direction: currentOffset=${currentOffset}, idealDistance=${idealSlideDistance}, targetOffset=${targetOffset}, maxOffset=${maxOffset}`);
+
+                // 如果目标位置超过最大偏移，直接返回最大偏移
+                if (targetOffset >= maxOffset) {
+                    console.log(`[SmartSlide] Target exceeds max, returning maxOffset=${maxOffset}`);
+                    return maxOffset;
+                }
+
+                let bestOffset = targetOffset;
+                let bestScore = -1;
+                let candidateCount = 0;
+
+                // 寻找最佳单词边界
+                for (let i = 0; i < words.length; i++) {
+                    measurer.textContent = words.slice(0, i + 1).join('');
+                    const wordEndWidth = measurer.offsetWidth;
+
+                    // 只考虑在目标范围内的位置
+                    if (wordEndWidth <= currentOffset || wordEndWidth > maxOffset) {
+                        continue;
+                    }
+
+                    // 计算这个位置的得分
+                    const distanceFromTarget = Math.abs(wordEndWidth - targetOffset);
+                    const distanceFromCurrent = wordEndWidth - currentOffset;
+
+                    // 确保有足够的滑动距离（至少容器宽度的50%）
+                    if (distanceFromCurrent < containerWidth * 0.5) {
+                        continue;
+                    }
+
+                    candidateCount++;
+                    const currentWord = words[i];
+                    const isContentWord = !this.isFunctionWord(currentWord);
+
+                    // 计算综合得分（距离越近得分越高，内容词结束位置加分）
+                    let score = 1000 - distanceFromTarget;
+                    if (isContentWord) {
+                        score += 100; // 内容词结束位置加分
+                    }
+
+                    // 如果距离目标位置很近（在理想距离的±20%范围内），额外加分
+                    if (distanceFromTarget <= idealSlideDistance * 0.2) {
+                        score += 50;
+                    }
+
+                    console.log(`[SmartSlide] Candidate ${candidateCount}: word="${currentWord}", width=${wordEndWidth}, distance=${distanceFromCurrent}, score=${score}, isContent=${isContentWord}`);
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestOffset = wordEndWidth;
+                    }
+                }
+
+                const finalOffset = Math.max(currentOffset, Math.min(bestOffset, maxOffset));
+                console.log(`[SmartSlide] Next sliding result: bestOffset=${bestOffset}, finalOffset=${finalOffset}, candidates=${candidateCount}`);
+                return finalOffset;
+
+            } else {
+                // 向后滑动：寻找合适的起始点
+                const idealSlideDistance = containerWidth * 0.8;
+                const targetOffset = Math.max(0, currentOffset - idealSlideDistance);
+
+                console.log(`[SmartSlide] Prev direction: currentOffset=${currentOffset}, idealDistance=${idealSlideDistance}, targetOffset=${targetOffset}`);
+
+                if (targetOffset <= 0) {
+                    console.log(`[SmartSlide] Target at start, returning 0`);
+                    return 0;
+                }
+
+                let bestOffset = targetOffset;
+                let bestScore = -1;
+                let candidateCount = 0;
+
+                // 寻找最佳单词边界
+                for (let i = 0; i < words.length; i++) {
+                    measurer.textContent = words.slice(0, i + 1).join('');
+                    const wordEndWidth = measurer.offsetWidth;
+
+                    // 只考虑在目标范围内的位置
+                    if (wordEndWidth >= currentOffset || wordEndWidth < 0) {
+                        continue;
+                    }
+
+                    // 确保有足够的滑动距离（至少容器宽度的50%）
+                    const distanceFromCurrent = currentOffset - wordEndWidth;
+                    if (distanceFromCurrent < containerWidth * 0.5) {
+                        continue;
+                    }
+
+                    candidateCount++;
+                    const currentWord = words[i];
+                    const isContentWord = !this.isFunctionWord(currentWord);
+
+                    // 计算这个位置的得分
+                    const distanceFromTarget = Math.abs(wordEndWidth - targetOffset);
+
+                    let score = 1000 - distanceFromTarget;
+                    if (isContentWord) {
+                        score += 100;
+                    }
+
+                    // 如果距离目标位置很近，额外加分
+                    if (distanceFromTarget <= idealSlideDistance * 0.2) {
+                        score += 50;
+                    }
+
+                    console.log(`[SmartSlide] Prev candidate ${candidateCount}: word="${currentWord}", width=${wordEndWidth}, distance=${distanceFromCurrent}, score=${score}, isContent=${isContentWord}`);
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestOffset = wordEndWidth;
+                    }
+                }
+
+                const finalOffset = Math.max(0, bestOffset);
+                console.log(`[SmartSlide] Prev sliding result: bestOffset=${bestOffset}, finalOffset=${finalOffset}, candidates=${candidateCount}`);
+                return finalOffset;
+            }
+
+        } catch (error) {
+            console.warn('[SmartSlide] Error in optimal word boundary detection:', error);
+            // 降级到简单的百分比计算
+            if (direction === 'next') {
+                return Math.min(currentOffset + containerWidth * 0.6, content.scrollWidth - containerWidth);
+            } else {
+                return Math.max(0, currentOffset - containerWidth * 0.6);
+            }
+        } finally {
+            document.body.removeChild(measurer);
+        }
+    }
+
+    /**
      * 初始化智能滑动功能
      */
     private initializeSmartSliding(popup: HTMLElement): void {
+        console.log(`[SmartSlide] Initializing smart sliding for popup`);
         const tooltips = popup.querySelectorAll('.lucid-toolpopup-definition-text-english-tooltip');
+        console.log(`[SmartSlide] Found ${tooltips.length} tooltips to initialize`);
 
-        tooltips.forEach(tooltip => {
+        tooltips.forEach((tooltip, index) => {
+            console.log(`[SmartSlide] Processing tooltip ${index + 1}/${tooltips.length}`);
             const container = tooltip.querySelector('.lucid-tooltip-text-container') as HTMLElement;
             const content = tooltip.querySelector('.lucid-tooltip-text-content') as HTMLElement;
             const rightHoverZone = tooltip.querySelector('.lucid-tooltip-hover-zone.right') as HTMLElement;
             const leftHoverZone = tooltip.querySelector('.lucid-tooltip-hover-zone.left') as HTMLElement;
             const scrollHint = tooltip.querySelector('.lucid-tooltip-scroll-hint') as HTMLElement;
 
+            console.log(`[SmartSlide] Tooltip ${index + 1} elements:`, {
+                container: !!container,
+                content: !!content,
+                rightHoverZone: !!rightHoverZone,
+                leftHoverZone: !!leftHoverZone,
+                scrollHint: !!scrollHint
+            });
+
             if (!container || !content || !rightHoverZone || !leftHoverZone || !scrollHint) {
+                console.warn(`[SmartSlide] Missing elements for tooltip ${index + 1}, skipping`);
                 return;
             }
 
+            console.log(`[SmartSlide] Setting up smart sliding for tooltip ${index + 1}`);
             this.setupSmartSlidingForTooltip(tooltip as HTMLElement, container, content, rightHoverZone, leftHoverZone, scrollHint);
         });
+
+        console.log(`[SmartSlide] Smart sliding initialization completed`);
     }
 
     /**
@@ -570,29 +789,188 @@ export class ToolpopupManager {
             }
         };
 
-        // 鼠标移动事件
+        let currentSlideOffset = 0; // 当前滑动偏移量
+        let totalContentWidth = 0;
+        let containerWidth = 0;
+        let hoverTimeout: number | null = null; // 悬停延迟定时器
+        let isInRightZone = false;
+        let isInLeftZone = false;
+        const HOVER_DELAY = 1000; // 1秒悬停延迟
+        const CONTINUOUS_DELAY = 1800; // 连续滑动间隔（1.8秒，比首次触发快一些）
+
+        // 计算下一个分段滑动距离（基于智能单词边界）
+        const calculateNextSlideDistance = (): number => {
+            return this.findOptimalWordBoundary(content, currentSlideOffset, containerWidth, 'next');
+        };
+
+        // 计算上一个分段滑动距离（基于智能单词边界）
+        const calculatePrevSlideDistance = (): number => {
+            return this.findOptimalWordBoundary(content, currentSlideOffset, containerWidth, 'prev');
+        };
+
+        // 分段滑动到下一段（使用智能单词边界）
+        const slideToNextSegment = () => {
+            console.log(`[SmartSlide] slideToNextSegment called`);
+            const maxSlideDistance = checkScrollable();
+            console.log(`[SmartSlide] maxSlideDistance: ${maxSlideDistance}, containerWidth: ${containerWidth}, totalContentWidth: ${totalContentWidth}`);
+
+            if (maxSlideDistance > 0) {
+                // 使用智能单词边界计算下一个滑动位置
+                const nextOffset = calculateNextSlideDistance();
+
+                console.log(`[SmartSlide] Smart boundary calculation: current=${currentSlideOffset}, next=${nextOffset}`);
+
+                if (nextOffset > currentSlideOffset) {
+                    currentSlideOffset = nextOffset;
+                    content.style.transform = `translateX(-${currentSlideOffset}px)`;
+                    container.classList.add('slid');
+                    // 添加模糊效果
+                    tooltip.classList.add('lucid-slide-blur-left', 'active');
+                    isSliding = currentSlideOffset > 0;
+                    console.log(`[SmartSlide] ✅ Sliding to next word boundary: ${currentSlideOffset}px with blur effect`);
+                } else {
+                    console.log(`[SmartSlide] ⚠️ No more content to slide (nextOffset <= currentSlideOffset)`);
+                }
+            } else {
+                console.log(`[SmartSlide] ⚠️ Content does not need scrolling (maxSlideDistance <= 0)`);
+            }
+        };
+
+        // 分段滑动到上一段（使用智能单词边界）
+        const slideToPrevSegment = () => {
+            if (currentSlideOffset > 0) {
+                // 使用智能单词边界计算上一个滑动位置
+                const prevOffset = calculatePrevSlideDistance();
+
+                console.log(`[SmartSlide] Smart prev boundary calculation: current=${currentSlideOffset}, prev=${prevOffset}`);
+
+                currentSlideOffset = prevOffset;
+                content.style.transform = `translateX(-${currentSlideOffset}px)`;
+
+                if (currentSlideOffset === 0) {
+                    container.classList.remove('slid');
+                    // 移除模糊效果
+                    tooltip.classList.remove('active');
+                    setTimeout(() => {
+                        tooltip.classList.remove('lucid-slide-blur-left');
+                    }, 300);
+                    isSliding = false;
+                } else {
+                    isSliding = true;
+                }
+                console.log(`[SmartSlide] ✅ Sliding to previous word boundary: ${currentSlideOffset}px`);
+            }
+        };
+
+        // 清除悬停定时器
+        const clearHoverTimeout = () => {
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+        };
+
+        // 更新checkScrollable以设置全局变量
+        const originalCheckScrollable = checkScrollable;
+        const enhancedCheckScrollable = () => {
+            console.log(`[SmartSlide] enhancedCheckScrollable called`);
+            const result = originalCheckScrollable();
+            const styles = getComputedStyle(tooltip);
+            containerWidth = container.offsetWidth || parseInt(styles.maxWidth) || 280;
+            totalContentWidth = content.scrollWidth;
+            console.log(`[SmartSlide] Updated dimensions - containerWidth: ${containerWidth}, totalContentWidth: ${totalContentWidth}, result: ${result}`);
+            return result;
+        };
+
+        // 鼠标移动事件（带延迟触发）
         container.addEventListener('mousemove', (e) => {
             const rect = container.getBoundingClientRect();
             const x = e.clientX - rect.left;
-            const containerWidth = rect.width;
+            const currentContainerWidth = rect.width;
 
-            const rightZoneStart = containerWidth * 0.9; // 右边10%
-            const leftZoneEnd = containerWidth * 0.1;   // 左边10%
+            const rightZoneStart = currentContainerWidth * 0.9; // 右边10%
+            const leftZoneEnd = currentContainerWidth * 0.1;   // 左边10%
+
+            // console.log(`[SmartSlide] Mouse move: x=${x.toFixed(1)}, width=${currentContainerWidth.toFixed(1)}, rightZone=${rightZoneStart.toFixed(1)}, leftZone=${leftZoneEnd.toFixed(1)}`);
 
             if (x >= rightZoneStart) {
-                if (!isSliding) {
-                    slideToEnd();
+                // 进入右侧区域
+                if (!isInRightZone) {
+                    isInRightZone = true;
+                    isInLeftZone = false;
+                    console.log(`[SmartSlide] Entered RIGHT zone, starting continuous sliding`);
+                    clearHoverTimeout();
+
+                    // 启动连续滑动逻辑
+                    const startContinuousSliding = () => {
+                        if (isInRightZone) {
+                            console.log(`[SmartSlide] RIGHT zone continuous timer triggered`);
+                            enhancedCheckScrollable(); // 更新全局变量
+                            slideToNextSegment();
+
+                            // 如果还在右侧区域且还有内容可以滑动，继续设置下一次滑动
+                            if (isInRightZone && currentSlideOffset < (totalContentWidth - containerWidth)) {
+                                hoverTimeout = setTimeout(startContinuousSliding, CONTINUOUS_DELAY) as any;
+                            }
+                        }
+                    };
+
+                    hoverTimeout = setTimeout(startContinuousSliding, HOVER_DELAY) as any;
                 }
-            } else if (x <= leftZoneEnd && isSliding) {
-                slideToStart();
+            } else if (x <= leftZoneEnd) {
+                // 进入左侧区域
+                if (!isInLeftZone) {
+                    isInLeftZone = true;
+                    isInRightZone = false;
+                    console.log(`[SmartSlide] Entered LEFT zone, starting continuous sliding`);
+                    clearHoverTimeout();
+
+                    // 启动连续滑动逻辑
+                    const startContinuousSliding = () => {
+                        if (isInLeftZone) {
+                            console.log(`[SmartSlide] LEFT zone continuous timer triggered`);
+                            enhancedCheckScrollable(); // 更新全局变量
+                            slideToPrevSegment();
+
+                            // 如果还在左侧区域且还有内容可以滑动，继续设置下一次滑动
+                            if (isInLeftZone && currentSlideOffset > 0) {
+                                hoverTimeout = setTimeout(startContinuousSliding, CONTINUOUS_DELAY) as any;
+                            }
+                        }
+                    };
+
+                    hoverTimeout = setTimeout(startContinuousSliding, HOVER_DELAY) as any;
+                }
+            } else {
+                // 在中间区域
+                if (isInRightZone || isInLeftZone) {
+                    console.log(`[SmartSlide] Left zones, entering MIDDLE zone`);
+                    isInRightZone = false;
+                    isInLeftZone = false;
+                    clearHoverTimeout();
+                }
             }
         });
 
         // 鼠标离开事件
         container.addEventListener('mouseleave', () => {
+            clearHoverTimeout();
+            isInRightZone = false;
+            isInLeftZone = false;
+            console.log(`[SmartSlide] Mouse left container, resetting all states`);
+
+            // 延迟回到起始位置
             setTimeout(() => {
-                if (isSliding) {
-                    slideToStart();
+                if (currentSlideOffset > 0) {
+                    console.log(`[SmartSlide] Returning to start position`);
+                    currentSlideOffset = 0;
+                    content.style.transform = originalTransform;
+                    container.classList.remove('slid');
+                    tooltip.classList.remove('active');
+                    setTimeout(() => {
+                        tooltip.classList.remove('lucid-slide-blur-left');
+                    }, 300);
+                    isSliding = false;
                 }
             }, 100);
         });
@@ -717,7 +1095,10 @@ export class ToolpopupManager {
             return;
         }
 
-        this.currentToolpopup = this.createToolpopupElement(wordDetails);
+        // 获取单词的标记次数
+        const markCount = await this.getWordMarkCount(word);
+
+        this.currentToolpopup = this.createToolpopupElement(wordDetails, markCount);
 
         // 设置动态字体大小（与tooltip保持一致的逻辑）
         const bodyPFontSize = this.getBodyPFontSize();

@@ -7,7 +7,7 @@
           "pos": "noun",
           "definitions": [
             {
-              "definition": "An act of scaling a wall or rampart, especially in military operations or as a sport, involving the use of ladders, ropes, or climbing techniques to overcome vertical obstacles",
+              "definition": "An act of scaling a wall or rampart, especially in military operations or as a sport, involving the use of ladders, ropes, or climbing techniques to overcome vertical obstacles and reach elevated positions safely",
               "chinese": "攀登，攀爬墙壁或城墙的行为",
               "chinese_short": "攀登"
             }
@@ -17,7 +17,7 @@
           "pos": "verb",
           "definitions": [
             {
-              "definition": "To climb or scale, especially a wall or fortification, as in a sport or military operation, or to climb a mountain, as in a mountaineering expedition, or to climb a ladder or rope",
+              "definition": "To climb or scale, especially a wall or fortification, as in a sport or military operation, or to climb a mountain, as in a mountaineering expedition, or to climb a ladder or rope using specialized equipment and techniques for safety and efficiency",
               "chinese": "攀登，攀爬，特别是墙壁或防御工事",
               "chinese_short": "攀登"
             }
@@ -50,11 +50,45 @@
         "us": "/ˌɛskəˈleɪd/",
         "uk": "/ˈɛskəleɪd/"
       }
+    },
+    {
+      "word": "comprehensive",
+      "explain": [
+        {
+          "pos": "adjective",
+          "definitions": [
+            {
+              "definition": "Complete and including everything that is necessary; covering all or nearly all elements or aspects of something in a thorough and detailed manner, leaving no important parts uncovered or unexplored, and providing a full understanding of the subject matter through extensive analysis and examination",
+              "chinese": "全面的，综合的，包含所有必要元素的",
+              "chinese_short": "全面的"
+            }
+          ]
+        }
+      ],
+      "wordFormats": [
+        {
+          "name": "原型",
+          "form": "comprehensive"
+        },
+        {
+          "name": "比较级",
+          "form": "more comprehensive"
+        },
+        {
+          "name": "最高级",
+          "form": "most comprehensive"
+        }
+      ],
+      "phonetic": {
+        "us": "/ˌkɑːmprɪˈhensɪv/",
+        "uk": "/ˌkɒmprɪˈhensɪv/"
+      }
     }
   ],
-  "wordCount": 1,
+  "wordCount": 2,
   "wordList": [
-    "escalade"
+    "escalade",
+    "comprehensive"
   ],
   "wordRelationships": [
     {
@@ -93,6 +127,31 @@
         }
       ],
       "totalFormsCount": 5
+    },
+    {
+      "baseForm": "comprehensive",
+      "baseFormId": 800,
+      "allForms": [
+        {
+          "id": 800,
+          "name": "原型",
+          "form": "comprehensive",
+          "isMainForm": true
+        },
+        {
+          "id": 801,
+          "name": "比较级",
+          "form": "more comprehensive",
+          "isMainForm": false
+        },
+        {
+          "id": 802,
+          "name": "最高级",
+          "form": "most comprehensive",
+          "isMainForm": false
+        }
+      ],
+      "totalFormsCount": 3
     }
   ],
   "queryMetadata": {
@@ -106,6 +165,10 @@
     "climb",
     "scale",
     "ascend",
-    "mount"
+    "mount",
+    "complete",
+    "thorough",
+    "extensive",
+    "detailed"
   ]
 }

@@ -17,7 +17,7 @@
   --lucid-text-disabled: #ccc;
 
   /* 边框颜色 */
-  --lucid-border-subtle: rgba(255, 255, 255, 0.1);
+  --lucid-border-subtle: rgba(255, 255, 255, 0.0);
 
   /* 交互颜色 */
   --lucid-accent-primary: #ff6b6b;
