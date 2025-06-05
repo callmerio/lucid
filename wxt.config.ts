@@ -4,7 +4,7 @@ import { resolve } from "path";
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ["@wxt-dev/module-react"],
-  browser: "arc",
+  browser: "chromium",
   // Chrome 137兼容性配置 - 禁用web-ext自动启动
   // webExt: {
   //   disabled: true, // 禁用自动浏览器启动，需要手动加载扩展
