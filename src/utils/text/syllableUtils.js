@@ -1,17 +1,25 @@
 /**
- * syllableUtils.js
+ * syllableUtils.ts
  * 专业的音节分割工具，使用 syllable 库
  */
 
 import { syllable } from 'syllable';
 
+// 定义特殊单词字典的类型
+type SpecialCases = {
+  [key: string]: string[];
+};
+
+// 定义音节分割函数的返回类型
+type SyllableResult = string[];
+
 /**
  * 高级音节分割函数
  * 使用专业的音节分割库，结合自定义规则
- * @param {string} word - 要分割的单词
- * @returns {string[]} - 音节数组
+ * @param word - 要分割的单词
+ * @returns 音节数组
  */
-export function advancedSyllabify(word) {
+export function advancedSyllabify(word: string): string[] {
     if (!word || typeof word !== 'string') {
         return [word || ''];
     }
@@ -24,7 +32,7 @@ export function advancedSyllabify(word) {
     }
 
     // 预定义的特殊单词字典（用于覆盖算法结果）
-    const specialCases = {
+    const specialCases: SpecialCases = {
         'debug': ['de', 'bug'],
         'escalade': ['es', 'ca', 'lade'],
         'beautiful': ['beau', 'ti', 'ful'],
@@ -113,7 +121,7 @@ export function advancedSyllabify(word) {
  * @param {number} targetSyllables - 目标音节数量
  * @returns {string[]} - 音节数组
  */
-function intelligentSyllableBreak(word, targetSyllables) {
+function intelligentSyllableBreak(word: string, targetSyllables: number): string[] {
     const vowels = 'aeiouAEIOU';
     const consonants = 'bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ';
     
@@ -198,7 +206,7 @@ function intelligentSyllableBreak(word, targetSyllables) {
  * @param {string} originalWord - 原始单词
  * @returns {string[]} - 调整后的音节数组
  */
-function adjustSyllableCount(syllables, target, originalWord) {
+function adjustSyllableCount(syllables: string[], target: number, originalWord: string): string[] {
     if (syllables.length === target) {
         return syllables;
     }
@@ -250,7 +258,7 @@ function adjustSyllableCount(syllables, target, originalWord) {
  * @param {string} word - 单词
  * @returns {string[]} - 音节数组
  */
-function basicSyllableBreak(word) {
+function basicSyllableBreak(word: string): string[] {
     const vowels = 'aeiouAEIOU';
     const syllables = [];
     let currentSyllable = '';
@@ -287,7 +295,7 @@ function basicSyllableBreak(word) {
  * @param {string} word - 单词
  * @returns {number} - 音节数量
  */
-export function getSyllableCount(word) {
+export function getSyllableCount(word: string): number {
     try {
         return syllable(word);
     } catch (error) {
@@ -301,8 +309,8 @@ export function getSyllableCount(word) {
  * @param {string[]} words - 单词数组
  * @returns {Object} - 单词到音节数组的映射
  */
-export function batchSyllabify(words) {
-    const result = {};
+export function batchSyllabify(words: string[]): Record<string, string[]> {
+    const result: Record<string, string[]> = {};
     words.forEach(word => {
         result[word] = advancedSyllabify(word);
     });

@@ -44,23 +44,7 @@ export default defineContentScript({
       originalConsoleError.apply(console, args);
     };
 
-    // 在开发环境中加载stagewise工具栏
-    if (import.meta.env.DEV) {
-      import('@stagewise/toolbar').then(({ initToolbar }) => {
-        try {
-          const stagewiseConfig = {
-            plugins: []
-          };
-          initToolbar(stagewiseConfig);
-          console.log("Stagewise 开发工具栏已加载");
-        } catch (error) {
-          // 捕获工具栏初始化过程中的错误，包括postMessage错误
-          console.warn("Stagewise 工具栏初始化警告:", error);
-        }
-      }).catch(err => {
-        console.error("无法加载Stagewise工具栏:", err);
-      });
-    }
+
 
     const handleSelectionAndHighlight = async () => {
       const sel = window.getSelection();

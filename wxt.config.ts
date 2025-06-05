@@ -46,7 +46,6 @@ export default defineConfig({
       ],
     } as any),
   },
-  // 确保stagewise包只在开发环境中被包含
   outDir: process.env.NODE_ENV === "development" ? ".output" : undefined,
   vite: () => ({
     build: {
