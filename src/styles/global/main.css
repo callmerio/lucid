@@ -12,6 +12,7 @@
 .lucid-toolpopup-container,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
+  font-weight: var(--lucid-font-weight-normal);
 }
 
 /* ===== 高亮效果 ===== */

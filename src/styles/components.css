@@ -75,6 +75,19 @@
   font-size: var(--lucid-font-size-2xl);
 }
 
+/* 字体权重工具类 */
+.lucid-font-normal {
+  font-weight: var(--lucid-font-weight-normal);
+}
+
+.lucid-font-medium {
+  font-weight: var(--lucid-font-weight-medium);
+}
+
+.lucid-font-semibold {
+  font-weight: var(--lucid-font-weight-semibold);
+}
+
 /* ===== 按钮组件 ===== */
 
 .lucid-btn {

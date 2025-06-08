@@ -61,6 +61,12 @@ src/styles/
 --lucid-font-size-base: 13px;
 --lucid-font-size-md: 14px;
 --lucid-font-size-lg: 16px;
+
+/* 字体权重 */
+--lucid-font-weight-thin: 300;
+--lucid-font-weight-normal: 400;
+--lucid-font-weight-medium: 500;
+--lucid-font-weight-semibold: 600;
 ```
 
 ### 间距系统
@@ -114,10 +120,28 @@ src/styles/
 .lucid-popup-base {
   position: absolute;
   font-family: var(--lucid-font-family);
+  font-weight: var(--lucid-font-weight-normal);
   user-select: none;
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--lucid-transition-fast);
+}
+```
+
+### 字体工具类
+
+```css
+/* 字体权重 */
+.lucid-font-normal {
+  font-weight: var(--lucid-font-weight-normal);
+}
+
+.lucid-font-medium {
+  font-weight: var(--lucid-font-weight-medium);
+}
+
+.lucid-font-semibold {
+  font-weight: var(--lucid-font-weight-semibold);
 }
 ```
 
@@ -239,10 +263,25 @@ src/styles/
 }
 ```
 
-### 3. **保持一致性**
+### 3. **统一字体权重**
+```css
+/* ❌ 避免硬编码字体权重 */
+.component {
+  font-weight: 500;
+  font-weight: bold;
+}
+
+/* ✅ 使用设计系统变量 */
+.component {
+  font-weight: var(--lucid-font-weight-normal);
+}
+```
+
+### 4. **保持一致性**
 - 使用统一的间距系统
-- 遵循既定的字体层级
+- 遵循既定的字体层级和权重
 - 保持动画时间的一致性
+- 所有组件默认使用 400 字体权重
 
 ## 🔧 维护指南
 
@@ -268,7 +307,8 @@ src/styles/
 ### 迁移检查清单
 
 - [ ] 替换所有硬编码的颜色值
-- [ ] 使用统一的字体系统
+- [ ] 使用统一的字体系统（font-family + font-weight）
+- [ ] 统一字体权重为 400（normal）
 - [ ] 应用标准间距
 - [ ] 更新动画引用
 - [ ] 测试主题兼容性

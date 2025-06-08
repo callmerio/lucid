@@ -458,8 +458,7 @@ const StyleManager = {
 }
 
 .lucid-tooltip-btn svg {
-  width: 22px !important;  /* 强制设置SVG尺寸 */
-  height: 22px !important;
+ 
   flex-shrink: 0;  /* 防止SVG被压缩 */
 }
 
@@ -770,7 +769,7 @@ const StyleManager = {
 .lucid-toolpopup-definition-text-chinese:hover .lucid-toolpopup-definition-text-english-tooltip {
   opacity: 1;
   visibility: visible;
-  max-width: calc(var(--lucid-width-toolpopup) - 40px); /* 动态计算：popup宽度减去40px边距 */
+  max-width: calc(var(--lucid-width-toolpopup) - 60px); /* 动态计算：popup宽度减去40px边距 */
   padding: 8px;
   /* 保持 white-space: nowrap 以支持滑动逻辑 */
 }
@@ -779,7 +778,7 @@ const StyleManager = {
 .lucid-toolpopup-definition-text-english-tooltip:hover {
   opacity: 1;
   visibility: visible;
-  max-width: calc(var(--lucid-width-toolpopup) - 40px); /* 动态计算：popup宽度减去40px边距 */
+  max-width: calc(var(--lucid-width-toolpopup) - 60px); /* 动态计算：popup宽度减去40px边距 */
   padding: 8px;
   /* 保持 white-space: nowrap 以支持滑动逻辑 */
 }

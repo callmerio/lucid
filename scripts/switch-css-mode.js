@@ -30,6 +30,7 @@ const FULL_VERSION = `/* ===== Lucid Extension 设计系统 ===== */
 .lucid-toolpopup-container,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
+  font-weight: var(--lucid-font-weight-normal);
 }
 
 /* ===== 高亮效果 ===== */
@@ -60,6 +61,7 @@ const ESSENTIAL_VERSION = `/* ===== Lucid Extension 精简版设计系统 ===== 
 .lucid-toolpopup-container,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
+  font-weight: var(--lucid-font-weight-normal);
 }
 
 /* ===== 高亮效果 ===== */
@@ -210,7 +212,6 @@ function main() {
 main();
 
 export {
-  getCurrentMode,
-  switchToMode,
-  showStatus
+  getCurrentMode, showStatus, switchToMode
 };
+

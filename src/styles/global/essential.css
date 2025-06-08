@@ -144,6 +144,7 @@
 .lucid-toolpopup-container,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
+  font-weight: var(--lucid-font-weight-normal);
 }
 
 /* ===== Tooltip 样式 ===== */

@@ -441,7 +441,7 @@ export class TooltipManager {
         </div>
         <div class="lucid-tooltip-actions">
           <button class="lucid-tooltip-btn lucid-tooltip-btn-down" title="减少高亮计数" style="color: ${buttonColors.downButtonColor};">
-            <svg width="16" height="16" viewBox="0 0 1228 1024" fill="currentColor">
+            <svg width="22" height="22" viewBox="0 0 1228 1024" fill="currentColor">
               <path d="M858.303391 402.567077a50.637368 50.637368 0 0 0-71.601239 0L607.648418 581.570174 428.594684 402.567077A50.637368 50.637368 0 0 0 356.993446 474.168316l214.854353 214.854353a50.637368 50.637368 0 0 0 71.601239 0l214.854353-214.854353a50.637368 50.637368 0 0 0 0-71.601239z"/>
             </svg>
           </button>
