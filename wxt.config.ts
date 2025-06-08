@@ -1,5 +1,5 @@
-import { defineConfig } from "wxt";
 import { resolve } from "path";
+import { defineConfig } from "wxt";
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -35,8 +35,8 @@ export default defineConfig({
   },
   dev: {
     server: {
-      port: 3000, // 使用默认端口3000
-      host: 'localhost',
+      port: 3000,
+      host: '0.0.0.0',
     },
     // 使用类型断言来允许 browserFlags
     ...({
@@ -51,6 +51,17 @@ export default defineConfig({
     build: {
       minify: process.env.NODE_ENV === "production",
       sourcemap: process.env.NODE_ENV === "development",
+    },
+    server: {
+      host: '0.0.0.0',
+      port: 3000,
+      strictPort: true,
+      hmr: {
+        host: '0.0.0.0',
+        port: 3000,
+        strictPort: true,
+        clientPort: 3000,
+      },
     },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),

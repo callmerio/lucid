@@ -69,8 +69,8 @@
   --lucid-width-tooltip-min: 120px;
   --lucid-width-tooltip-max: 280px;
   --lucid-width-toolpopup: 320px;
-  --lucid-height-button-sm: 20px;
-  --lucid-height-button-md: 24px;
+  --lucid-height-button-sm: 24px;  /* 从20px改为24px，为16px SVG提供足够空间 */
+  --lucid-height-button-md: 28px;  /* 相应调整中等按钮尺寸 */
 }
 
 /* ===== 亮色主题 ===== */

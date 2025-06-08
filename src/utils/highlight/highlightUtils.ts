@@ -457,6 +457,12 @@ const StyleManager = {
   transform: scale(0.95);
 }
 
+.lucid-tooltip-btn svg {
+  width: 22px !important;  /* 强制设置SVG尺寸 */
+  height: 22px !important;
+  flex-shrink: 0;  /* 防止SVG被压缩 */
+}
+
 .lucid-tooltip-btn-like svg {
   transform: scale(0.7); /* 爱心图标缩小到70% */
 }
