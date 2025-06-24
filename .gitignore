@@ -27,3 +27,5 @@ web-ext.config.ts
 .windsurf
 CodeFlattened
 .aider*
+# @generate-docs.sh
+docs/code2prompt-output

@@ -1,7 +1,8 @@
-import { debounce } from "lodash-es";
 import "@styles/global/main.css"; // 引入 Tailwind CSS
-import { expandSelectionToFullWord } from "@utils/text/selectionUtils";
 import { applyWordHighlight } from "@utils/highlight/highlightUtils";
+import { expandSelectionToFullWord } from "@utils/text/selectionUtils";
+import { debounce } from "lodash-es";
+import { defineContentScript } from 'wxt/utils/define-content-script';
 
 /* ------------------------------------------------------------------
  *  内容脚本入口
@@ -15,7 +16,7 @@ export default defineContentScript({
   matches: ["<all_urls>"],
   allFrames: true,
   matchAboutBlank: true,
-  main() {
+  async main() {
     /* ---------------- iframe‑context guard ---------------- */
     try {
       if (window.top && window.top !== window) {
@@ -31,6 +32,15 @@ export default defineContentScript({
       return () => { };
     }
     console.log("Lucid 扩展：内容脚本已加载");
+
+    // 初始化管理器 - 确保事件监听器被设置
+    const { TooltipManager } = await import("@utils/dom/tooltipManager");
+    const { ToolpopupManager } = await import("@utils/dom/toolpopupManager");
+
+    const tooltipManager = TooltipManager.getInstance();
+    const toolpopupManager = ToolpopupManager.getInstance();
+
+    console.log("[Lucid] TooltipManager 和 ToolpopupManager 已初始化");
 
     // 添加全局错误处理，特别是postMessage错误
     const originalConsoleError = console.error;
@@ -140,6 +150,12 @@ export default defineContentScript({
     });
     return () => {
       document.removeEventListener("keyup", debouncedKeyUp);
+
+      // 清理管理器
+      tooltipManager.destroy();
+      toolpopupManager.destroy();
+
+      console.log("[Lucid] 内容脚本清理完成");
     };
   },
 });

@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "source": "project",
+  "metadata": {
+    "version": "2.0.0",
+    "description": "project 级资源注册表",
+    "createdAt": "2025-06-24T14:40:26.885Z",
+    "updatedAt": "2025-06-24T14:40:26.886Z",
+    "resourceCount": 1
+  },
+  "resources": [
+    {
+      "id": "prd-expert",
+      "name": "PRD专家",
+      "version": "1.0.0",
+      "description": "专业的产品需求文档专家，擅长需求分析、用户故事编写和产品规格定义",
+      "category": "product-management",
+      "tags": [
+        "PRD",
+        "产品经理",
+        "需求分析",
+        "用户故事",
+        "产品规格"
+      ],
+      "author": "Lucid Team",
+      "created_at": "2025-01-27",
+      "updated_at": "2025-01-27",
+      "source": "project",
+      "protocol": "role://",
+      "path": "domain/prd-expert.json"
+    }
+  ],
+  "stats": {
+    "totalResources": 1,
+    "byProtocol": {
+      "role://": 1
+    },
+    "bySource": {
+      "project": 1
+    }
+  }
+}

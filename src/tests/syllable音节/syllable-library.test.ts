@@ -5,14 +5,14 @@
  */
 
 import { syllable } from 'syllable';
-import { advancedSyllabify, getSyllableCount, batchSyllabify } from '../utils/text/syllableUtils.js';
+import { advancedSyllabify, batchSyllabify, getSyllableCount } from '../../utils/text/syllableUtils.ts';
 
 describe('Syllable 库功能测试', () => {
-  
+
   describe('基础音节计数测试', () => {
     test('单音节单词应该返回 1', () => {
       const singleSyllableWords = ['cat', 'dog', 'run', 'big', 'red', 'sun', 'book', 'tree'];
-      
+
       singleSyllableWords.forEach(word => {
         const count = syllable(word);
         expect(count).toBe(1);
@@ -22,7 +22,7 @@ describe('Syllable 库功能测试', () => {
 
     test('双音节单词应该返回 2', () => {
       const doubleSyllableWords = ['happy', 'water', 'table', 'window', 'garden', 'simple', 'paper', 'tiger'];
-      
+
       doubleSyllableWords.forEach(word => {
         const count = syllable(word);
         expect(count).toBe(2);
@@ -32,7 +32,7 @@ describe('Syllable 库功能测试', () => {
 
     test('三音节单词应该返回 3', () => {
       const tripleSyllableWords = ['beautiful', 'computer', 'elephant', 'banana', 'important', 'wonderful'];
-      
+
       tripleSyllableWords.forEach(word => {
         const count = syllable(word);
         expect(count).toBe(3);
@@ -49,7 +49,7 @@ describe('Syllable 库功能测试', () => {
         { word: 'international', expected: 5 },
         { word: 'communication', expected: 5 }
       ];
-      
+
       multiSyllableWords.forEach(({ word, expected }) => {
         const count = syllable(word);
         expect(count).toBe(expected);
@@ -82,7 +82,7 @@ describe('Syllable 库功能测试', () => {
         { word: 'time', expected: 1 },
         { word: 'place', expected: 1 }
       ];
-      
+
       silentEWords.forEach(({ word, expected }) => {
         const count = syllable(word);
         expect(count).toBe(expected);
@@ -98,7 +98,7 @@ describe('Syllable 库功能测试', () => {
         { word: 'newspaper', expected: 3 },
         { word: 'classroom', expected: 2 }
       ];
-      
+
       compoundWords.forEach(({ word, expected }) => {
         const count = syllable(word);
         expect(count).toBe(expected);
@@ -119,7 +119,7 @@ describe('Syllable 库功能测试', () => {
         { word: 'database', expected: 3 },
         { word: 'interface', expected: 3 }
       ];
-      
+
       programmingWords.forEach(({ word, expected }) => {
         const count = syllable(word);
         console.log(`📊 "${word}" -> ${count} 音节 (期望: ${expected})`);
@@ -132,7 +132,7 @@ describe('Syllable 库功能测试', () => {
   describe('项目自定义音节工具测试', () => {
     test('getSyllableCount 函数应该正常工作', () => {
       const testWords = ['hello', 'world', 'javascript', 'typescript'];
-      
+
       testWords.forEach(word => {
         const count = getSyllableCount(word);
         expect(typeof count).toBe('number');
@@ -143,7 +143,7 @@ describe('Syllable 库功能测试', () => {
 
     test('advancedSyllabify 函数应该返回音节数组', () => {
       const testWords = ['hello', 'beautiful', 'computer', 'development'];
-      
+
       testWords.forEach(word => {
         const syllables = advancedSyllabify(word);
         expect(Array.isArray(syllables)).toBe(true);
@@ -156,7 +156,7 @@ describe('Syllable 库功能测试', () => {
     test('batchSyllabify 函数应该批量处理单词', () => {
       const testWords = ['cat', 'happy', 'beautiful', 'development'];
       const result = batchSyllabify(testWords);
-      
+
       expect(typeof result).toBe('object');
       testWords.forEach(word => {
         expect(result[word]).toBeDefined();
@@ -173,16 +173,16 @@ describe('Syllable 库功能测试', () => {
         'hello', 'world', 'javascript', 'typescript', 'programming', 'development',
         'beautiful', 'wonderful', 'amazing', 'incredible', 'fantastic', 'excellent'
       ];
-      
+
       const startTime = performance.now();
-      
+
       words.forEach(word => {
         syllable(word);
       });
-      
+
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       console.log(`✅ 处理 ${words.length} 个单词耗时: ${duration.toFixed(2)}ms`);
       expect(duration).toBeLessThan(100); // 应该在100ms内完成
     });
@@ -191,7 +191,7 @@ describe('Syllable 库功能测试', () => {
   describe('边界情况测试', () => {
     test('大写字母单词', () => {
       const upperCaseWords = ['HELLO', 'WORLD', 'JAVASCRIPT'];
-      
+
       upperCaseWords.forEach(word => {
         const count = syllable(word);
         const lowerCount = syllable(word.toLowerCase());
@@ -202,7 +202,7 @@ describe('Syllable 库功能测试', () => {
 
     test('混合大小写单词', () => {
       const mixedCaseWords = ['JavaScript', 'TypeScript', 'GitHub', 'iPhone'];
-      
+
       mixedCaseWords.forEach(word => {
         const count = syllable(word);
         expect(count).toBeGreaterThan(0);
@@ -212,7 +212,7 @@ describe('Syllable 库功能测试', () => {
 
     test('包含数字的单词', () => {
       const wordsWithNumbers = ['web3', 'html5', 'css3', 'es6'];
-      
+
       wordsWithNumbers.forEach(word => {
         const count = syllable(word);
         expect(count).toBeGreaterThan(0);

@@ -35,7 +35,7 @@ export default defineConfig({
   },
   dev: {
     server: {
-      port: 3000,
+      port: parseInt(process.env.WXT_DEV_SERVER_PORT || '3000'),
       host: '0.0.0.0',
     },
     // 使用类型断言来允许 browserFlags
@@ -47,24 +47,27 @@ export default defineConfig({
     } as any),
   },
   outDir: process.env.NODE_ENV === "development" ? ".output" : undefined,
-  vite: () => ({
-    build: {
-      minify: process.env.NODE_ENV === "production",
-      sourcemap: process.env.NODE_ENV === "development",
-    },
-    server: {
-      host: '0.0.0.0',
-      port: 3000,
-      strictPort: true,
-      hmr: {
-        host: '0.0.0.0',
-        port: 3000,
-        strictPort: true,
-        clientPort: 3000,
+  vite: () => {
+    const port = parseInt(process.env.WXT_DEV_SERVER_PORT || '3000');
+    return {
+      build: {
+        minify: process.env.NODE_ENV === "production",
+        sourcemap: process.env.NODE_ENV === "development",
       },
-    },
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-    },
-  }),
+      server: {
+        host: '0.0.0.0',
+        port: port,
+        strictPort: true,
+        hmr: {
+          host: '0.0.0.0',
+          port: port,
+          strictPort: true,
+          clientPort: port,
+        },
+      },
+      define: {
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      },
+    };
+  },
 });

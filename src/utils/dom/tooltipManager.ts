@@ -2,6 +2,7 @@
  * Tooltip管理器 - 处理高亮单词的hover解释显示
  */
 
+import { UI_EVENTS } from '@constants/uiEvents';
 import {
   calculateHighlight,
   decreaseWordHighlight,
@@ -9,7 +10,6 @@ import {
   type ToggleHighlightContext
 } from '../highlight/highlightUtils';
 import { simpleEventManager, SimpleEventManager } from './simpleEventManager';
-import { ToolpopupManager } from './toolpopupManager'; // Import the new ToolpopupManager
 
 // 模拟翻译数据 - 实际项目中应该从API获取
 const MOCK_TRANSLATIONS: Record<string, {
@@ -181,9 +181,30 @@ export class TooltipManager {
   private hideTimeout: number | null = null;
   private shiftKeyCleanup: (() => void) | null = null; // 简化的清理函数
   private currentTargetElement: HTMLElement | null = null; // 跟踪当前目标元素
+  private globalEventCleanups: (() => void)[] = []; // 全局事件清理函数
 
   private constructor() {
-    // 轻量级初始化，无需复杂监控
+    // 订阅全局事件
+    this.setupGlobalEventListeners();
+  }
+
+  /**
+   * 设置全局事件监听器
+   */
+  private setupGlobalEventListeners(): void {
+    // 监听全局隐藏事件
+    const hideAllCleanup = simpleEventManager.subscribeGlobalEvent(
+      UI_EVENTS.UI_STATE.HIDE_ALL,
+      (event) => {
+        if (event.payload.except !== 'tooltip') {
+          this.hideTooltip(0);
+        }
+      },
+      {},
+      'TooltipManager'
+    );
+
+    this.globalEventCleanups.push(hideAllCleanup);
   }
 
   static getInstance(): TooltipManager {
@@ -308,7 +329,11 @@ export class TooltipManager {
       this.hideTooltip(0); // 立即隐藏，不延迟
 
       // 🔧 修复：显示tooltip时自动隐藏toolpopup，避免同时显示两个弹窗
-      ToolpopupManager.getInstance().hideToolpopup();
+      simpleEventManager.dispatchGlobalEvent(
+        UI_EVENTS.UI_STATE.HIDE_ALL,
+        { except: 'tooltip', reason: 'tooltip-showing' },
+        'TooltipManager'
+      );
 
       // 获取翻译信息（异步）
       const translation = await getWordTranslation(word);
@@ -756,8 +781,16 @@ export class TooltipManager {
         // 立即隐藏tooltip，避免与toolpopup重叠
         this.hideTooltip(0);
 
-        // 调用新的showToolpopup方法，传递当前tooltip元素用于平滑过渡
-        ToolpopupManager.getInstance().showToolpopup(currentWord, currentTargetElement, currentTooltipElement);
+        // 通过事件系统请求显示toolpopup，传递当前tooltip元素用于平滑过渡
+        simpleEventManager.dispatchGlobalEvent(
+          UI_EVENTS.TOOLTIP.TRANSITION_TO_POPUP,
+          {
+            word: currentWord,
+            targetElement: currentTargetElement,
+            fromTooltip: currentTooltipElement
+          },
+          'TooltipManager'
+        );
       }
     };
 
@@ -786,6 +819,11 @@ export class TooltipManager {
   public destroy(): void {
     this.hideTooltip(0);
     this.removeShiftKeyListener();
+
+    // 清理全局事件监听器
+    this.globalEventCleanups.forEach(cleanup => cleanup());
+    this.globalEventCleanups = [];
+
     this.currentTargetElement = null;
     console.log('[TooltipManager] Destroyed');
   }

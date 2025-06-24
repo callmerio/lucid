@@ -1,3 +1,5 @@
+import { defineBackground } from 'wxt/utils/define-background';
+
 const CONTEXT_MENU_ID = "lucid-log-selected-text";
 
 export default defineBackground(() => {

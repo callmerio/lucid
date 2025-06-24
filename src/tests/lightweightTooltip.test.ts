@@ -4,8 +4,8 @@
  */
 
 import { vi } from 'vitest';
-import { SimpleEventManager } from '../../utils/dom/simpleEventManager';
-import { TooltipManager } from '../../utils/dom/tooltipManager';
+import { SimpleEventManager } from '../utils/dom/simpleEventManager';
+import { TooltipManager } from '../utils/dom/tooltipManager';
 
 describe('轻量级Tooltip系统测试', () => {
   let simpleEventManager: SimpleEventManager;
@@ -247,18 +247,18 @@ describe('轻量级Tooltip系统测试', () => {
       expect(tooltips.length).toBe(1);
     });
 
-    test('应该正确处理相同单词的重复显示', () => {
+    test('应该正确处理相同单词的重复显示', async () => {
       const testElement = document.createElement('span');
       testElement.textContent = 'test word';
       testElement.dataset.word = 'test';
       document.body.appendChild(testElement);
 
       // 显示tooltip
-      tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip(testElement, 'test');
       const firstTooltip = document.querySelector('.lucid-tooltip');
 
       // 再次显示相同单词的tooltip
-      tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip(testElement, 'test');
       const secondTooltip = document.querySelector('.lucid-tooltip');
 
       // 应该是同一个tooltip

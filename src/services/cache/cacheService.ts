@@ -3,6 +3,7 @@
  * 负责管理查词结果的本地缓存，提高响应速度
  */
 
+import { CacheService as ICacheService, CacheStats } from '../interfaces';
 import type { WordDefinition } from '../api/dictionaryApi';
 
 export interface CacheEntry<T> {
@@ -20,12 +21,14 @@ export interface CacheOptions {
  * LRU 缓存服务
  * 实现最近最少使用 (LRU) 缓存算法
  */
-export class CacheService {
+export class CacheService implements ICacheService {
   private static instance: CacheService;
   private cache: Map<string, CacheEntry<any>>;
   private accessOrder: string[];
   private maxSize: number;
   private defaultTtl: number;
+  private hitCount: number = 0;
+  private missCount: number = 0;
 
   private constructor(options: CacheOptions = {}) {
     this.cache = new Map();
@@ -42,6 +45,21 @@ export class CacheService {
       CacheService.instance = new CacheService(options);
     }
     return CacheService.instance;
+  }
+
+  /**
+   * 初始化服务
+   */
+  async initialize(): Promise<void> {
+    // 启动定期清理
+    this.startPeriodicCleanup();
+  }
+
+  /**
+   * 销毁服务
+   */
+  async destroy(): Promise<void> {
+    await this.clear();
   }
 
   /**
@@ -98,13 +116,13 @@ export class CacheService {
   }
 
   /**
-   * 获取缓存的单词定义
+   * 获取缓存值
    */
-  async getWordDefinition(word: string, language: string = 'en'): Promise<WordDefinition | null> {
-    const key = this.generateKey(word, language);
+  async get<T>(key: string): Promise<T | null> {
     const entry = this.cache.get(key);
 
     if (!entry) {
+      this.missCount++;
       return null;
     }
 
@@ -114,28 +132,24 @@ export class CacheService {
       if (index > -1) {
         this.accessOrder.splice(index, 1);
       }
+      this.missCount++;
       return null;
     }
 
     this.updateAccessOrder(key);
-    return entry.data as WordDefinition;
+    this.hitCount++;
+    return entry.data as T;
   }
 
   /**
-   * 缓存单词定义
+   * 设置缓存值
    */
-  async setWordDefinition(
-    word: string, 
-    definition: WordDefinition, 
-    language: string = 'en',
-    ttl?: number
-  ): Promise<void> {
-    const key = this.generateKey(word, language);
+  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     const now = Date.now();
     const expiresAt = now + (ttl || this.defaultTtl);
 
-    const entry: CacheEntry<WordDefinition> = {
-      data: definition,
+    const entry: CacheEntry<T> = {
+      data: value,
       timestamp: now,
       expiresAt,
     };
@@ -146,10 +160,9 @@ export class CacheService {
   }
 
   /**
-   * 删除特定缓存
+   * 删除缓存
    */
-  async removeWordDefinition(word: string, language: string = 'en'): Promise<void> {
-    const key = this.generateKey(word, language);
+  async remove(key: string): Promise<void> {
     this.cache.delete(key);
     const index = this.accessOrder.indexOf(key);
     if (index > -1) {
@@ -163,18 +176,14 @@ export class CacheService {
   async clear(): Promise<void> {
     this.cache.clear();
     this.accessOrder = [];
+    this.hitCount = 0;
+    this.missCount = 0;
   }
 
   /**
    * 获取缓存统计信息
    */
-  getStats(): {
-    size: number;
-    maxSize: number;
-    hitRate: number;
-    oldestEntry?: number;
-    newestEntry?: number;
-  } {
+  getStats(): CacheStats {
     let oldestTimestamp = Infinity;
     let newestTimestamp = 0;
 
@@ -187,13 +196,45 @@ export class CacheService {
       }
     }
 
+    const totalRequests = this.hitCount + this.missCount;
+    const hitRate = totalRequests > 0 ? this.hitCount / totalRequests : 0;
+
     return {
       size: this.cache.size,
       maxSize: this.maxSize,
-      hitRate: 0, // 需要实现命中率统计
+      hitRate,
       oldestEntry: oldestTimestamp === Infinity ? undefined : oldestTimestamp,
       newestEntry: newestTimestamp === 0 ? undefined : newestTimestamp,
     };
+  }
+
+  /**
+   * 获取缓存的单词定义 (向后兼容)
+   */
+  async getWordDefinition(word: string, language: string = 'en'): Promise<WordDefinition | null> {
+    const key = this.generateKey(word, language);
+    return this.get<WordDefinition>(key);
+  }
+
+  /**
+   * 缓存单词定义 (向后兼容)
+   */
+  async setWordDefinition(
+    word: string, 
+    definition: WordDefinition, 
+    language: string = 'en',
+    ttl?: number
+  ): Promise<void> {
+    const key = this.generateKey(word, language);
+    return this.set(key, definition, ttl);
+  }
+
+  /**
+   * 删除特定缓存 (向后兼容)
+   */
+  async removeWordDefinition(word: string, language: string = 'en'): Promise<void> {
+    const key = this.generateKey(word, language);
+    return this.remove(key);
   }
 
   /**

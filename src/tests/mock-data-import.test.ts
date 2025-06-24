@@ -3,7 +3,7 @@
  * 验证不同的 mock data 加载方式在 WXT 框架下的可行性
  */
 
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 
 // 方式1: 直接导入 JSON 文件（静态导入）
 import testMockData from './mock-data/test-mock-data.json';

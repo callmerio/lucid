@@ -2,10 +2,11 @@
  * ToolpopupManager - Handles the display of detailed word information.
  */
 
+import { UI_EVENTS } from '@constants/uiEvents';
+import { decreaseWordHighlight, toggleWordHighlightState, type ToggleHighlightContext } from '../highlight/highlightUtils';
 import { formatPhonetic } from '../text/phoneticUtils';
-
-// 避免循环导入，使用延迟导入
-let TooltipManager: any = null;
+import { advancedSyllabify } from '../text/syllableUtils.ts';
+import { simpleEventManager } from './simpleEventManager';
 
 // Define a type for the detailed word data, based on dictionary.json structure
 export interface WordDefinition {
@@ -41,6 +42,7 @@ export interface DetailedWordData {
 export class ToolpopupManager {
     private static instance: ToolpopupManager;
     private currentToolpopup: HTMLElement | null = null;
+    private globalEventCleanups: (() => void)[] = []; // 全局事件清理函数
 
     /**
      * 从CSS变量获取设计系统的值，避免硬编码
@@ -113,7 +115,40 @@ export class ToolpopupManager {
         return `${toolpopupWidth - 20}px`; // 留20px边距
     }
 
-    private constructor() { }
+    private constructor() {
+        // 订阅全局事件
+        this.setupGlobalEventListeners();
+    }
+
+    /**
+     * 设置全局事件监听器
+     */
+    private setupGlobalEventListeners(): void {
+        // 监听 tooltip 转换到 toolpopup 的事件
+        const transitionCleanup = simpleEventManager.subscribeGlobalEvent(
+            UI_EVENTS.TOOLTIP.TRANSITION_TO_POPUP,
+            (event) => {
+                const { word, targetElement, fromTooltip } = event.payload;
+                this.showToolpopup(word, targetElement, fromTooltip);
+            },
+            {},
+            'ToolpopupManager'
+        );
+
+        // 监听全局隐藏事件
+        const hideAllCleanup = simpleEventManager.subscribeGlobalEvent(
+            UI_EVENTS.UI_STATE.HIDE_ALL,
+            (event) => {
+                if (event.payload.except !== 'toolpopup') {
+                    this.hideToolpopup();
+                }
+            },
+            {},
+            'ToolpopupManager'
+        );
+
+        this.globalEventCleanups.push(transitionCleanup, hideAllCleanup);
+    }
 
     public static getInstance(): ToolpopupManager {
         if (!ToolpopupManager.instance) {
@@ -151,16 +186,18 @@ export class ToolpopupManager {
             // 尝试根据单词名称匹配mock数据
             const wordData = mockData.words.find((w: any) =>
                 w.word.toLowerCase() === word.toLowerCase()
-            ) || mockData.words[0]; // 如果找不到匹配的，使用第一个作为fallback
+            );
 
-            console.log('[ToolpopupManager] Using mock data file for:', word, wordData);
+            if (wordData) {
+                console.log(`[ToolpopupManager] Found mock data for "${word}".`);
 
-            return {
-                word: wordData.word,
-                phonetic: wordData.phonetic,
-                explain: wordData.explain,
-                wordFormats: wordData.wordFormats || []
-            };
+                return {
+                    word: word, // 明确：使用用户选择的原始单词，保持显示一致性
+                    phonetic: wordData.phonetic, // 📝 明确：音标数据来自mock数据
+                    explain: wordData.explain, // 📝 明确：释义数据来自mock数据
+                    wordFormats: wordData.wordFormats || [] // 📝 明确：词形变化来自mock数据
+                };
+            }
         }
 
         // 移除硬编码的escalade数据，完全依赖mock数据文件
@@ -187,9 +224,27 @@ export class ToolpopupManager {
     }
 
     /**
-     * 音节分割函数
+     * 音节分割方法 - 使用专业的音节分割工具
+     * @param word 要分割的单词
+     * @returns 音节数组
      */
     private syllabify(word: string): string[] {
+        try {
+            // 使用专业的音节分割工具
+            return advancedSyllabify(word);
+        } catch (error) {
+            console.warn('[ToolpopupManager] 音节分割出错，使用回退方案:', error);
+            // 回退到简单分割
+            return this.fallbackSyllabify(word);
+        }
+    }
+
+    /**
+     * 回退音节分割方法
+     * @param word 要分割的单词
+     * @returns 音节数组
+     */
+    private fallbackSyllabify(word: string): string[] {
         if (!word || typeof word !== 'string') {
             return [word || ''];
         }
@@ -198,28 +253,6 @@ export class ToolpopupManager {
 
         if (cleanWord.length <= 1) {
             return [word];
-        }
-
-        // 基础字典（最常用的单词）
-        const basicDict: { [key: string]: string[] } = {
-            'debug': ['de', 'bug'],
-            'escalade': ['es', 'ca', 'lade'],
-            'beautiful': ['beau', 'ti', 'ful'],
-            'computer': ['com', 'pu', 'ter'],
-            'technology': ['tech', 'nol', 'o', 'gy'],
-            'information': ['in', 'for', 'ma', 'tion'],
-            'development': ['de', 'vel', 'op', 'ment'],
-            'javascript': ['ja', 'va', 'script'],
-            'database': ['da', 'ta', 'base'],
-            'keyboard': ['key', 'board'],
-            'software': ['soft', 'ware'],
-            'internet': ['in', 'ter', 'net'],
-            'chocolate': ['choc', 'o', 'late'],
-            'elephant': ['el', 'e', 'phant']
-        };
-
-        if (basicDict[cleanWord]) {
-            return basicDict[cleanWord];
         }
 
         // 简单的音节分割算法
@@ -260,7 +293,9 @@ export class ToolpopupManager {
      * 显示音节分割的单词
      */
     private createSyllabifiedWordHTML(word: string): string {
+        console.log(`[ToolpopupManager] 🔧 音节分割调试 - 输入单词: "${word}"`);
         const syllables = this.syllabify(word);
+        console.log(`[ToolpopupManager] 🔧 音节分割结果:`, syllables);
 
         return syllables.map((syllable, index) => {
             let html = `<span class="lucid-toolpopup-syllable">${syllable}</span>`;
@@ -362,12 +397,14 @@ export class ToolpopupManager {
             `;
         }).join('');
 
+        console.log(`[ToolpopupManager] 🔧 创建Toolpopup - wordDetails.word: "${wordDetails.word}"`);
+
         popup.innerHTML = `
             <div class="lucid-toolpopup-header">
                 <span class="lucid-toolpopup-word">${this.createSyllabifiedWordHTML(wordDetails.word)}</span>
                 <div class="lucid-toolpopup-header-icons">
-                    <svg t="1748503165621" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3121"><path d="M325.973333 833.28h-38.826666a106.666667 106.666667 0 0 1-106.666667-106.666667V441.173333a106.666667 106.666667 0 0 1 106.666667-106.666666h38.826666a21.333333 21.333333 0 0 1 21.333334 21.333333v456.106667a21.333333 21.333333 0 0 1-21.333334 21.333333z m-38.826666-456.106667a64 64 0 0 0-64 64v285.44a64 64 0 0 0 64 64h17.493333V377.173333z" p-id="3122"></path><path d="M758.613333 832H325.973333a21.333333 21.333333 0 0 1-21.333333-21.333333V355.84a21.333333 21.333333 0 0 1 21.333333-21.333333h8.96l99.413334-158.933334A85.333333 85.333333 0 0 1 595.84 213.333333v121.6h166.826667a100.906667 100.906667 0 0 1 75.52 34.346667 104.96 104.96 0 0 1 25.386666 82.986667l-43.946666 325.973333A62.08 62.08 0 0 1 758.613333 832z m-411.306666-42.666667h411.306666a19.413333 19.413333 0 0 0 18.773334-17.28L821.333333 448a62.293333 62.293333 0 0 0-15.146666-49.28 57.386667 57.386667 0 0 0-42.666667-19.84h-188.586667a21.333333 21.333333 0 0 1-21.333333-21.333333V213.333333a42.666667 42.666667 0 0 0-80.64-17.493333l-1.28 2.346667-106.666667 170.666666a21.333333 21.333333 0 0 1-17.493333 10.026667z" p-id="3123"></path></svg>
-                    <svg class="icon-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                    <svg t="1748503165621" class="icon lucid-toolpopup-decrease-btn" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3121"><path d="M325.973333 833.28h-38.826666a106.666667 106.666667 0 0 1-106.666667-106.666667V441.173333a106.666667 106.666667 0 0 1 106.666667-106.666666h38.826666a21.333333 21.333333 0 0 1 21.333334 21.333333v456.106667a21.333333 21.333333 0 0 1-21.333334 21.333333z m-38.826666-456.106667a64 64 0 0 0-64 64v285.44a64 64 0 0 0 64 64h17.493333V377.173333z" p-id="3122"></path><path d="M758.613333 832H325.973333a21.333333 21.333333 0 0 1-21.333333-21.333333V355.84a21.333333 21.333333 0 0 1 21.333333-21.333333h8.96l99.413334-158.933334A85.333333 85.333333 0 0 1 595.84 213.333333v121.6h166.826667a100.906667 100.906667 0 0 1 75.52 34.346667 104.96 104.96 0 0 1 25.386666 82.986667l-43.946666 325.973333A62.08 62.08 0 0 1 758.613333 832z m-411.306666-42.666667h411.306666a19.413333 19.413333 0 0 0 18.773334-17.28L821.333333 448a62.293333 62.293333 0 0 0-15.146666-49.28 57.386667 57.386667 0 0 0-42.666667-19.84h-188.586667a21.333333 21.333333 0 0 1-21.333333-21.333333V213.333333a42.666667 42.666667 0 0 0-80.64-17.493333l-1.28 2.346667-106.666667 170.666666a21.333333 21.333333 0 0 1-17.493333 10.026667z" p-id="3123"></path></svg>
+                    <svg class="icon-heart lucid-toolpopup-favorite-btn" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
                 </div>
             </div>
             <div class="lucid-toolpopup-phonetic">
@@ -428,6 +465,9 @@ export class ToolpopupManager {
             this.handleWordClick(clickedWord);
         });
 
+        // 添加header按钮事件处理
+        this.setupToolpopupButtonEvents(popup, word);
+
         // 初始化智能滑动功能
         this.initializeSmartSliding(popup);
 
@@ -452,6 +492,138 @@ export class ToolpopupManager {
             }
         };
         document.addEventListener('keydown', escHandler);
+    }
+
+    /**
+     * 设置toolpopup header按钮事件
+     */
+    private setupToolpopupButtonEvents(popup: HTMLElement, word: string): void {
+        // 获取两个按钮元素
+        const decreaseBtn = popup.querySelector('.lucid-toolpopup-decrease-btn') as HTMLElement;
+        const favoriteBtn = popup.querySelector('.lucid-toolpopup-favorite-btn') as HTMLElement;
+
+        if (!decreaseBtn || !favoriteBtn) {
+            console.warn('[ToolpopupManager] Header buttons not found');
+            return;
+        }
+
+        // 减少查询次数按钮事件
+        decreaseBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const displayedWord = popup.querySelector('.lucid-toolpopup-word')?.textContent || 'unknown';
+            console.log(`[ToolpopupManager] 🔽 减少高亮计数 - 操作单词: "${word}" (显示单词: "${displayedWord}")`);
+
+            try {
+                // 从popup的dataset中获取状态信息
+                const markCount = parseInt(popup.dataset.markCount || '0');
+                const isHighlighted = popup.dataset.isHighlighted === 'true';
+                const isDarkText = popup.dataset.isDarkText === 'true';
+
+                if (isHighlighted && markCount > 0) {
+                    // 查找页面上的高亮元素作为targetElement
+                    const targetElement = document.querySelector<HTMLElement>(`.lucid-highlight[data-word="${word}"]`) || popup;
+
+                    await decreaseWordHighlight(word, targetElement, isDarkText);
+
+                    // 刷新toolpopup状态
+                    this.refreshToolpopupState(popup, word);
+
+                    console.log(`[ToolpopupManager] ✅ 高亮计数已减少 - 单词: "${word}"`);
+                } else {
+                    console.log(`[ToolpopupManager] ⚠️ 无法减少高亮 - 单词: "${word}", 高亮状态: ${isHighlighted}, 计数: ${markCount}`);
+                }
+            } catch (error) {
+                console.error(`[ToolpopupManager] ❌ Error decreasing highlight for "${word}":`, error);
+            }
+        });
+
+        // 收藏切换按钮事件
+        favoriteBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const button = e.currentTarget as HTMLElement;
+            const displayedWord = popup.querySelector('.lucid-toolpopup-word')?.textContent || 'unknown';
+
+            // 防止重复点击
+            if (button.dataset.disabled === 'true') {
+                return;
+            }
+
+            button.dataset.disabled = 'true';
+            console.log(`[ToolpopupManager] ❤️ 切换收藏状态 - 操作单词: "${word}" (显示单词: "${displayedWord}")`);
+
+            try {
+                // 从popup的dataset中获取状态信息
+                const isDarkText = popup.dataset.isDarkText === 'true';
+                const currentIsHighlighted = popup.dataset.isHighlighted === 'true';
+
+                // 构造context对象，使用页面上的高亮元素作为sourceElement
+                const targetElement = document.querySelector<HTMLElement>(`.lucid-highlight[data-word="${word}"]`) || popup;
+                const context: ToggleHighlightContext = {
+                    sourceElement: targetElement
+                };
+
+                await toggleWordHighlightState(word, isDarkText, context);
+
+                // 刷新toolpopup状态（类似tooltip的refreshTooltip方法）
+                this.refreshToolpopupState(popup, word);
+
+                const action = currentIsHighlighted ? '移除高亮' : '添加高亮';
+                console.log(`[ToolpopupManager] ✅ 收藏状态已切换 - 单词: "${word}", 操作: ${action}`);
+            } catch (error) {
+                console.error(`[ToolpopupManager] ❌ Error toggling favorite for "${word}":`, error);
+            } finally {
+                // 重新启用按钮
+                button.dataset.disabled = 'false';
+            }
+        });
+    }
+
+    /**
+     * 刷新toolpopup状态以反映最新的高亮状态（类似tooltip的refreshTooltip方法）
+     */
+    private refreshToolpopupState(popup: HTMLElement, word: string): void {
+        // 获取最新的单词状态
+        // 如果高亮被移除，需要查找页面上的其他实例
+        const remainingHighlights = document.querySelectorAll<HTMLElement>('.lucid-highlight');
+        const sameWordHighlight = Array.from(remainingHighlights).find(el => el.dataset.word === word);
+
+        let newIsHighlighted: boolean;
+        let newMarkCount: number;
+        let baseColor: string;
+        let isDarkText: boolean;
+
+        if (sameWordHighlight) {
+            // 如果还有相同词汇的高亮存在，使用它的状态
+            newIsHighlighted = true;
+            newMarkCount = parseInt(sameWordHighlight.dataset.markCount || '0');
+            baseColor = sameWordHighlight.dataset.baseColor || 'orange';
+            isDarkText = sameWordHighlight.dataset.isDarkText === 'true';
+        } else {
+            // 如果没有高亮了，创建一个默认的未高亮状态
+            newIsHighlighted = false;
+            newMarkCount = 0;
+            baseColor = popup.dataset.baseColor || 'orange';
+            isDarkText = popup.dataset.isDarkText === 'true';
+        }
+
+        // 更新popup的状态信息
+        popup.dataset.isHighlighted = newIsHighlighted.toString();
+        popup.dataset.markCount = newMarkCount.toString();
+        popup.dataset.baseColor = baseColor;
+        popup.dataset.isDarkText = isDarkText.toString();
+
+        // 更新footer中的计数显示
+        const historyCountElement = popup.querySelector('.lucid-toolpopup-history-count');
+        if (historyCountElement) {
+            historyCountElement.textContent = newMarkCount.toString();
+        }
+
+        console.log(`[ToolpopupManager] Toolpopup state refreshed for word: "${word}", new state:`, {
+            isHighlighted: newIsHighlighted,
+            markCount: newMarkCount,
+            baseColor: baseColor,
+            isDarkText: isDarkText
+        });
     }
 
     /**
@@ -1064,19 +1236,18 @@ export class ToolpopupManager {
      * 支持从小型tooltip平滑过渡到大型弹窗
      */
     public async showToolpopup(word: string, referenceElement?: HTMLElement, fromTooltip?: HTMLElement): Promise<void> {
-        console.log(`[ToolpopupManager] Showing toolpopup for word: ${word}`);
+        console.log(`[ToolpopupManager] 🔧 开始显示Toolpopup - 原始请求单词: "${word}"`);
 
         if (this.currentToolpopup) {
             this.hideToolpopup();
         }
 
         // 🔧 修复：显示toolpopup时自动隐藏tooltip，避免同时显示两个弹窗
-        if (!TooltipManager) {
-            // 延迟导入避免循环依赖
-            const { TooltipManager: TM } = await import('./tooltipManager');
-            TooltipManager = TM;
-        }
-        TooltipManager.getInstance().hideTooltip(0); // 立即隐藏tooltip
+        simpleEventManager.dispatchGlobalEvent(
+            UI_EVENTS.UI_STATE.HIDE_ALL,
+            { except: 'toolpopup', reason: 'toolpopup-showing' },
+            'ToolpopupManager'
+        );
 
         const wordDetails = await this.getWordDetailedInfo(word);
         if (!wordDetails) {
@@ -1084,10 +1255,30 @@ export class ToolpopupManager {
             return;
         }
 
+        console.log(`[ToolpopupManager] 🔧 获取到的wordDetails:`, {
+            requestedWord: word,
+            returnedWord: wordDetails.word,
+            isCorrect: word === wordDetails.word
+        });
+
         // 获取单词的标记次数
         const markCount = await this.getWordMarkCount(word);
 
         this.currentToolpopup = this.createToolpopupElement(wordDetails, markCount);
+
+        // 存储单词状态信息到popup元素的dataset中，供按钮事件使用
+        this.currentToolpopup.dataset.word = word;
+        this.currentToolpopup.dataset.markCount = markCount.toString();
+
+        // 检查单词是否已高亮（通过查找页面上的高亮元素）
+        const existingHighlight = document.querySelector<HTMLElement>(`.lucid-highlight[data-word="${word}"]`);
+        const isHighlighted = !!existingHighlight;
+        const baseColor = existingHighlight?.dataset.baseColor || 'orange';
+        const isDarkText = existingHighlight?.dataset.isDarkText === 'true' || false;
+
+        this.currentToolpopup.dataset.isHighlighted = isHighlighted.toString();
+        this.currentToolpopup.dataset.baseColor = baseColor;
+        this.currentToolpopup.dataset.isDarkText = isDarkText.toString();
 
         // 设置动态字体大小（与tooltip保持一致的逻辑）
         const bodyPFontSize = this.getBodyPFontSize();
@@ -1239,6 +1430,19 @@ export class ToolpopupManager {
                 }
             }, 200); // 匹配动画时间
         }
+    }
+
+    /**
+     * 清理资源
+     */
+    public destroy(): void {
+        this.hideToolpopup();
+
+        // 清理全局事件监听器
+        this.globalEventCleanups.forEach(cleanup => cleanup());
+        this.globalEventCleanups = [];
+
+        console.log('[ToolpopupManager] Destroyed');
     }
 }
 
