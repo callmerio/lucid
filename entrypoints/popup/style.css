@@ -1,69 +1,420 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2025-06-25 21:15; Reason: 重写popup样式使用lucid-toolpopup-container设计风格;
+}} */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* 导入Lucid设计系统 */
+@import url('../../src/styles/global/essential.css');
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-a {
-  font-weight: 400;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
+/* ===== Popup容器基础样式 ===== */
+.lucid-toolpopup-container {
+  /* 使用Lucid设计token */
+  font-family: var(--lucid-font-family);
+  font-size: var(--lucid-font-size-base);
+  color: var(--lucid-text-primary);
+  line-height: var(--lucid-line-height-normal);
+  
+  /* 容器尺寸 */
+  width: var(--lucid-width-toolpopup);
+  min-height: 400px;
+  max-height: 600px;
+  
+  /* 覆盖基础样式中的绝对定位，popup中使用相对定位 */
+  position: relative;
+  z-index: auto;
+  transform: none;
+  
+  /* 保持毛玻璃效果和样式 */
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-xl);
+  border: 1px solid var(--lucid-border-subtle);
+  box-shadow: var(--lucid-shadow-lg);
+  
+  /* 内容布局 */
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;
+  gap: var(--lucid-spacing-5);
+  padding: var(--lucid-spacing-6);
+  
+  /* 确保可见 */
+  opacity: 1;
+  user-select: none;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ===== 标题栏样式 ===== */
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--lucid-spacing-3);
+  border-bottom: 1px solid var(--lucid-border-subtle);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 400;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.popup-title {
+  display: flex;
+  align-items: center;
+  gap: var(--lucid-spacing-2);
+  font-weight: var(--lucid-font-weight-semibold);
+  font-size: var(--lucid-font-size-md);
+}
+
+.popup-icon {
+  font-size: 16px;
+}
+
+.popup-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--lucid-spacing-2);
+  font-size: var(--lucid-font-size-sm);
+  color: var(--lucid-text-secondary);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lucid-text-muted);
+  transition: background-color var(--lucid-transition-fast);
+}
+
+.status-indicator.connected .status-dot {
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+}
+
+.status-indicator.connecting .status-dot {
+  background: #fbbf24;
+  animation: lucid-breathe 2s infinite;
+}
+
+.status-indicator.disconnected .status-dot {
+  background: #ef4444;
+}
+
+/* ===== 统计卡片样式 ===== */
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lucid-spacing-3);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--lucid-spacing-3);
+}
+
+.stat-card {
+  background: var(--lucid-accent-secondary);
+  border-radius: var(--lucid-radius-md);
+  padding: var(--lucid-spacing-4);
+  text-align: center;
+  transition: background-color var(--lucid-transition-fast);
+}
+
+.stat-card:hover {
+  background: var(--lucid-accent-secondary-hover);
+}
+
+.stat-number {
+  font-size: var(--lucid-font-size-2xl);
+  font-weight: var(--lucid-font-weight-semibold);
+  color: var(--lucid-text-primary);
+  line-height: 1;
+  margin-bottom: var(--lucid-spacing-2);
+}
+
+.stat-label {
+  font-size: var(--lucid-font-size-sm);
+  color: var(--lucid-text-secondary);
+  font-weight: var(--lucid-font-weight-normal);
+}
+
+/* ===== 控制面板样式 ===== */
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lucid-spacing-3);
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--lucid-spacing-3) var(--lucid-spacing-4);
+  background: var(--lucid-accent-secondary);
+  border-radius: var(--lucid-radius-md);
+}
+
+.control-label {
+  font-size: var(--lucid-font-size-base);
+  color: var(--lucid-text-primary);
+}
+
+/* Toggle Button 样式 */
+.toggle-button {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--lucid-text-muted);
+  border-radius: 12px;
+  border: none;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: background-color var(--lucid-transition-normal);
+  outline: none;
 }
 
+.toggle-button:hover {
+  background: var(--lucid-text-disabled);
+}
+
+.toggle-button.enabled {
+  background: var(--lucid-accent-primary);
+}
+
+.toggle-button.enabled:hover {
+  background: var(--lucid-accent-primary-hover);
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--lucid-transition-normal) var(--lucid-ease-bounce);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-button.enabled .toggle-slider {
+  transform: translateX(20px);
+}
+
+/* ===== 词汇列表样式 ===== */
+.words-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lucid-spacing-3);
+  flex: 1;
+  min-height: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--lucid-spacing-2);
+}
+
+.section-title {
+  font-weight: var(--lucid-font-weight-semibold);
+  color: var(--lucid-text-primary);
+}
+
+.section-count {
+  font-size: var(--lucid-font-size-sm);
+  color: var(--lucid-text-secondary);
+  background: var(--lucid-accent-secondary);
+  padding: var(--lucid-spacing-2) var(--lucid-spacing-3);
+  border-radius: var(--lucid-radius-sm);
+}
+
+.words-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lucid-spacing-2);
+  overflow-y: auto;
+  max-height: 180px;
+  padding-right: var(--lucid-spacing-2);
+}
+
+/* 自定义滚动条 */
+.words-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.words-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.words-list::-webkit-scrollbar-thumb {
+  background: var(--lucid-accent-secondary);
+  border-radius: 2px;
+}
+
+.words-list::-webkit-scrollbar-thumb:hover {
+  background: var(--lucid-accent-secondary-hover);
+}
+
+.word-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--lucid-spacing-3) var(--lucid-spacing-4);
+  background: var(--lucid-accent-secondary);
+  border-radius: var(--lucid-radius-md);
+  cursor: pointer;
+  transition: all var(--lucid-transition-fast);
+}
+
+.word-item:hover {
+  background: var(--lucid-accent-secondary-hover);
+  transform: translateY(-1px);
+}
+
+.word-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lucid-spacing-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.word-text {
+  font-weight: var(--lucid-font-weight-semibold);
+  color: var(--lucid-text-primary);
+  font-size: var(--lucid-font-size-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.word-translation {
+  font-size: var(--lucid-font-size-sm);
+  color: var(--lucid-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.word-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--lucid-spacing-2);
+  flex-shrink: 0;
+}
+
+.word-count {
+  font-size: var(--lucid-font-size-sm);
+  font-weight: var(--lucid-font-weight-semibold);
+  color: var(--lucid-accent-primary);
+}
+
+.word-time {
+  font-size: var(--lucid-font-size-sm);
+  color: var(--lucid-text-tertiary);
+}
+
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lucid-spacing-3);
+  padding: var(--lucid-spacing-8);
+  color: var(--lucid-text-muted);
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: var(--lucid-font-size-sm);
+}
+
+/* ===== 底部操作按钮样式 ===== */
+.actions-section {
+  display: flex;
+  gap: var(--lucid-spacing-3);
+  padding-top: var(--lucid-spacing-3);
+  border-top: 1px solid var(--lucid-border-subtle);
+}
+
+.action-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lucid-spacing-2);
+  padding: var(--lucid-spacing-3) var(--lucid-spacing-4);
+  border-radius: var(--lucid-radius-md);
+  font-size: var(--lucid-font-size-sm);
+  font-weight: var(--lucid-font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--lucid-transition-fast);
+  border: none;
+  outline: none;
+}
+
+.action-button.secondary {
+  background: var(--lucid-accent-secondary);
+  color: var(--lucid-text-primary);
+}
+
+.action-button.secondary:hover {
+  background: var(--lucid-accent-secondary-hover);
+  transform: translateY(-1px);
+}
+
+.action-button.primary {
+  background: var(--lucid-accent-primary);
+  color: white;
+}
+
+.action-button.primary:hover {
+  background: var(--lucid-accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 350px) {
+  .lucid-toolpopup-container {
+    width: 300px;
+    padding: var(--lucid-spacing-5);
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stat-number {
+    font-size: var(--lucid-font-size-md);
+  }
+}
+
+/* ===== 辅助动画 ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lucid-toolpopup-container {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ===== Dark/Light主题适配 ===== */
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  [data-theme="light"] .lucid-toolpopup-container {
+    /* 亮色主题已在essential.css中定义 */
   }
 }
