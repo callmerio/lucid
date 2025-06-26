@@ -3,10 +3,10 @@
  * @description 统一的弹窗服务，负责管理所有弹窗的显示、隐藏和状态。
  */
 
-import { IPopupService, PopupOptions } from '../types/services';
-import { createRoot, Root } from 'react-dom/client';
-import React from 'react';
-import { Popup } from '../components/ui/common/Popup'; // 假设Popup组件已创建
+import { IPopupService, PopupOptions } from "../types/services";
+import { createRoot, Root } from "react-dom/client";
+import React from "react";
+import { Popup } from "../components/ui/common/Popup"; // 假设Popup组件已创建
 
 interface PopupInstance {
   id: string;
@@ -32,19 +32,25 @@ class PopupService implements IPopupService {
     return PopupService.instance;
   }
 
-  public show(id: string, content: React.ReactNode, options: PopupOptions = {}): void {
+  public show(
+    id: string,
+    content: React.ReactNode,
+    options: PopupOptions = {}
+  ): void {
     if (this.popups.has(id)) {
-      console.warn(`[PopupService] Popup with id "${id}" is already shown. Use update() instead.`);
+      console.warn(
+        `[PopupService] Popup with id "${id}" is already shown. Use update() instead.`
+      );
       this.update(id, content, options);
       return;
     }
 
-    const container = document.createElement('div');
-    container.id = `lucid-popup-container-${id}`;
+    const container = document.createElement("div");
+    container.id = `lucid-toolfull-container-${id}`;
     document.body.appendChild(container);
 
     const root = createRoot(container);
-    
+
     const popupInstance: PopupInstance = {
       id,
       content,
@@ -54,7 +60,7 @@ class PopupService implements IPopupService {
     };
 
     this.popups.set(id, popupInstance);
-    
+
     // 渲染Popup组件
     root.render(
       <Popup
@@ -65,7 +71,7 @@ class PopupService implements IPopupService {
         onClose={() => this.hide(id)}
       />
     );
-    
+
     console.log(`[PopupService] Shown popup: "${id}"`);
   }
 
@@ -83,15 +89,24 @@ class PopupService implements IPopupService {
     console.log(`[PopupService] Hidden popup: "${id}"`);
   }
 
-  public update(id: string, content?: React.ReactNode, options?: PopupOptions): void {
+  public update(
+    id: string,
+    content?: React.ReactNode,
+    options?: PopupOptions
+  ): void {
     const popupInstance = this.popups.get(id);
     if (!popupInstance) {
-      console.warn(`[PopupService] Cannot update popup with id "${id}": not found.`);
+      console.warn(
+        `[PopupService] Cannot update popup with id "${id}": not found.`
+      );
       return;
     }
 
     const newContent = content !== undefined ? content : popupInstance.content;
-    const newOptions = options !== undefined ? { ...popupInstance.options, ...options } : popupInstance.options;
+    const newOptions =
+      options !== undefined
+        ? { ...popupInstance.options, ...options }
+        : popupInstance.options;
 
     popupInstance.content = newContent;
     popupInstance.options = newOptions;

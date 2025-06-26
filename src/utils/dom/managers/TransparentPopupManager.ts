@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { PopupContent } from '../../../components/ui/PopupContent';
+import { Toolfull } from '@components/ui/Toolfull';
 import { SimpleEventManager } from '../simpleEventManager';
 import { UI_EVENTS } from '../../../constants/uiEvents';
 
@@ -189,7 +189,7 @@ export class TransparentPopupManager {
     // 创建React根节点
     this.reactRoot = createRoot(this.currentPopup);
 
-    // 渲染PopupContent组件
+    // 渲染Toolfull组件
     const defaultWordData = {
       word: this.currentOptions?.word || 'example',
       phonetic: { us: '/ɪɡˈzæmpəl/', uk: '/ɪɡˈzɑːmpəl/' },
@@ -200,10 +200,10 @@ export class TransparentPopupManager {
     };
 
     this.reactRoot.render(
-      React.createElement(PopupContent, {
+      React.createElement(Toolfull, {
         word: this.currentOptions?.word || 'example',
         wordData: this.currentOptions?.wordData || defaultWordData,
-        className: 'lucid-transparent-popup-content',
+        className: 'lucid-transparent-full-content',
         onClose: () => this.hide('用户关闭')
       })
     );

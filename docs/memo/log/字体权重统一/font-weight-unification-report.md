@@ -28,7 +28,7 @@
 ```css
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-tooltip-detail,
+.lucid-toolfull,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal); /* 新增 */
@@ -40,7 +40,7 @@
 ```css
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-tooltip-detail,
+.lucid-toolfull,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal); /* 新增 */
@@ -98,18 +98,18 @@ button {
 
 ```css
 /* 修改前 */
-.lucid-toolpopup-word {
+.lucid-toolfull-word {
   font-weight: 600;
 }
-.lucid-toolpopup-syllable-separator {
+.lucid-toolfull-syllable-separator {
   font-weight: 300;
 }
 
 /* 修改后 */
-.lucid-toolpopup-word {
+.lucid-toolfull-word {
   font-weight: 400;
 }
-.lucid-toolpopup-syllable-separator {
+.lucid-toolfull-syllable-separator {
   font-weight: 400;
 }
 ```
@@ -147,7 +147,7 @@ button {
 #### 5.2 弹窗组件示例
 
 ```css
-.lucid-popup-base {
+.lucid-toolfull-base {
   position: absolute;
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal); /* 新增 */

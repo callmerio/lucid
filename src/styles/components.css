@@ -141,7 +141,7 @@
 
 /* ===== 弹窗基础样式 ===== */
 
-.lucid-popup-base {
+.lucid-toolfull-base {
   position: absolute;
   font-family: var(--lucid-font-family);
   user-select: none;
@@ -152,46 +152,16 @@
     transform var(--lucid-transition-fast);
 }
 
-.lucid-popup-visible {
+.lucid-toolfull-visible {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* ===== Tooltip 特定样式 ===== */
-
-.lucid-tooltip-container {
-  z-index: var(--lucid-z-tooltip);
-  transform: translateY(-2px);
-  font-size: var(--lucid-font-size-base);
-  line-height: var(--lucid-line-height-normal);
-  max-width: var(--lucid-width-tooltip-max);
-  min-width: var(--lucid-width-tooltip-min);
-}
-
-.lucid-tooltip-container.lucid-popup-visible {
-  transform: translateY(0);
-}
-
-.lucid-tooltip-content {
-  border-radius: var(--lucid-radius-md);
-  box-shadow: var(--lucid-shadow-md);
-  font-size: var(--lucid-font-size-md);
-  white-space: nowrap;
-  text-align: left;
-  font-weight: var(--lucid-font-weight-normal);
-  letter-spacing: var(--lucid-letter-spacing-wide);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  transition:
-    width var(--lucid-transition-normal),
-    padding-right var(--lucid-transition-normal);
-  height: auto;
-}
+/* Tooltip 样式已移至 src/components/ui/Tooltip.css */
 
 /* ===== ToolPopup 特定样式 ===== */
 
-.lucid-tooltip-detail {
+.lucid-toolfull {
   z-index: var(--lucid-z-toolpopup);
   border-radius: var(--lucid-radius-xl);
   padding: var(--lucid-spacing-8);
@@ -202,7 +172,7 @@
   transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
 }
 
-.lucid-tooltip-detail.lucid-popup-visible {
+.lucid-toolfull.lucid-toolfull-visible {
   transform: scaleY(1) translateY(0);
 }
 

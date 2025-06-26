@@ -119,32 +119,6 @@
   }
 }
 
-@keyframes lucid-toolpopup-enter {
-  0% {
-    opacity: 0;
-    transform: scaleY(0) translateY(-10px);
-    transform-origin: top center;
-  }
-  100% {
-    opacity: 1;
-    transform: scaleY(1) translateY(0);
-    transform-origin: top center;
-  }
-}
-
-@keyframes lucid-toolpopup-exit {
-  0% {
-    opacity: 1;
-    transform: scaleY(1) translateY(0);
-    transform-origin: top center;
-  }
-  100% {
-    opacity: 0;
-    transform: scaleY(0) translateY(-10px);
-    transform-origin: top center;
-  }
-}
-
 @keyframes lucid-shine {
   from {
     -webkit-mask-position: 150%;
@@ -157,84 +131,13 @@
 /* ===== 基础组件样式 ===== */
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
-.lucid-tooltip,
-.lucid-tooltip-detail,
+.lucid-toolfull,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);
 }
 
-/* ===== Tooltip 样式 ===== */
-.lucid-tooltip {
-  position: absolute;
-  z-index: var(--lucid-z-tooltip);
-  opacity: 0;
-  transform: translateY(-2px);
-  transition:
-    opacity var(--lucid-transition-fast),
-    transform var(--lucid-transition-fast);
-  pointer-events: none;
-  font-family: var(--lucid-font-family);
-  font-size: var(--lucid-font-size-base);
-  line-height: var(--lucid-line-height-normal);
-  max-width: var(--lucid-width-tooltip-max);
-  min-width: var(--lucid-width-tooltip-min);
-}
-
-.lucid-tooltip-visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.lucid-tooltip-content {
-  background: var(--lucid-bg-glass-primary);
-  backdrop-filter: var(--lucid-blur-md);
-  -webkit-backdrop-filter: var(--lucid-blur-md);
-  border-radius: var(--lucid-radius-md);
-  border: 1px solid var(--lucid-border-subtle);
-  box-shadow: var(--lucid-shadow-md);
-  color: var(--lucid-text-primary);
-  position: relative;
-  font-size: var(--lucid-font-size-md);
-  white-space: nowrap;
-  text-align: left;
-  font-weight: var(--lucid-font-weight-normal);
-  letter-spacing: var(--lucid-letter-spacing-wide);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  transition:
-    width var(--lucid-transition-normal),
-    padding-right var(--lucid-transition-normal);
-  height: auto;
-}
-
-/* ===== ToolPopup 样式 ===== */
-.lucid-tooltip-detail {
-  position: absolute;
-  z-index: var(--lucid-z-toolpopup);
-  background: var(--lucid-bg-glass-primary);
-  backdrop-filter: var(--lucid-blur-md);
-  -webkit-backdrop-filter: var(--lucid-blur-md);
-  border-radius: var(--lucid-radius-xl);
-  border: 1px solid var(--lucid-border-subtle);
-  padding: var(--lucid-spacing-8);
-  width: var(--lucid-width-toolpopup);
-  box-shadow: var(--lucid-shadow-lg);
-  user-select: none;
-  font-family: var(--lucid-font-family);
-  color: var(--lucid-text-primary);
-  opacity: 0;
-  transform: scaleY(0) translateY(-10px);
-  transform-origin: top center;
-  transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
-}
-
-.lucid-tooltip-detail.lucid-toolpopup-visible {
-  opacity: 1;
-  transform: scaleY(1) translateY(0);
-}
+/* Tooltip 样式已移至 src/components/ui/Tooltip.css */
 
 /* 高亮效果 */
 .lucid-highlight:hover {
@@ -246,15 +149,6 @@
   );
   -webkit-mask-size: 200%;
   animation: lucid-shine 2s infinite;
-}
-
-@keyframes lucid-shine {
-  from {
-    -webkit-mask-position: 150%;
-  }
-  to {
-    -webkit-mask-position: -50%;
-  }
 }
 
 /* ===== 透明弹窗样式 ===== */

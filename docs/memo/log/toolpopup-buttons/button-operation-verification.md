@@ -11,17 +11,20 @@
 ### 数据流验证
 
 1. **Tooltip 阶段**：
+
    ```typescript
    tooltip.dataset.word = word; // 存储原始高亮单词
    ```
 
 2. **转换到 Toolpopup**：
+
    ```typescript
    const currentWord = this.currentTooltip.dataset.word || word; // 获取原始单词
    ToolpopupManager.getInstance().showToolpopup(currentWord, ...); // 传递原始单词
    ```
 
 3. **Toolpopup 存储**：
+
    ```typescript
    popup.dataset.word = word; // 存储原始单词到 toolpopup
    ```
@@ -47,11 +50,16 @@
 
 ```typescript
 // 减少高亮按钮
-const displayedWord = popup.querySelector('.lucid-toolpopup-word')?.textContent || 'unknown';
-console.log(`[ToolpopupManager] 🔽 减少高亮计数 - 操作单词: "${word}" (显示单词: "${displayedWord}")`);
+const displayedWord =
+  popup.querySelector(".lucid-toolfull-word")?.textContent || "unknown";
+console.log(
+  `[ToolpopupManager] 🔽 减少高亮计数 - 操作单词: "${word}" (显示单词: "${displayedWord}")`
+);
 
 // 收藏按钮
-console.log(`[ToolpopupManager] ❤️ 切换收藏状态 - 操作单词: "${word}" (显示单词: "${displayedWord}")`);
+console.log(
+  `[ToolpopupManager] ❤️ 切换收藏状态 - 操作单词: "${word}" (显示单词: "${displayedWord}")`
+);
 ```
 
 ### 2. 验证测试场景
@@ -59,6 +67,7 @@ console.log(`[ToolpopupManager] ❤️ 切换收藏状态 - 操作单词: "${wor
 需要测试以下场景：
 
 1. **基本场景**：
+
    - 高亮单词 "test"
    - 按 Shift 打开 toolpopup（显示 "escalade" 信息）
    - 点击减少按钮，应该减少 "test" 的高亮计数

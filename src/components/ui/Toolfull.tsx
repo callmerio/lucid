@@ -1,15 +1,15 @@
 /**
- * @file PopupContent.tsx
+ * @file Toolfull.tsx
  * @description Renders the detailed content for a word popup.
  * This is a pure UI component that receives all its data and handlers via props.
  */
 
 import React from "react";
-import "./PopupContent.css";
+import "./Toolfull.css";
 import { WordDetails } from "../../types/services";
 import { BaseComponentProps } from "../types";
 
-interface PopupContentProps extends BaseComponentProps {
+interface ToolfullProps extends BaseComponentProps {
   word: string;
   wordData: WordDetails;
   onClose: () => void;
@@ -18,7 +18,7 @@ interface PopupContentProps extends BaseComponentProps {
   // onToggleFavorite: () => void;
 }
 
-export const PopupContent: React.FC<PopupContentProps> = ({
+export const Toolfull: React.FC<ToolfullProps> = ({
   word,
   wordData,
   onClose,
@@ -26,48 +26,46 @@ export const PopupContent: React.FC<PopupContentProps> = ({
 }) => {
   // Helper to create phonetic elements
   const renderPhonetic = (region: "us" | "uk", phonetic: string) => (
-    <div className={`lucid-toolpopup-phonetic-group ${region}-phonetic`}>
-      <span className="lucid-toolpopup-phonetic-region">
+    <div className={`lucid-toolfull-phonetic-group ${region}-phonetic`}>
+      <span className="lucid-toolfull-phonetic-region">
         {region.toUpperCase()}
       </span>
-      <span className="lucid-toolpopup-phonetic-text">{phonetic}</span>
+      <span className="lucid-toolfull-phonetic-text">{phonetic}</span>
     </div>
   );
 
   return (
-    <div
-      className={`lucid-tooltip-detail lucid-toolpopup-visible ${className}`}
-    >
-      <div className="popup-header">
-        <div className="popup-title">
-          <span className="lucid-toolpopup-word">{wordData.word}</span>
+    <div className={`lucid-toolfull lucid-toolfull-visible ${className}`}>
+      <div className="lucid-toolfull-header">
+        <div className="lucid-toolfull-title">
+          <span className="lucid-toolfull-word">{wordData.word}</span>
         </div>
         <button className="close-button" onClick={onClose} aria-label="关闭">
           ✕
         </button>
       </div>
 
-      <div className="lucid-toolpopup-phonetic">
+      <div className="lucid-toolfull-phonetic">
         {wordData.phonetic?.us && renderPhonetic("us", wordData.phonetic.us)}
         {wordData.phonetic?.uk && renderPhonetic("uk", wordData.phonetic.uk)}
       </div>
 
-      <div className="lucid-toolpopup-definitions-area">
+      <div className="lucid-toolfull-definitions-area">
         {wordData.explain.map((explanation, index) => (
-          <div key={index} className="lucid-toolpopup-explain-group">
-            <div className="lucid-toolpopup-definition">
+          <div key={index} className="lucid-toolfull-explain-group">
+            <div className="lucid-toolfull-definition">
               <span
-                className={`lucid-toolpopup-pos pos-${explanation.pos.toLowerCase().replace(" ", "-")}`}
+                className={`lucid-toolfull-pos pos-${explanation.pos.toLowerCase().replace(" ", "-")}`}
               >
                 {explanation.pos}
               </span>
               {explanation.definitions.map((def, defIndex) => (
                 <span
                   key={defIndex}
-                  className="lucid-toolpopup-definition-text-chinese"
+                  className="lucid-toolfull-definition-text-chinese"
                 >
                   {def.chinese_short || def.chinese}
-                  <span className="lucid-toolpopup-definition-text-english-tooltip">
+                  <span className="lucid-toolfull-definition-text-english-tooltip">
                     {def.definition}
                   </span>
                 </span>

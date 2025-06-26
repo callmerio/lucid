@@ -1,0 +1,119 @@
+/* src/components/ui/Tooltip.css */
+
+/* ===== Base Tooltip Styles (from essential.css) ===== */
+.lucid-tooltip {
+  position: absolute;
+  z-index: var(--lucid-z-tooltip);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity var(--lucid-transition-fast),
+    transform var(--lucid-transition-fast);
+  pointer-events: none;
+  font-family: var(--lucid-font-family);
+  font-size: var(--lucid-font-size-base);
+  line-height: var(--lucid-line-height-normal);
+  max-width: var(--lucid-width-tooltip-max);
+  min-width: var(--lucid-width-tooltip-min);
+}
+
+.lucid-tooltip-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ===== Content Styles (from essential.css & components.css) ===== */
+.lucid-tooltip-content {
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-md);
+  border: 1px solid var(--lucid-border-subtle);
+  box-shadow: var(--lucid-shadow-md);
+  color: var(--lucid-text-primary);
+  position: relative;
+  font-size: var(--lucid-font-size-md);
+  white-space: nowrap;
+  text-align: left;
+  font-weight: var(--lucid-font-weight-normal);
+  letter-spacing: var(--lucid-letter-spacing-wide);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition:
+    width var(--lucid-transition-normal),
+    padding-right var(--lucid-transition-normal);
+  height: auto;
+  padding: var(--lucid-spacing-3) var(--lucid-spacing-4);
+}
+
+/* ===== New/Missing Styles ===== */
+
+.lucid-tooltip-main {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.lucid-tooltip-text {
+  /* Styles for the main translation text */
+}
+
+.lucid-tooltip-phonetic {
+  color: var(--lucid-text-secondary);
+  margin-left: var(--lucid-spacing-2);
+}
+
+.lucid-tooltip-pos {
+  color: var(--lucid-text-tertiary);
+  margin-left: var(--lucid-spacing-2);
+}
+
+.lucid-tooltip-hover-zone {
+  /* A zone to keep the tooltip open when moving mouse towards it */
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+}
+
+.lucid-tooltip-actions {
+  display: flex;
+  align-items: center;
+  margin-left: var(--lucid-spacing-4);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: var(--lucid-spacing-4);
+}
+
+.lucid-tooltip-btn {
+  background: none;
+  border: none;
+  color: var(--lucid-text-secondary);
+  cursor: pointer;
+  padding: var(--lucid-spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--lucid-radius-sm);
+  transition: background-color var(--lucid-transition-fast), color var(--lucid-transition-fast);
+}
+
+.lucid-tooltip-btn:hover {
+  background-color: var(--lucid-accent-secondary-hover);
+  color: var(--lucid-text-primary);
+}
+
+.lucid-tooltip-btn-down {
+  /* Specific styles for down button if needed */
+}
+
+.lucid-tooltip-btn-like {
+  /* Specific styles for like button if needed */
+}
+
+.lucid-tooltip-btn svg {
+  width: 16px;
+  height: 16px;
+}

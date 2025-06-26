@@ -482,7 +482,7 @@ const StyleManager = {
 
 /* ===== TOOLPOPUP STYLES (使用设计系统) ===== */
 
-.lucid-tooltip-detail {
+.lucid-toolfull {
   position: absolute;
   z-index: var(--lucid-z-toolpopup);
   /* 使用设计系统的毛玻璃效果 */
@@ -504,7 +504,7 @@ const StyleManager = {
   transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
 }
 
-.lucid-tooltip-detail.lucid-toolpopup-visible {
+.lucid-toolfull.lucid-toolfull-visible {
   opacity: 1;
   transform: scaleY(1) translateY(0);
 }
@@ -512,18 +512,18 @@ const StyleManager = {
 /* 动画关键帧已移至 animations.css 统一管理 */
 
 /* 当toolpopup显示在目标元素上方时的样式 */
-.lucid-tooltip-detail.lucid-toolpopup-above {
+.lucid-toolfull.lucid-toolfull-above {
   /* 可以添加特殊样式，比如阴影方向调整等 */
 }
 
-.lucid-toolpopup-header {
+.lucid-toolfull-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--lucid-spacing-6);
 }
 
-.lucid-toolpopup-word {
+.lucid-toolfull-word {
   /* font-size 由 JavaScript 动态设置为 tooltip 字体的2倍 */
   font-weight: var(--lucid-font-weight-semibold);
   color: var(--lucid-text-primary);
@@ -533,22 +533,22 @@ const StyleManager = {
   -ms-user-select: none;
 }
 
-.lucid-toolpopup-syllable {
+.lucid-toolfull-syllable {
   display: inline;
 }
 
-.lucid-toolpopup-syllable-separator {
+.lucid-toolfull-syllable-separator {
   color: var(--lucid-text-tertiary);
   font-weight: var(--lucid-font-weight-normal);
   margin: 0 1px;
 }
 
-.lucid-toolpopup-header-icons {
+.lucid-toolfull-header-icons {
   display: flex;
   align-items: center;
 }
 
-.lucid-toolpopup-header-icons svg {
+.lucid-toolfull-header-icons svg {
   width: var(--lucid-height-button-md);
   height: var(--lucid-height-button-md);
   margin-left: var(--lucid-spacing-5);
@@ -561,30 +561,30 @@ const StyleManager = {
 /* 呼吸动画已移至 animations.css 统一管理 */
 
 /* Checkmark图标hover效果 */
-.lucid-toolpopup-header-icons svg.icon:hover {
+.lucid-toolfull-header-icons svg.icon:hover {
   animation: lucid-breathe 1.5s ease-in-out infinite;
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
 }
 
 /* Heart图标样式 */
-.lucid-toolpopup-header-icons svg.icon-heart {
+.lucid-toolfull-header-icons svg.icon-heart {
   fill: var(--lucid-accent-primary);
 }
 
 /* Heart图标hover效果 */
-.lucid-toolpopup-header-icons svg.icon-heart:hover {
+.lucid-toolfull-header-icons svg.icon-heart:hover {
   animation: lucid-breathe 1.5s ease-in-out infinite;
   fill: var(--lucid-accent-primary-hover);
   filter: drop-shadow(0 0 8px var(--lucid-accent-primary));
 }
 
-.lucid-toolpopup-header-icons svg.icon {
+.lucid-toolfull-header-icons svg.icon {
   stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 8;
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
 
-.lucid-toolpopup-phonetic {
+.lucid-toolfull-phonetic {
   font-size: var(--lucid-font-size-md);
   color: var(--lucid-text-muted);
   margin-bottom: var(--lucid-spacing-8);
@@ -595,7 +595,7 @@ const StyleManager = {
   transition: all var(--lucid-transition-normal);
 }
 
-.lucid-toolpopup-phonetic-group {
+.lucid-toolfull-phonetic-group {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -603,7 +603,7 @@ const StyleManager = {
   white-space: nowrap;
 }
 
-.lucid-toolpopup-phonetic-region {
+.lucid-toolfull-phonetic-region {
   background-color: var(--lucid-accent-secondary);
   padding: var(--lucid-spacing-1) var(--lucid-spacing-3);
   border-radius: var(--lucid-radius-sm);
@@ -613,17 +613,17 @@ const StyleManager = {
   transition: all var(--lucid-transition-normal);
 }
 
-.lucid-toolpopup-phonetic-text {
+.lucid-toolfull-phonetic-text {
   cursor: pointer;
   transition: all var(--lucid-transition-normal);
 }
 
-.lucid-toolpopup-phonetic-text:hover {
+.lucid-toolfull-phonetic-text:hover {
   color: var(--lucid-text-primary);
 }
 
 /* 默认只显示US音标，UK音标隐藏在右侧 */
-.lucid-toolpopup-phonetic-group.uk-phonetic {
+.lucid-toolfull-phonetic-group.uk-phonetic {
   opacity: 0;
   max-width: 0;
   overflow: hidden;
@@ -631,17 +631,17 @@ const StyleManager = {
 }
 
 /* 悬浮时扩展显示UK音标 */
-.lucid-toolpopup-phonetic:hover .lucid-toolpopup-phonetic-group.uk-phonetic {
+.lucid-toolfull-phonetic:hover .lucid-toolfull-phonetic-group.uk-phonetic {
   opacity: 1;
   max-width: 200px;
   margin-left: 15px;
 }
 
-.lucid-toolpopup-explain-group {
+.lucid-toolfull-explain-group {
   margin-bottom: 15px;
 }
 
-.lucid-toolpopup-pos {
+.lucid-toolfull-pos {
   background-color: rgba(255, 255, 255, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
@@ -654,20 +654,20 @@ const StyleManager = {
   position: relative;
 }
 
-.lucid-toolpopup-definition {
+.lucid-toolfull-definition {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.lucid-toolpopup-definition-text-chinese {
+.lucid-toolfull-definition-text-chinese {
   /* font-size 和 line-height 由 JavaScript 动态设置，与 tooltip 字体大小保持一致 */
   color: #ddd;
   position: relative;
 }
 
 /* English tooltip with smart sliding */
-.lucid-toolpopup-definition-text-english-tooltip {
+.lucid-toolfull-definition-text-english-tooltip {
   position: absolute;
   bottom: 20%;
   left: 0;
@@ -756,7 +756,7 @@ const StyleManager = {
 }
 
 /* Show hint when tooltip is visible and content is scrollable */
-.lucid-toolpopup-definition-text-english-tooltip.scrollable .lucid-tooltip-scroll-hint {
+.lucid-toolfull-definition-text-english-tooltip.scrollable .lucid-tooltip-scroll-hint {
   opacity: 0.6;
 }
 
@@ -766,7 +766,7 @@ const StyleManager = {
 }
 
 /* Show tooltip when hovering over Chinese text */
-.lucid-toolpopup-definition-text-chinese:hover .lucid-toolpopup-definition-text-english-tooltip {
+.lucid-toolfull-definition-text-chinese:hover .lucid-toolfull-definition-text-english-tooltip {
   opacity: 1;
   visibility: visible;
   max-width: calc(var(--lucid-width-toolpopup) - 60px); /* 动态计算：popup宽度减去40px边距 */
@@ -775,7 +775,7 @@ const StyleManager = {
 }
 
 /* Keep tooltip visible when hovering over the tooltip itself */
-.lucid-toolpopup-definition-text-english-tooltip:hover {
+.lucid-toolfull-definition-text-english-tooltip:hover {
   opacity: 1;
   visibility: visible;
   max-width: calc(var(--lucid-width-toolpopup) - 60px); /* 动态计算：popup宽度减去40px边距 */
@@ -784,7 +784,7 @@ const StyleManager = {
 }
 
 /* Styles for individual words in English tooltip */
-.lucid-toolpopup-definition-word {
+.lucid-toolfull-definition-word {
   cursor: pointer;
   transition: all 0.3s ease;
   color: inherit;
@@ -796,15 +796,15 @@ const StyleManager = {
   -ms-user-select: none;
 }
 
-.lucid-toolpopup-definition-word:hover {
+.lucid-toolfull-definition-word:hover {
   color: #fff;
 }
 
-.lucid-toolpopup-definition-word:active {
+.lucid-toolfull-definition-word:active {
   color: #ccc;
 }
 
-.lucid-toolpopup-footer {
+.lucid-toolfull-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -813,7 +813,7 @@ const StyleManager = {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.lucid-toolpopup-history {
+.lucid-toolfull-history {
   display: flex;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
@@ -821,7 +821,7 @@ const StyleManager = {
   border-radius: 8px;
 }
 
-.lucid-toolpopup-history svg {
+.lucid-toolfull-history svg {
   width: 16px;
   height: 16px;
   fill: rgba(255, 255, 255, 0.7);
@@ -829,12 +829,12 @@ const StyleManager = {
   filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
 }
 
-.lucid-toolpopup-history-count {
+.lucid-toolfull-history-count {
   font-size: 13px;
   color: #aaa;
 }
 
-.lucid-toolpopup-actions svg {
+.lucid-toolfull-actions svg {
   width: 18px;
   height: 18px;
   margin-left: 15px;
@@ -845,7 +845,7 @@ const StyleManager = {
 
 /* Light theme toolpopup - 与tooltip保持一致 */
 @media (prefers-color-scheme: light) {
-  .lucid-tooltip-detail {
+  .lucid-toolfull {
     /* 亮色主题的毛玻璃效果 - 与tooltip相同 */
     background: rgba(240, 240, 240, 0.4);
     -webkit-backdrop-filter: blur(10px);
@@ -855,55 +855,55 @@ const StyleManager = {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 
-  .lucid-toolpopup-word {
+  .lucid-toolfull-word {
     color: #333;
   }
 
-  .lucid-toolpopup-header-icons svg {
+  .lucid-toolfull-header-icons svg {
     fill: rgba(0, 0, 0, 0.7);
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
   }
 
-  .lucid-toolpopup-phonetic {
+  .lucid-toolfull-phonetic {
     color: #666;
   }
 
-  .lucid-toolpopup-phonetic-region {
+  .lucid-toolfull-phonetic-region {
     background-color: rgba(0, 0, 0, 0.1);
     color: #666;
   }
 
-  .lucid-toolpopup-pos {
+  .lucid-toolfull-pos {
     background-color: rgba(0, 0, 0, 0.1);
     color: #666;
   }
 
-  .lucid-toolpopup-definition-text-chinese {
+  .lucid-toolfull-definition-text-chinese {
     color: #333;
   }
 
-  .lucid-toolpopup-definition-text-english-tooltip {
+  .lucid-toolfull-definition-text-english-tooltip {
     color: #666;
   }
 
-  .lucid-toolpopup-footer {
+  .lucid-toolfull-footer {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  .lucid-toolpopup-history {
+  .lucid-toolfull-history {
     background-color: rgba(0, 0, 0, 0.1);
   }
 
-  .lucid-toolpopup-history svg {
+  .lucid-toolfull-history svg {
     fill: rgba(0, 0, 0, 0.7);
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
   }
 
-  .lucid-toolpopup-history-count {
+  .lucid-toolfull-history-count {
     color: #666;
   }
 
-  .lucid-toolpopup-actions svg {
+  .lucid-toolfull-actions svg {
     fill: rgba(0, 0, 0, 0.7);
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
   }

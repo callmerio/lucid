@@ -1,6 +1,6 @@
-/* src/components/ui/PopupContent.css */
+/* src/components/ui/Toolfull.css */
 
-.popup-header {
+.lucid-toolfull-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,20 +8,20 @@
   border-bottom: 1px solid var(--lucid-border-subtle);
 }
 
-.popup-title {
+.lucid-toolfull-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--lucid-font-size-md);
+  font-size: var(--lucid-font-size-2xl);
   font-weight: var(--lucid-font-weight-semibold);
   color: var(--lucid-text-primary);
 }
 
-.popup-icon {
+.lucid-toolfull-icon {
   font-size: 18px;
 }
 
-.popup-status {
+.lucid-toolfull-status {
   font-size: var(--lucid-font-size-sm);
 }
 
@@ -91,18 +91,22 @@
   color: var(--lucid-text-secondary);
 }
 
-.controls-section, .words-section, .actions-section {
+.controls-section,
+.words-section,
+.actions-section {
   padding: 12px 0;
 }
 
-.control-item, .section-header {
+.control-item,
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.control-label, .section-title {
+.control-label,
+.section-title {
   font-size: var(--lucid-font-size-md);
   font-weight: var(--lucid-font-weight-semibold);
   color: var(--lucid-text-primary);
@@ -209,4 +213,30 @@
   text-align: center;
   padding: 20px;
   color: var(--lucid-text-muted);
+}
+
+/* ===== ToolPopup 样式 ===== */
+.lucid-toolfull {
+  position: absolute;
+  z-index: var(--lucid-z-toolpopup);
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-xl);
+  border: 1px solid var(--lucid-border-subtle);
+  padding: var(--lucid-spacing-8);
+  width: var(--lucid-width-toolpopup);
+  box-shadow: var(--lucid-shadow-lg);
+  user-select: none;
+  font-family: var(--lucid-font-family);
+  color: var(--lucid-text-primary);
+  opacity: 0;
+  transform: scaleY(0) translateY(-10px);
+  transform-origin: top center;
+  transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
+}
+
+.lucid-toolfull.lucid-toolfull-visible {
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
 }

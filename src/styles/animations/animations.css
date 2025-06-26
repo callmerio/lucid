@@ -97,7 +97,7 @@
 
 /* ===== ToolPopup 专用动画 ===== */
 
-@keyframes lucid-toolpopup-enter {
+@keyframes lucid-toolfull-enter {
   0% {
     opacity: 0;
     transform: scaleY(0) translateY(-10px);
@@ -110,7 +110,7 @@
   }
 }
 
-@keyframes lucid-toolpopup-exit {
+@keyframes lucid-toolfull-exit {
   0% {
     opacity: 1;
     transform: scaleY(1) translateY(0);
@@ -144,7 +144,8 @@
 }
 
 @keyframes lucid-breathe {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
   }
@@ -155,7 +156,8 @@
 }
 
 @keyframes lucid-flash {
-  0%, 100% {
+  0%,
+  100% {
     color: inherit !important;
   }
   50% {
@@ -217,7 +219,9 @@
 }
 
 .lucid-hover-lift {
-  transition: transform var(--lucid-transition-fast), box-shadow var(--lucid-transition-fast);
+  transition:
+    transform var(--lucid-transition-fast),
+    box-shadow var(--lucid-transition-fast);
 }
 
 .lucid-hover-lift:hover {
@@ -245,7 +249,8 @@
 }
 
 @keyframes lucid-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -260,7 +265,10 @@
 }
 
 .lucid-transition-colors {
-  transition: color var(--lucid-transition-fast), background-color var(--lucid-transition-fast), border-color var(--lucid-transition-fast);
+  transition:
+    color var(--lucid-transition-fast),
+    background-color var(--lucid-transition-fast),
+    border-color var(--lucid-transition-fast);
 }
 
 .lucid-transition-opacity {
@@ -288,7 +296,7 @@
 }
 
 .lucid-slide-blur-left::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;

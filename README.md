@@ -33,7 +33,7 @@
 lucid/
 ├── src/                    # 源代码
 │   ├── components/         # React组件
-│   │   └── ui/            # UI组件 (PopupContent等)
+│   │   └── ui/            # UI组件 (Toolfull等)
 │   ├── services/          # 业务服务层
 │   ├── utils/             # 工具函数
 │   │   └── dom/           # DOM操作工具
@@ -168,7 +168,7 @@ Background Script → Content Script → TransparentPopupManager
 
 ### 添加新功能到透明弹窗
 
-1. 修改 `PopupContent` 组件添加UI元素
+1. 修改 `Toolfull` 组件添加UI元素
 2. 在 `TransparentPopupManager` 中添加相应的事件处理
 3. 更新消息通信协议 (如需要)
 4. 添加相应的测试用例

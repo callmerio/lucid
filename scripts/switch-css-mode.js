@@ -27,7 +27,7 @@ const FULL_VERSION = `/* ===== Lucid Extension 设计系统 ===== */
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-tooltip-detail,
+.lucid-toolfull,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);
@@ -58,7 +58,7 @@ const ESSENTIAL_VERSION = `/* ===== Lucid Extension 精简版设计系统 ===== 
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-tooltip-detail,
+.lucid-toolfull,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);

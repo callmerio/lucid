@@ -72,7 +72,7 @@
       }
 
       /* 引入tooltip样式 */
-      .lucid-tooltip-detail {
+      .lucid-toolfull {
         background: rgba(30, 30, 30, 0.8);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -84,26 +84,26 @@
         user-select: none;
       }
 
-      .lucid-toolpopup-header {
+      .lucid-toolfull-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 15px;
       }
 
-      .lucid-toolpopup-word {
+      .lucid-toolfull-word {
         font-size: 24px;
         font-weight: 400;
         color: #f0f0f0;
       }
 
-      .lucid-toolpopup-syllable-separator {
+      .lucid-toolfull-syllable-separator {
         color: rgba(255, 255, 255, 0.4);
         font-weight: 400;
         margin: 0 1px;
       }
 
-      .lucid-toolpopup-phonetic {
+      .lucid-toolfull-phonetic {
         font-size: 14px;
         color: #aaa;
         margin-bottom: 20px;
@@ -111,13 +111,13 @@
         gap: 15px;
       }
 
-      .lucid-toolpopup-phonetic-group {
+      .lucid-toolfull-phonetic-group {
         display: flex;
         align-items: center;
         cursor: pointer;
       }
 
-      .lucid-toolpopup-phonetic-region {
+      .lucid-toolfull-phonetic-region {
         background-color: rgba(255, 255, 255, 0.1);
         padding: 2px 6px;
         border-radius: 4px;
@@ -126,17 +126,17 @@
         color: #ccc;
       }
 
-      .lucid-toolpopup-explain-group {
+      .lucid-toolfull-explain-group {
         margin-bottom: 15px;
       }
 
-      .lucid-toolpopup-definition {
+      .lucid-toolfull-definition {
         display: flex;
         align-items: flex-start;
         margin-bottom: 8px;
       }
 
-      .lucid-toolpopup-pos {
+      .lucid-toolfull-pos {
         background-color: rgba(255, 255, 255, 0.1);
         padding: 2px 6px;
         border-radius: 4px;
@@ -147,7 +147,7 @@
         text-align: center;
       }
 
-      .lucid-toolpopup-definition-text-chinese {
+      .lucid-toolfull-definition-text-chinese {
         font-size: 14px;
         color: #ddd;
         line-height: 1.6;
@@ -210,15 +210,15 @@
       </div>
 
       <div class="tooltip-container">
-        <div class="lucid-tooltip-detail" id="tooltip-container">
-          <div class="lucid-toolpopup-header">
-            <span class="lucid-toolpopup-word" id="word-display"
+        <div class="lucid-toolfull" id="tooltip-container">
+          <div class="lucid-toolfull-header">
+            <span class="lucid-toolfull-word" id="word-display"
               >Loading...</span
             >
           </div>
-          <div class="lucid-toolpopup-phonetic" id="phonetic-display"></div>
+          <div class="lucid-toolfull-phonetic" id="phonetic-display"></div>
           <div
-            class="lucid-toolpopup-definitions-area"
+            class="lucid-toolfull-definitions-area"
             id="definitions-display"
           ></div>
         </div>
@@ -266,13 +266,13 @@
           // 更新音标显示
           const phoneticDisplay = document.getElementById("phonetic-display");
           phoneticDisplay.innerHTML = `
-                <div class="lucid-toolpopup-phonetic-group">
-                    <span class="lucid-toolpopup-phonetic-region">US</span>
-                    <span class="lucid-toolpopup-phonetic-text">${wordData.phonetic.us}</span>
+                <div class="lucid-toolfull-phonetic-group">
+                    <span class="lucid-toolfull-phonetic-region">US</span>
+                    <span class="lucid-toolfull-phonetic-text">${wordData.phonetic.us}</span>
                 </div>
-                <div class="lucid-toolpopup-phonetic-group">
-                    <span class="lucid-toolpopup-phonetic-region">UK</span>
-                    <span class="lucid-toolpopup-phonetic-text">${wordData.phonetic.uk}</span>
+                <div class="lucid-toolfull-phonetic-group">
+                    <span class="lucid-toolfull-phonetic-region">UK</span>
+                    <span class="lucid-toolfull-phonetic-text">${wordData.phonetic.uk}</span>
                 </div>
             `;
 
@@ -284,14 +284,14 @@
 
           wordData.explain.forEach((explainGroup) => {
             const groupDiv = document.createElement("div");
-            groupDiv.className = "lucid-toolpopup-explain-group";
+            groupDiv.className = "lucid-toolfull-explain-group";
 
             explainGroup.definitions.forEach((def) => {
               const defDiv = document.createElement("div");
-              defDiv.className = "lucid-toolpopup-definition";
+              defDiv.className = "lucid-toolfull-definition";
               defDiv.innerHTML = `
-                        <span class="lucid-toolpopup-pos">${explainGroup.pos}.</span>
-                        <span class="lucid-toolpopup-definition-text-chinese">${def.chinese_short}</span>
+                        <span class="lucid-toolfull-pos">${explainGroup.pos}.</span>
+                        <span class="lucid-toolfull-definition-text-chinese">${def.chinese_short}</span>
                     `;
               groupDiv.appendChild(defDiv);
             });

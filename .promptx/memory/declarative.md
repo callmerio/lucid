@@ -18,12 +18,12 @@
 ## Popup重写成功实施
 
 - **时间**: 2025-06-25 21:27
-- **任务**: 完全重写popup摒弃sidepanel，使用lucid-tooltip-detail设计风格
+- **任务**: 完全重写popup摒弃sidepanel，使用lucid-toolfull设计风格
 - **结果**: 成功在浏览器中显示完整功能界面
 
 ## 实际运行效果确认
 
-- ✅ lucid-tooltip-detail毛玻璃样式正确显示
+- ✅ lucid-toolfull毛玻璃样式正确显示
 - ✅ 词汇统计卡片(1247总词汇, 23今日新增, 8当前页面)
 - ✅ 连接状态指示器(已连接绿点)
 - ✅ 扩展启用控制开关
@@ -41,11 +41,11 @@
 ## 关键经验
 
 1. **完全移除sidepanel依赖**是正确决策，popup模式更稳定
-2. **lucid-tooltip-detail设计系统**提供了一致的视觉体验
+2. **lucid-toolfull设计系统**提供了一致的视觉体验
 3. **WXT框架构建**能正确处理复杂的设计系统CSS
 4. **备份分支策略**保护了之前的架构工作成果
 
-这次重写成功解决了之前的popup问题，为后续功能开发奠定了稳定基础。 --tags chrome-extension popup-rewrite lucid-design wxt-framework success-case
+这次重写成功解决了之前的popup问题，为后续功能开发奠定了稳定基础。 --tags chrome-extension full-rewrite lucid-design wxt-framework success-case
 --tags #其他 #评分:8 #有效期:长期
 
 - END
