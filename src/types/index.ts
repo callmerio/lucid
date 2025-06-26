@@ -202,6 +202,7 @@ export interface PerformanceMetrics {
 // 导出其他模块的类型
 export * from './events';
 export * from './config';
+export * from './services';
 
 // 重新导出组件类型
 export type {

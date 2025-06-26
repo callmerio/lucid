@@ -83,12 +83,48 @@
         "us": "/ˌkɑːmprɪˈhensɪv/",
         "uk": "/ˌkɒmprɪˈhensɪv/"
       }
+    },
+    {
+      "word": "favorite",
+      "explain": [
+        {
+          "pos": "adjective",
+          "definitions": [
+            {
+              "definition": "Preferred before all others of the same kind.",
+              "chinese": "最喜爱的",
+              "chinese_short": "最爱的"
+            }
+          ]
+        },
+        {
+          "pos": "noun",
+          "definitions": [
+            {
+              "definition": "A person or thing that is particularly popular or well-liked.",
+              "chinese": "特别受喜爱的人或物",
+              "chinese_short": "宠儿"
+            }
+          ]
+        }
+      ],
+      "wordFormats": [
+        {
+          "name": "原型",
+          "form": "favorite"
+        }
+      ],
+      "phonetic": {
+        "us": "/ˈfeɪvərɪt/",
+        "uk": "/ˈfeɪvərɪt/"
+      }
     }
   ],
-  "wordCount": 2,
+  "wordCount": 3,
   "wordList": [
     "escalade",
-    "comprehensive"
+    "comprehensive",
+    "favorite"
   ],
   "wordRelationships": [
     {

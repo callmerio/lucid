@@ -18,8 +18,6 @@ export interface TooltipProps extends BaseComponentProps {
   translation: string;
   phonetic?: string;
   partOfSpeech?: string;
-  position: { x: number; y: number };
-  visible: boolean;
   onExpand?: () => void;
   onCollapse?: () => void;
   onClose?: () => void;
@@ -29,8 +27,6 @@ export interface TooltipProps extends BaseComponentProps {
 export interface ToolpopupProps extends BaseComponentProps {
   word: string;
   wordData: DetailedWordData;
-  position: { x: number; y: number };
-  visible: boolean;
   onClose?: () => void;
   onWordAction?: (action: string, word: string) => void;
 }

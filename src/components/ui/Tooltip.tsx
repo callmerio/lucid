@@ -11,17 +11,12 @@ export const Tooltip: React.FC<TooltipProps> = ({
   translation,
   phonetic,
   partOfSpeech,
-  position,
-  visible,
   className = '',
   testId = 'lucid-tooltip',
   onExpand,
   onCollapse,
   onClose: _onClose,
 }) => {
-  if (!visible) {
-    return null;
-  }
 
   const handleExpand = () => {
     onExpand?.();
@@ -35,11 +30,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <div
-      className={`lucid-tooltip ${visible ? 'lucid-tooltip-visible' : ''} ${className}`}
-      style={{
-        left: position.x,
-        top: position.y,
-      }}
+      className={`lucid-tooltip lucid-tooltip-visible ${className}`}
       data-testid={testId}
       data-word={word}
     >

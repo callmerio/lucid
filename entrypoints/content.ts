@@ -38,8 +38,8 @@ export default defineContentScript({
     let tooltipManager: any, toolpopupManager: any, transparentPopupManager: any;
 
     try {
-      const { TooltipManager } = await import("@utils/dom/tooltipManager");
-      const { ToolpopupManager } = await import("@utils/dom/toolpopupManager");
+      const { TooltipManager } = await import("@utils/dom/managers/TooltipManager.tsx");
+      const { ToolpopupManager } = await import("@utils/dom/toolpopupManager.tsx");
 
       tooltipManager = TooltipManager.getInstance();
       toolpopupManager = ToolpopupManager.getInstance();
