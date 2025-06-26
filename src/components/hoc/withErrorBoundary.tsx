@@ -4,7 +4,7 @@
  */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { WithErrorBoundaryProps } from '../types';
+import { WithErrorBoundaryProps } from '@components/types';
 
 interface ErrorBoundaryState {
   hasError: boolean;

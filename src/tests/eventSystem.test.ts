@@ -2,7 +2,7 @@
  * 事件系统测试 - 验证全局事件总线功能
  */
 
-import { EventPriority, UI_EVENTS } from '../constants/uiEvents';
+import { EventPriority, UI_EVENTS } from '@constants/uiEvents';
 import { SimpleEventManager } from '../utils/dom/simpleEventManager';
 
 describe('EventSystem', () => {

@@ -3,7 +3,7 @@
  * 测试 tooltip 位置计算器的核心功能
  */
 
-import { Position, PositionOptions, TooltipPositioner } from '@utils/dom/managers/TooltipPositioner';
+import { Position, PositionOptions, TooltipPositioner } from '@utils/dom/managers/tooltip/TooltipPositioner';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('TooltipPositioner', () => {

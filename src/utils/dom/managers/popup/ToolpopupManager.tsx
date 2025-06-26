@@ -4,10 +4,10 @@
  * This manager is responsible for subscribing to global events and triggering the display of the toolpopup via the PopupService.
  */
 
-import { popupService } from "../../services/PopupService.tsx";
-import { dataService } from "../../services/DataService";
+import { popupService } from "@services/PopupService";
+import { dataService } from "@services/DataService";
 import { UI_EVENTS } from "@constants/uiEvents";
-import { simpleEventManager } from "./simpleEventManager";
+import { simpleEventManager } from "../../simpleEventManager";
 import { Toolfull } from "@components/ui/Toolfull";
 import React from "react";
 

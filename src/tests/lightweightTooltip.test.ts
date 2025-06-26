@@ -5,7 +5,7 @@
 
 import { vi } from 'vitest';
 import { SimpleEventManager } from '../utils/dom/simpleEventManager';
-import { TooltipManager } from '../utils/dom/tooltipManager';
+import { TooltipManager } from '../utils/dom/legacy/tooltipManager';
 
 describe('轻量级Tooltip系统测试', () => {
   let simpleEventManager: SimpleEventManager;

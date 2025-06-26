@@ -9,8 +9,8 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Toolfull } from '@components/ui/Toolfull';
-import { SimpleEventManager } from '../simpleEventManager';
-import { UI_EVENTS } from '../../../constants/uiEvents';
+import { SimpleEventManager } from '../../simpleEventManager';
+import { UI_EVENTS } from '@constants/uiEvents';
 
 export interface TransparentPopupOptions {
   position?: { x: number; y: number };

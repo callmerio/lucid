@@ -5,7 +5,7 @@
  */
 
 import { syllable } from 'syllable';
-import { advancedSyllabify, batchSyllabify, getSyllableCount } from '../../utils/text/syllableUtils.ts';
+import { advancedSyllabify, batchSyllabify, getSyllableCount } from '../../utils/text/syllable';
 
 describe('Syllable 库功能测试', () => {
 

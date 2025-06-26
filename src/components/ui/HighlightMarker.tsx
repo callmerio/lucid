@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { HighlightMarkerProps } from '../types';
+import { HighlightMarkerProps } from '@components/types';
 
 export const HighlightMarker: React.FC<HighlightMarkerProps> = ({
   word,

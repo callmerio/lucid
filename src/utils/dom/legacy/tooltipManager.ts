@@ -8,8 +8,8 @@ import {
   decreaseWordHighlight,
   toggleWordHighlightState,
   type ToggleHighlightContext
-} from '../highlight/highlightUtils';
-import { simpleEventManager, SimpleEventManager } from './simpleEventManager';
+} from '@utils/highlight/highlightUtils';
+import { simpleEventManager, SimpleEventManager } from '../simpleEventManager';
 
 // 模拟翻译数据 - 实际项目中应该从API获取
 const MOCK_TRANSLATIONS: Record<string, {

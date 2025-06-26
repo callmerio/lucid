@@ -3,7 +3,7 @@
  * @description 统一的数据服务，负责获取和缓存单词数据。
  */
 
-import { IDataService, WordDetails } from '../types/services';
+import { IDataService, WordDetails } from '@/types/services';
 import { mockDataService } from './mock/mockDataService'; // 暂时依赖mock数据
 
 class DataService implements IDataService {

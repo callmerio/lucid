@@ -1,7 +1,7 @@
 import "@styles/global/essential.css";
 import "@styles/global/main.css"; // 引入 Tailwind CSS
 import { applyWordHighlight } from "@utils/highlight/highlightUtils";
-import { expandSelectionToFullWord } from "@utils/text/selectionUtils";
+import { expandSelectionToFullWord } from "@utils/text/selection";
 import { debounce } from "lodash-es";
 import { defineContentScript } from 'wxt/utils/define-content-script';
 
@@ -38,8 +38,8 @@ export default defineContentScript({
     let tooltipManager: any, toolpopupManager: any, transparentPopupManager: any;
 
     try {
-      const { TooltipManager } = await import("@utils/dom/managers/TooltipManager.tsx");
-      const { ToolpopupManager } = await import("@utils/dom/toolpopupManager.tsx");
+      const { TooltipManager } = await import("@utils/dom/managers/tooltip/TooltipManager.tsx");
+      const { ToolpopupManager } = await import("@utils/dom/managers/popup/ToolpopupManager.tsx");
 
       tooltipManager = TooltipManager.getInstance();
       toolpopupManager = ToolpopupManager.getInstance();
@@ -51,7 +51,7 @@ export default defineContentScript({
 
     // 尝试初始化透明弹窗管理器
     try {
-      const { TransparentPopupManager } = await import("@utils/dom/managers/TransparentPopupManager");
+      const { TransparentPopupManager } = await import("@utils/dom/managers/popup/TransparentPopupManager");
       transparentPopupManager = TransparentPopupManager.getInstance();
       console.log("[Lucid] TransparentPopupManager 已初始化");
     } catch (error) {

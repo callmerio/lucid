@@ -1,5 +1,5 @@
 /**
- * phoneticUtils 工具函数测试
+ * phonetic 工具函数测试
  * 测试音标格式化工具的核心功能
  */
 
@@ -37,7 +37,7 @@ function removePhoneticSlashes(phonetic: string): string {
   return trimmed;
 }
 
-describe('phoneticUtils', () => {
+describe('phonetic', () => {
   describe('formatPhonetic', () => {
     it('应该为没有斜杠的音标添加斜杠', () => {
       expect(formatPhonetic('həˈloʊ')).toBe('/həˈloʊ/');

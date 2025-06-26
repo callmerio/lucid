@@ -1,20 +1,15 @@
-/**
- * 管理器模块导出
- * 统一导出所有重构后的管理器类
- */
+// [INTERNAL_ACTION: Creating unified managers index file.]
+// {{CHENGQI:
+// Action: Added; Timestamp: 2025-06-26T11:45:00+08:00; Reason: 统一导出所有DOM管理器模块，优化依赖关系;
+// }}
 
-// 主要管理器
-export { TooltipManager } from './TooltipManager';
+// Tooltip管理器
+export { TooltipRenderer } from './tooltip/TooltipRenderer';
+export type { TooltipRenderOptions } from './tooltip/TooltipRenderer';
 
-// 专职管理器
-export { TooltipRenderer } from './TooltipRenderer';
-export { TooltipPositioner } from './TooltipPositioner';
-export { TooltipStateManager } from './TooltipStateManager';
-export { TooltipEventHandler } from './TooltipEventHandler';
+// Popup管理器  
+export { TransparentPopupManager } from './popup/TransparentPopupManager';
+export type { TransparentPopupOptions } from './popup/TransparentPopupManager';
 
-// 类型定义
-export type { TooltipRenderOptions } from './TooltipRenderer';
-export type { Position, PositionOptions } from './TooltipPositioner';
-export type { TooltipState, StateChangeEvent, StateChangeHandler } from './TooltipStateManager';
-export type { EventHandlerOptions } from './TooltipEventHandler';
-export type { TooltipManagerOptions, ShowTooltipOptions } from './TooltipManager';
+// 通用DOM管理器
+export { SimpleEventManager } from '../simpleEventManager';

@@ -3,10 +3,10 @@
  * @description 统一的弹窗服务，负责管理所有弹窗的显示、隐藏和状态。
  */
 
-import { IPopupService, PopupOptions } from "../types/services";
+import { IPopupService, PopupOptions } from "@/types/services";
 import { createRoot, Root } from "react-dom/client";
 import React from "react";
-import { Popup } from "../components/ui/common/Popup"; // 假设Popup组件已创建
+import { Popup } from "@components/ui/common/Popup"; // 假设Popup组件已创建
 
 interface PopupInstance {
   id: string;

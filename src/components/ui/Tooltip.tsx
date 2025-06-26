@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import "./Tooltip.css";
-import { TooltipProps } from "../types";
+import "../../styles/components/Tooltip.css";
+import { TooltipProps } from "@components/types";
 
 export const Tooltip: React.FC<TooltipProps> = ({
   word,

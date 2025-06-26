@@ -231,15 +231,27 @@ export type {
 // 重新导出管理器类型
 export type {
   TooltipRenderOptions,
+} from '../utils/dom/managers/tooltip/TooltipRenderer';
+
+export type {
   Position as TooltipPosition,
   PositionOptions,
+} from '../utils/dom/managers/tooltip/TooltipPositioner';
+
+export type {
   TooltipState,
   StateChangeEvent,
   StateChangeHandler,
+} from '../utils/dom/managers/tooltip/TooltipStateManager';
+
+export type {
   EventHandlerOptions,
+} from '../utils/dom/managers/tooltip/TooltipEventHandler';
+
+export type {
   TooltipManagerOptions,
   ShowTooltipOptions,
-} from '../utils/dom/managers';
+} from '../utils/dom/managers/tooltip/TooltipManager';
 
 // 工具类型
 export type Nullable<T> = T | null;

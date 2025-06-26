@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { PopupOptions } from "../../../types/services";
+import { PopupOptions } from "@/types/services";
 
 interface PopupProps {
   id: string;

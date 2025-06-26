@@ -1,4 +1,4 @@
-import { TooltipManager } from "../dom/tooltipManager";
+import { TooltipManager } from "../dom/legacy/tooltipManager";
 
 /**
  * 扩展程序在 `browser.storage.local` 中保存的数据结构。

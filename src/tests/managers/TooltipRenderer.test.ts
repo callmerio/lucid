@@ -3,7 +3,7 @@
  * 测试 tooltip 渲染器的核心功能
  */
 
-import { TooltipRenderer, TooltipRenderOptions } from '@utils/dom/managers/TooltipRenderer';
+import { TooltipRenderer, TooltipRenderOptions } from '@utils/dom/managers/tooltip/TooltipRenderer';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock React 和相关依赖

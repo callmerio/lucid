@@ -3,7 +3,7 @@
  * 测试 tooltip 管理器协调器的核心功能
  */
 
-import { ShowTooltipOptions, TooltipManager, TooltipManagerOptions } from '@utils/dom/managers/TooltipManager';
+import { ShowTooltipOptions, TooltipManager, TooltipManagerOptions } from '@utils/dom/managers/tooltip/TooltipManager';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // 创建 Mock 实例的引用

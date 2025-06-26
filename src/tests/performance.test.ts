@@ -3,9 +3,9 @@
  */
 
 import { SimpleEventManager } from '../utils/dom/simpleEventManager';
-import { TooltipManager } from '../utils/dom/tooltipManager';
-import { ToolpopupManager } from '../utils/dom/toolpopupManager';
-import { UI_EVENTS, EventPriority } from '../constants/uiEvents';
+import { TooltipManager } from '../utils/dom/legacy/tooltipManager';
+import { ToolpopupManager } from '../utils/dom/managers/popup/ToolpopupManager';
+import { UI_EVENTS, EventPriority } from '@constants/uiEvents';
 
 describe('性能基准测试', () => {
   let eventManager: SimpleEventManager;

@@ -5,9 +5,9 @@
  */
 
 import React from "react";
-import "./Toolfull.css";
-import { WordDetails } from "../../types/services";
-import { BaseComponentProps } from "../types";
+import "../../styles/components/Toolfull.css";
+import { WordDetails } from "@/types/services";
+import { BaseComponentProps } from "@components/types";
 
 interface ToolfullProps extends BaseComponentProps {
   word: string;

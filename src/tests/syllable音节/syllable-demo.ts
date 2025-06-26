@@ -5,7 +5,7 @@
  */
 
 import { syllable } from 'syllable';
-import { advancedSyllabify, getSyllableCount, batchSyllabify } from '@utils/text/syllableUtils';
+import { advancedSyllabify, getSyllableCount, batchSyllabify } from '@utils/text/syllable';
 
 /**
  * 演示基础音节计数功能

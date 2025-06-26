@@ -3,8 +3,8 @@
  * 作为协调器，整合各个专职管理器的功能
  */
 
-import { popupService } from "../../../services/PopupService.tsx";
-import { Tooltip } from "../../../components/ui/Tooltip";
+import { popupService } from "@services/PopupService";
+import { Tooltip } from "@components/ui/Tooltip";
 import { TooltipStateManager } from "./TooltipStateManager";
 
 export interface TooltipManagerOptions {
