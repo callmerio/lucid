@@ -147,7 +147,9 @@
   user-select: none;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--lucid-transition-fast), transform var(--lucid-transition-fast);
+  transition:
+    opacity var(--lucid-transition-fast),
+    transform var(--lucid-transition-fast);
 }
 
 .lucid-popup-visible {
@@ -181,13 +183,15 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  transition: width var(--lucid-transition-normal), padding-right var(--lucid-transition-normal);
+  transition:
+    width var(--lucid-transition-normal),
+    padding-right var(--lucid-transition-normal);
   height: auto;
 }
 
 /* ===== ToolPopup 特定样式 ===== */
 
-.lucid-toolpopup-container {
+.lucid-tooltip-detail {
   z-index: var(--lucid-z-toolpopup);
   border-radius: var(--lucid-radius-xl);
   padding: var(--lucid-spacing-8);
@@ -198,7 +202,7 @@
   transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
 }
 
-.lucid-toolpopup-container.lucid-popup-visible {
+.lucid-tooltip-detail.lucid-popup-visible {
   transform: scaleY(1) translateY(0);
 }
 
@@ -213,7 +217,8 @@
 }
 
 .lucid-animate-scale-in {
-  animation: lucid-scale-in var(--lucid-transition-normal) var(--lucid-ease-bounce) forwards;
+  animation: lucid-scale-in var(--lucid-transition-normal)
+    var(--lucid-ease-bounce) forwards;
 }
 
 .lucid-animate-scale-out {
@@ -245,29 +250,73 @@
 
 /* ===== 间距工具类 ===== */
 
-.lucid-p-0 { padding: var(--lucid-spacing-0); }
-.lucid-p-1 { padding: var(--lucid-spacing-1); }
-.lucid-p-2 { padding: var(--lucid-spacing-2); }
-.lucid-p-3 { padding: var(--lucid-spacing-3); }
-.lucid-p-4 { padding: var(--lucid-spacing-4); }
-.lucid-p-5 { padding: var(--lucid-spacing-5); }
-.lucid-p-6 { padding: var(--lucid-spacing-6); }
-.lucid-p-8 { padding: var(--lucid-spacing-8); }
+.lucid-p-0 {
+  padding: var(--lucid-spacing-0);
+}
+.lucid-p-1 {
+  padding: var(--lucid-spacing-1);
+}
+.lucid-p-2 {
+  padding: var(--lucid-spacing-2);
+}
+.lucid-p-3 {
+  padding: var(--lucid-spacing-3);
+}
+.lucid-p-4 {
+  padding: var(--lucid-spacing-4);
+}
+.lucid-p-5 {
+  padding: var(--lucid-spacing-5);
+}
+.lucid-p-6 {
+  padding: var(--lucid-spacing-6);
+}
+.lucid-p-8 {
+  padding: var(--lucid-spacing-8);
+}
 
-.lucid-m-0 { margin: var(--lucid-spacing-0); }
-.lucid-m-1 { margin: var(--lucid-spacing-1); }
-.lucid-m-2 { margin: var(--lucid-spacing-2); }
-.lucid-m-3 { margin: var(--lucid-spacing-3); }
-.lucid-m-4 { margin: var(--lucid-spacing-4); }
-.lucid-m-5 { margin: var(--lucid-spacing-5); }
-.lucid-m-6 { margin: var(--lucid-spacing-6); }
-.lucid-m-8 { margin: var(--lucid-spacing-8); }
+.lucid-m-0 {
+  margin: var(--lucid-spacing-0);
+}
+.lucid-m-1 {
+  margin: var(--lucid-spacing-1);
+}
+.lucid-m-2 {
+  margin: var(--lucid-spacing-2);
+}
+.lucid-m-3 {
+  margin: var(--lucid-spacing-3);
+}
+.lucid-m-4 {
+  margin: var(--lucid-spacing-4);
+}
+.lucid-m-5 {
+  margin: var(--lucid-spacing-5);
+}
+.lucid-m-6 {
+  margin: var(--lucid-spacing-6);
+}
+.lucid-m-8 {
+  margin: var(--lucid-spacing-8);
+}
 
 /* ===== 圆角工具类 ===== */
 
-.lucid-rounded-none { border-radius: var(--lucid-radius-none); }
-.lucid-rounded-sm { border-radius: var(--lucid-radius-sm); }
-.lucid-rounded-md { border-radius: var(--lucid-radius-md); }
-.lucid-rounded-lg { border-radius: var(--lucid-radius-lg); }
-.lucid-rounded-xl { border-radius: var(--lucid-radius-xl); }
-.lucid-rounded-full { border-radius: var(--lucid-radius-full); }
+.lucid-rounded-none {
+  border-radius: var(--lucid-radius-none);
+}
+.lucid-rounded-sm {
+  border-radius: var(--lucid-radius-sm);
+}
+.lucid-rounded-md {
+  border-radius: var(--lucid-radius-md);
+}
+.lucid-rounded-lg {
+  border-radius: var(--lucid-radius-lg);
+}
+.lucid-rounded-xl {
+  border-radius: var(--lucid-radius-xl);
+}
+.lucid-rounded-full {
+  border-radius: var(--lucid-radius-full);
+}

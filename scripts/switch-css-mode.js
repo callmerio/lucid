@@ -5,14 +5,14 @@
  * 在完整版设计系统和精简版之间切换
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MAIN_CSS_PATH = path.join(__dirname, '../src/styles/global/main.css');
+const MAIN_CSS_PATH = path.join(__dirname, "../src/styles/global/main.css");
 
 const FULL_VERSION = `/* ===== Lucid Extension 设计系统 ===== */
 @import '../theme/design-tokens.css';
@@ -27,7 +27,7 @@ const FULL_VERSION = `/* ===== Lucid Extension 设计系统 ===== */
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-toolpopup-container,
+.lucid-tooltip-detail,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);
@@ -58,7 +58,7 @@ const ESSENTIAL_VERSION = `/* ===== Lucid Extension 精简版设计系统 ===== 
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-toolpopup-container,
+.lucid-tooltip-detail,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);
@@ -80,16 +80,16 @@ const ESSENTIAL_VERSION = `/* ===== Lucid Extension 精简版设计系统 ===== 
 
 function getCurrentMode() {
   try {
-    const content = fs.readFileSync(MAIN_CSS_PATH, 'utf8');
-    if (content.includes('@import \'./essential.css\';')) {
-      return 'essential';
-    } else if (content.includes('@import \'./design-tokens.css\';')) {
-      return 'full';
+    const content = fs.readFileSync(MAIN_CSS_PATH, "utf8");
+    if (content.includes("@import './essential.css';")) {
+      return "essential";
+    } else if (content.includes("@import './design-tokens.css';")) {
+      return "full";
     } else {
-      return 'unknown';
+      return "unknown";
     }
   } catch (error) {
-    console.error('❌ 无法读取main.css文件:', error.message);
+    console.error("❌ 无法读取main.css文件:", error.message);
     process.exit(1);
   }
 }
@@ -97,43 +97,45 @@ function getCurrentMode() {
 function switchToMode(mode) {
   try {
     let content;
-    if (mode === 'full') {
+    if (mode === "full") {
       content = FULL_VERSION;
-    } else if (mode === 'essential') {
+    } else if (mode === "essential") {
       content = ESSENTIAL_VERSION;
     } else {
       throw new Error('无效的模式，请使用 "full" 或 "essential"');
     }
 
-    fs.writeFileSync(MAIN_CSS_PATH, content, 'utf8');
-    console.log(`✅ 已切换到 ${mode === 'full' ? '完整版' : '精简版'} 设计系统`);
+    fs.writeFileSync(MAIN_CSS_PATH, content, "utf8");
+    console.log(
+      `✅ 已切换到 ${mode === "full" ? "完整版" : "精简版"} 设计系统`
+    );
   } catch (error) {
-    console.error('❌ 切换失败:', error.message);
+    console.error("❌ 切换失败:", error.message);
     process.exit(1);
   }
 }
 
 function showStatus() {
   const currentMode = getCurrentMode();
-  console.log('\n📊 当前CSS模式状态:');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log("\n📊 当前CSS模式状态:");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-  if (currentMode === 'full') {
-    console.log('🎨 当前模式: 完整版设计系统');
-    console.log('📦 预计大小: ~16kB');
-    console.log('✨ 功能: 完整的设计token、组件库、动画系统');
-    console.log('🎯 适用: 开发环境、功能测试');
-  } else if (currentMode === 'essential') {
-    console.log('⚡ 当前模式: 精简版设计系统');
-    console.log('📦 预计大小: ~3-4kB');
-    console.log('✨ 功能: 核心样式、基础动画、主题支持');
-    console.log('🎯 适用: 生产环境、性能优化');
+  if (currentMode === "full") {
+    console.log("🎨 当前模式: 完整版设计系统");
+    console.log("📦 预计大小: ~16kB");
+    console.log("✨ 功能: 完整的设计token、组件库、动画系统");
+    console.log("🎯 适用: 开发环境、功能测试");
+  } else if (currentMode === "essential") {
+    console.log("⚡ 当前模式: 精简版设计系统");
+    console.log("📦 预计大小: ~3-4kB");
+    console.log("✨ 功能: 核心样式、基础动画、主题支持");
+    console.log("🎯 适用: 生产环境、性能优化");
   } else {
-    console.log('❓ 当前模式: 未知');
-    console.log('⚠️  请检查main.css文件配置');
+    console.log("❓ 当前模式: 未知");
+    console.log("⚠️  请检查main.css文件配置");
   }
 
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 }
 
 function showHelp() {
@@ -169,34 +171,39 @@ function main() {
   const args = process.argv.slice(2);
   const command = args[0];
 
-  if (!command || command === 'help' || command === '-h' || command === '--help') {
+  if (
+    !command ||
+    command === "help" ||
+    command === "-h" ||
+    command === "--help"
+  ) {
     showHelp();
     return;
   }
 
   switch (command) {
-    case 'status':
+    case "status":
       showStatus();
       break;
 
-    case 'full':
+    case "full":
       const currentMode = getCurrentMode();
-      if (currentMode === 'full') {
-        console.log('ℹ️  已经是完整版模式，无需切换');
+      if (currentMode === "full") {
+        console.log("ℹ️  已经是完整版模式，无需切换");
         showStatus();
       } else {
-        switchToMode('full');
+        switchToMode("full");
         showStatus();
       }
       break;
 
-    case 'essential':
+    case "essential":
       const currentModeEss = getCurrentMode();
-      if (currentModeEss === 'essential') {
-        console.log('ℹ️  已经是精简版模式，无需切换');
+      if (currentModeEss === "essential") {
+        console.log("ℹ️  已经是精简版模式，无需切换");
         showStatus();
       } else {
-        switchToMode('essential');
+        switchToMode("essential");
         showStatus();
       }
       break;
@@ -211,7 +218,4 @@ function main() {
 // 直接运行主程序
 main();
 
-export {
-  getCurrentMode, showStatus, switchToMode
-};
-
+export { getCurrentMode, showStatus, switchToMode };

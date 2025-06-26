@@ -482,7 +482,7 @@ const StyleManager = {
 
 /* ===== TOOLPOPUP STYLES (使用设计系统) ===== */
 
-.lucid-toolpopup-container {
+.lucid-tooltip-detail {
   position: absolute;
   z-index: var(--lucid-z-toolpopup);
   /* 使用设计系统的毛玻璃效果 */
@@ -504,7 +504,7 @@ const StyleManager = {
   transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
 }
 
-.lucid-toolpopup-container.lucid-toolpopup-visible {
+.lucid-tooltip-detail.lucid-toolpopup-visible {
   opacity: 1;
   transform: scaleY(1) translateY(0);
 }
@@ -512,7 +512,7 @@ const StyleManager = {
 /* 动画关键帧已移至 animations.css 统一管理 */
 
 /* 当toolpopup显示在目标元素上方时的样式 */
-.lucid-toolpopup-container.lucid-toolpopup-above {
+.lucid-tooltip-detail.lucid-toolpopup-above {
   /* 可以添加特殊样式，比如阴影方向调整等 */
 }
 
@@ -845,7 +845,7 @@ const StyleManager = {
 
 /* Light theme toolpopup - 与tooltip保持一致 */
 @media (prefers-color-scheme: light) {
-  .lucid-toolpopup-container {
+  .lucid-tooltip-detail {
     /* 亮色主题的毛玻璃效果 - 与tooltip相同 */
     background: rgba(240, 240, 240, 0.4);
     -webkit-backdrop-filter: blur(10px);

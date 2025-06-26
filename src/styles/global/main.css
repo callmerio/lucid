@@ -1,5 +1,5 @@
 /* ===== Lucid Extension 精简版设计系统 ===== */
-@import './essential.css';
+@import "./essential.css";
 
 @tailwind base;
 @tailwind components;
@@ -9,7 +9,7 @@
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-toolpopup-container,
+.lucid-tooltip-detail,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);

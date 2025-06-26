@@ -158,7 +158,7 @@
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
 .lucid-tooltip,
-.lucid-toolpopup-container,
+.lucid-tooltip-detail,
 .lucid-highlight {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);
@@ -211,7 +211,7 @@
 }
 
 /* ===== ToolPopup 样式 ===== */
-.lucid-toolpopup-container {
+.lucid-tooltip-detail {
   position: absolute;
   z-index: var(--lucid-z-toolpopup);
   background: var(--lucid-bg-glass-primary);
@@ -231,7 +231,7 @@
   transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
 }
 
-.lucid-toolpopup-container.lucid-toolpopup-visible {
+.lucid-tooltip-detail.lucid-toolpopup-visible {
   opacity: 1;
   transform: scaleY(1) translateY(0);
 }

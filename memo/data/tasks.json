@@ -3,7 +3,7 @@
     {
       "id": "7da30178-b887-4966-8e70-a37d0401f17d",
       "name": "Apply Glassmorphism Effect to Transparent Popup",
-      "description": "Modify the CSS for `.lucid-transparent-popup` to include a backdrop-filter for a glassmorphism effect, matching the style of `.lucid-toolpopup-container`.",
+      "description": "Modify the CSS for `.lucid-transparent-popup` to include a backdrop-filter for a glassmorphism effect, matching the style of `.lucid-tooltip-detail`.",
       "status": "completed",
       "dependencies": [],
       "createdAt": "2025-06-25T16:57:18.542Z",
