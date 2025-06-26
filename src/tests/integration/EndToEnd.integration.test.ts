@@ -263,6 +263,27 @@ class MockLucidApplication {
   }
 }
 
+interface IDataService {
+  getWordDefinition(word: string): Promise<any>;
+}
+
+interface ICacheService {
+  get(key: string): Promise<any>;
+  set(key: string, value: any, ttl?: number): Promise<void>;
+  clear(): Promise<void>;
+  cache: Map<string, any>;
+}
+
+interface IUiService {
+  currentTooltip: HTMLElement | null;
+  config: any;
+  createTooltip(data: any, position: any): HTMLElement;
+  showTooltip(tooltip: HTMLElement): void;
+  hideTooltip(): void;
+  getCurrentTooltip(): HTMLElement | null;
+}
+
+
 describe('End-to-End Integration', () => {
   let app: MockLucidApplication;
   let testElement: HTMLElement;
@@ -298,9 +319,9 @@ describe('End-to-End Integration', () => {
       const events: any[] = [];
 
       // 监听所有事件
-      app.on('tooltip:shown', (data) => events.push({ type: 'shown', data }));
+      app.on('tooltip:shown', (data: any) => events.push({ type: 'shown', data }));
       app.on('tooltip:hidden', () => events.push({ type: 'hidden' }));
-      app.on('tooltip:error', (data) => events.push({ type: 'error', data }));
+      app.on('tooltip:error', (data: any) => events.push({ type: 'error', data }));
 
       // 触发单词悬停
       await app.showTooltipForWord('hello', testElement);
@@ -311,7 +332,7 @@ describe('End-to-End Integration', () => {
       expect(events[0].data.word).toBe('hello');
 
       // 验证 UI 状态
-      const uiService = app.getService('uiService');
+      const uiService = app.getService<IUiService>('uiService');
       const tooltip = uiService.getCurrentTooltip();
       expect(tooltip).toBeTruthy();
       expect(tooltip?.textContent).toContain('hello');
@@ -327,7 +348,7 @@ describe('End-to-End Integration', () => {
     });
 
     it('应该正确处理缓存机制', async () => {
-      const dataService = app.getService('dataService');
+      const dataService = app.getService<IDataService>('dataService');
       const getDefinitionSpy = vi.spyOn(dataService, 'getWordDefinition');
 
       // 第一次查询
@@ -341,7 +362,7 @@ describe('End-to-End Integration', () => {
       expect(getDefinitionSpy).toHaveBeenCalledTimes(1); // 仍然是1次
 
       // 验证缓存中的数据
-      const cacheService = app.getService('cacheService');
+      const cacheService = app.getService<ICacheService>('cacheService');
       const cachedData = await cacheService.get('word:hello');
       expect(cachedData).toBeTruthy();
       expect(cachedData.word).toBe('hello');
@@ -349,7 +370,7 @@ describe('End-to-End Integration', () => {
 
     it('应该处理未找到单词的情况', async () => {
       const events: any[] = [];
-      app.on('tooltip:shown', (data) => events.push({ type: 'shown', data }));
+      app.on('tooltip:shown', (data: any) => events.push({ type: 'shown', data }));
 
       await app.showTooltipForWord('nonexistent', testElement);
 
@@ -357,7 +378,7 @@ describe('End-to-End Integration', () => {
       expect(events[0].data.word).toBe('nonexistent');
       // isDefault 属性在Mock实现中可能不存在，这是可以接受的
 
-      const uiService = app.getService('uiService');
+      const uiService = app.getService<IUiService>('uiService');
       const tooltip = uiService.getCurrentTooltip();
       expect(tooltip?.textContent).toContain('No definition found');
     });
@@ -375,7 +396,7 @@ describe('End-to-End Integration', () => {
 
       try {
         const events: any[] = [];
-        app.on('tooltip:shown', (data) => events.push({ type: 'shown', word: data.word }));
+        app.on('tooltip:shown', (data: any) => events.push({ type: 'shown', word: data.word }));
         app.on('tooltip:hidden', () => events.push({ type: 'hidden' }));
 
         // 显示第一个单词
@@ -391,7 +412,7 @@ describe('End-to-End Integration', () => {
         expect(events[events.length - 1].word).toBe('world');
 
         // 验证当前显示的是第二个单词
-        const uiService = app.getService('uiService');
+        const uiService = app.getService<IUiService>('uiService');
         const tooltip = uiService.getCurrentTooltip();
         expect(tooltip?.textContent).toContain('world');
         expect(tooltip?.textContent).toContain('/wɜːld/');
@@ -402,7 +423,7 @@ describe('End-to-End Integration', () => {
     });
 
     it('应该为不同单词建立独立的缓存', async () => {
-      const cacheService = app.getService('cacheService');
+      const cacheService = app.getService<ICacheService>('cacheService');
 
       // 查询两个不同的单词
       await app.showTooltipForWord('hello', testElement);
@@ -432,14 +453,14 @@ describe('End-to-End Integration', () => {
 
   describe('错误处理流程', () => {
     it('应该处理数据服务错误', async () => {
-      const dataService = app.getService('dataService');
+      const dataService = app.getService<IDataService>('dataService');
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
       // Mock 数据服务抛出错误
       vi.spyOn(dataService, 'getWordDefinition').mockRejectedValueOnce(new Error('Network error'));
 
       const events: any[] = [];
-      app.on('tooltip:error', (data) => events.push({ type: 'error', data }));
+      app.on('tooltip:error', (data: any) => events.push({ type: 'error', data }));
 
       await app.showTooltipForWord('hello', testElement);
 
@@ -452,7 +473,7 @@ describe('End-to-End Integration', () => {
     });
 
     it('应该从错误中恢复并继续工作', async () => {
-      const dataService = app.getService('dataService');
+      const dataService = app.getService<IDataService>('dataService');
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
       // 第一次调用失败
@@ -469,7 +490,7 @@ describe('End-to-End Integration', () => {
 
       // 第二次调用应该成功
       await app.showTooltipForWord('hello', testElement);
-      const uiService = app.getService('uiService');
+      const uiService = app.getService<IUiService>('uiService');
       const tooltip = uiService.getCurrentTooltip();
       expect(tooltip?.textContent).toContain('Recovered definition');
 
@@ -490,7 +511,7 @@ describe('End-to-End Integration', () => {
     it('应该在创建 tooltip 时应用最大宽度', async () => {
       await app.showTooltipForWord('hello', testElement);
 
-      const uiService = app.getService('uiService');
+      const uiService = app.getService<IUiService>('uiService');
       const tooltip = uiService.getCurrentTooltip();
       expect(tooltip?.style.maxWidth).toBe('300px');
     });
@@ -501,8 +522,8 @@ describe('End-to-End Integration', () => {
       // 创建一些状态
       await app.showTooltipForWord('hello', testElement);
 
-      const uiService = app.getService('uiService');
-      const cacheService = app.getService('cacheService');
+      const uiService = app.getService<IUiService>('uiService');
+      const cacheService = app.getService<ICacheService>('cacheService');
 
       expect(uiService.getCurrentTooltip()).toBeTruthy();
 
@@ -538,13 +559,13 @@ describe('End-to-End Integration', () => {
       await Promise.all(promises);
 
       // 应该只有一个 tooltip 存在
-      const uiService = app.getService('uiService');
+      const uiService = app.getService<IUiService>('uiService');
       expect(uiService.getCurrentTooltip()).toBeTruthy();
       expect(document.querySelectorAll('.lucid-tooltip')).toHaveLength(1);
     });
 
     it('应该高效处理重复查询', async () => {
-      const dataService = app.getService('dataService');
+      const dataService = app.getService<IDataService>('dataService');
       const getDefinitionSpy = vi.spyOn(dataService, 'getWordDefinition');
 
       // 多次查询同一个单词

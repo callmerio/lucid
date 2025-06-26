@@ -3,9 +3,9 @@
  * 作为协调器，整合各个专职管理器的功能
  */
 
-import { popupService } from '../../../services/PopupService.tsx';
-import { Tooltip } from '../../../components/ui/Tooltip';
-import { TooltipStateManager } from './TooltipStateManager';
+import { popupService } from "../../../services/PopupService.tsx";
+import { Tooltip } from "../../../components/ui/Tooltip";
+import { TooltipStateManager } from "./TooltipStateManager";
 
 export interface TooltipManagerOptions {
   onWordAction?: (action: string, word: string) => void;
@@ -20,7 +20,7 @@ export interface ShowTooltipOptions {
   phonetic?: string;
   partOfSpeech?: string;
   targetElement: HTMLElement;
-  preferredPosition?: 'top' | 'bottom' | 'left' | 'right' | 'auto';
+  preferredPosition?: "top" | "bottom" | "left" | "right" | "auto";
 }
 
 export class TooltipManager {
@@ -31,7 +31,7 @@ export class TooltipManager {
   private constructor(options: TooltipManagerOptions = {}) {
     // 初始化状态管理器
     this.stateManager = new TooltipStateManager();
-    
+
     // 监听状态变化以同步渲染
     this.stateManager.addStateChangeListener((event) => {
       this.handleStateChange(event);
@@ -58,7 +58,7 @@ export class TooltipManager {
       phonetic,
       partOfSpeech,
       targetElement,
-      preferredPosition = 'auto',
+      preferredPosition = "auto",
     } = options;
 
     try {
@@ -70,7 +70,6 @@ export class TooltipManager {
           translation={translation}
           phonetic={phonetic}
           partOfSpeech={partOfSpeech}
-          visible={true}
           onExpand={() => this.stateManager.expand()}
           onCollapse={() => this.stateManager.collapse()}
           onClose={() => this.stateManager.hide(true)}
@@ -81,9 +80,8 @@ export class TooltipManager {
         targetElement,
         position: preferredPosition,
       });
-
     } catch (error) {
-      console.error('[TooltipManager] Error showing tooltip:', error);
+      console.error("[TooltipManager] Error showing tooltip:", error);
       this.stateManager.hide(true);
       throw error;
     }
@@ -119,5 +117,93 @@ export class TooltipManager {
    */
   getCurrentTargetElement(): HTMLElement | null {
     return this.stateManager.getCurrentTargetElement();
+  }
+
+  /**
+   * 添加缺失的方法以满足测试需求
+   */
+
+  /**
+   * 处理状态变化
+   */
+  private handleStateChange(event: any): void {
+    // 处理状态变化逻辑
+    console.log("[TooltipManager] State changed:", event);
+  }
+
+  /**
+   * 销毁管理器
+   */
+  destroy(): void {
+    this.stateManager.destroy();
+    // 重置单例实例
+    TooltipManager.instance = null as any;
+  }
+
+  /**
+   * 展开 tooltip
+   */
+  expandTooltip(): void {
+    this.stateManager.expand();
+  }
+
+  /**
+   * 收起 tooltip
+   */
+  collapseTooltip(): void {
+    this.stateManager.collapse();
+  }
+
+  /**
+   * 切换展开状态
+   */
+  toggleExpanded(): void {
+    this.stateManager.toggleExpanded();
+  }
+
+  /**
+   * 检查是否可见
+   */
+  isVisible(): boolean {
+    return this.stateManager.isVisible();
+  }
+
+  /**
+   * 处理鼠标进入事件
+   */
+  handleMouseEnter(element: HTMLElement): void {
+    this.stateManager.cancelHide();
+  }
+
+  /**
+   * 处理鼠标离开事件
+   */
+  handleMouseLeave(element: HTMLElement): void {
+    this.stateManager.hide();
+  }
+
+  /**
+   * 处理键盘事件
+   */
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    if (event.key === "Escape") {
+      this.hideTooltip(true);
+    } else if (event.key === "Enter" || event.key === " ") {
+      this.toggleExpanded();
+    }
+  }
+
+  /**
+   * 获取当前状态
+   */
+  getCurrentState(): any {
+    return this.stateManager.getState();
+  }
+
+  /**
+   * 获取统计信息
+   */
+  getStats(): any {
+    return this.stateManager.getStats();
   }
 }

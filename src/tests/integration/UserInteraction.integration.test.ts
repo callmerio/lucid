@@ -99,7 +99,6 @@ class MockUserInteractionManager {
     const event = new MouseEvent('mouseover', {
       bubbles: true,
       cancelable: true,
-      target: element
     });
     Object.defineProperty(event, 'target', { value: element });
     this.handleMouseOver(event);
@@ -109,7 +108,6 @@ class MockUserInteractionManager {
     const event = new MouseEvent('mouseout', {
       bubbles: true,
       cancelable: true,
-      target: element
     });
     Object.defineProperty(event, 'target', { value: element });
     this.handleMouseOut(event);

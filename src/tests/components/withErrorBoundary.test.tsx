@@ -10,6 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("react", () => ({
   default: {
     Component: class Component {
+      props: any;
+      state: any;
       constructor(props: any) {
         this.props = props;
         this.state = {};
@@ -28,6 +30,8 @@ vi.mock("react", () => ({
     })),
   },
   Component: class Component {
+    props: any;
+    state: any;
     constructor(props: any) {
       this.props = props;
       this.state = {};
@@ -50,7 +54,7 @@ interface ErrorBoundaryState {
 
 // Mock 错误边界属性接口
 interface WithErrorBoundaryProps {
-  fallback?: ReactNode;
+  fallback?: any;
   onError?: (error: Error, errorInfo: { componentStack?: string }) => void;
 }
 
@@ -224,7 +228,7 @@ describe("withErrorBoundary", () => {
 
       expect(result.type).toBe(MockErrorBoundary);
       expect(result.props.children.type).toBe(MockTestComponent);
-      expect(result.props.children.props.name).toBe("Test");
+      expect((result.props.children.props as any).name).toBe("Test");
     });
 
     it("应该传递所有 props 给子组件", () => {

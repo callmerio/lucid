@@ -377,8 +377,8 @@ describe('TooltipSystem Integration', () => {
       const eventService = tooltipManager.getServiceContainer().resolve<MockIntegratedEventService>('eventService');
       const events: any[] = [];
 
-      eventService.subscribe('tooltip:shown', (data) => events.push({ type: 'shown', data }));
-      eventService.subscribe('tooltip:hidden', (data) => events.push({ type: 'hidden', data }));
+      eventService.subscribe('tooltip:shown', (data: any) => events.push({ type: 'shown', data }));
+      eventService.subscribe('tooltip:hidden', (data: any) => events.push({ type: 'hidden', data }));
 
       // 显示和隐藏 tooltip
       await tooltipManager.showTooltip('hello', targetElement);

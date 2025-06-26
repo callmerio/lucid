@@ -48,7 +48,6 @@ export class TooltipRenderer {
     this.reactRoot.render(
       React.createElement(Tooltip, {
         ...options,
-        visible: true,
         className: 'lucid-tooltip-rendered',
       })
     );
@@ -112,7 +111,6 @@ export class TooltipRenderer {
     this.reactRoot.render(
       React.createElement(Tooltip, {
         ...updatedProps,
-        visible: true,
         className: 'lucid-tooltip-rendered',
       })
     );

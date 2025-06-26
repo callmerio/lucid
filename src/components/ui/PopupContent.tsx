@@ -7,8 +7,9 @@
 import React from "react";
 import "./PopupContent.css";
 import { WordDetails } from "../../types/services";
+import { BaseComponentProps } from "../types";
 
-interface PopupContentProps {
+interface PopupContentProps extends BaseComponentProps {
   word: string;
   wordData: WordDetails;
   onClose: () => void;
@@ -21,6 +22,7 @@ export const PopupContent: React.FC<PopupContentProps> = ({
   word,
   wordData,
   onClose,
+  className = "",
 }) => {
   // Helper to create phonetic elements
   const renderPhonetic = (region: "us" | "uk", phonetic: string) => (
@@ -33,7 +35,9 @@ export const PopupContent: React.FC<PopupContentProps> = ({
   );
 
   return (
-    <div className="lucid-tooltip-detail lucid-toolpopup-visible">
+    <div
+      className={`lucid-tooltip-detail lucid-toolpopup-visible ${className}`}
+    >
       <div className="popup-header">
         <div className="popup-title">
           <span className="lucid-toolpopup-word">{wordData.word}</span>

@@ -459,7 +459,7 @@ describe('SimpleEventManager', () => {
 
       testCases.forEach(func => {
         const expected = func();
-        const result = MockSimpleEventManager.safeExecute(func);
+        const result = MockSimpleEventManager.safeExecute(func as () => any);
         expect(result).toEqual(expected);
       });
     });

@@ -1356,7 +1356,7 @@ export async function applyWordHighlight(
   if (selectedText) {
     // 查找页面上是否已有相同词汇的高亮
     const existingHighlights = document.querySelectorAll<HTMLElement>(".lucid-highlight");
-    for (const highlight of existingHighlights) {
+    for (const highlight of Array.from(existingHighlights)) {
       const highlightWord = highlight.dataset.word || "";
       if (highlightWord === selectedText) {
         targetHighlight = highlight;

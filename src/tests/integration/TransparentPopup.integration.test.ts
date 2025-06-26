@@ -75,11 +75,11 @@ Object.defineProperty(global, 'document', { value: mockDocument, writable: true 
 Object.defineProperty(global, 'browser', { value: mockBrowser, writable: true });
 
 // 模拟React
-global.React = {
+(global as any).React = {
   createElement: vi.fn(() => ({ type: 'div', props: {} }))
 };
 
-global.createRoot = vi.fn(() => ({
+(global as any).createRoot = vi.fn(() => ({
   render: vi.fn(),
   unmount: vi.fn()
 }));

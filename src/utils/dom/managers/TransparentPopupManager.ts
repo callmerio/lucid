@@ -15,6 +15,8 @@ import { UI_EVENTS } from '../../../constants/uiEvents';
 export interface TransparentPopupOptions {
   position?: { x: number; y: number };
   referenceElement?: HTMLElement;
+  word?: string;
+  wordData?: any; // 临时使用 any，稍后可以改为具体类型
 }
 
 export class TransparentPopupManager {
@@ -24,6 +26,7 @@ export class TransparentPopupManager {
   private currentPopup: HTMLElement | null = null;
   private reactRoot: Root | null = null;
   private isVisible = false;
+  private currentOptions: TransparentPopupOptions | null = null;
 
   // 事件管理
   private eventManager: SimpleEventManager;
@@ -72,6 +75,9 @@ export class TransparentPopupManager {
     try {
       console.log('[TransparentPopupManager] 显示弹窗');
 
+      // 存储当前选项
+      this.currentOptions = options || {};
+
       // 如果已经显示，先隐藏
       if (this.isVisible) {
         this.hide();
@@ -96,10 +102,10 @@ export class TransparentPopupManager {
       this.isVisible = true;
 
       // 发送显示事件
-      this.eventManager.emit(UI_EVENTS.TRANSPARENT_POPUP.SHOWN, {
+      this.eventManager.dispatchGlobalEvent(UI_EVENTS.TRANSPARENT_POPUP.SHOWN, {
         position: this.calculatePosition(options?.position),
         element: this.currentPopup!
-      });
+      }, 'TransparentPopupManager');
 
       console.log('[TransparentPopupManager] 弹窗显示完成');
     } catch (error) {
@@ -134,9 +140,9 @@ export class TransparentPopupManager {
       this.isVisible = false;
 
       // 发送隐藏事件
-      this.eventManager.emit(UI_EVENTS.TRANSPARENT_POPUP.HIDDEN, {
+      this.eventManager.dispatchGlobalEvent(UI_EVENTS.TRANSPARENT_POPUP.HIDDEN, {
         reason: reason || '用户操作'
-      });
+      }, 'TransparentPopupManager');
 
       console.log('[TransparentPopupManager] 弹窗隐藏完成');
     } catch (error) {
@@ -184,8 +190,19 @@ export class TransparentPopupManager {
     this.reactRoot = createRoot(this.currentPopup);
 
     // 渲染PopupContent组件
+    const defaultWordData = {
+      word: this.currentOptions?.word || 'example',
+      phonetic: { us: '/ɪɡˈzæmpəl/', uk: '/ɪɡˈzɑːmpəl/' },
+      explain: [{
+        pos: 'noun',
+        definitions: [{ chinese: '示例，例子', chinese_short: '示例' }]
+      }]
+    };
+
     this.reactRoot.render(
       React.createElement(PopupContent, {
+        word: this.currentOptions?.word || 'example',
+        wordData: this.currentOptions?.wordData || defaultWordData,
         className: 'lucid-transparent-popup-content',
         onClose: () => this.hide('用户关闭')
       })
