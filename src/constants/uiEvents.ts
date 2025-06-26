@@ -50,6 +50,17 @@ export const UI_EVENTS = {
   },
 
   /**
+   * 透明弹窗相关事件
+   */
+  TRANSPARENT_POPUP: {
+    SHOW: 'lucid:transparent-popup:show',
+    HIDE: 'lucid:transparent-popup:hide',
+    TOGGLE: 'lucid:transparent-popup:toggle',
+    SHOWN: 'lucid:transparent-popup:shown',
+    HIDDEN: 'lucid:transparent-popup:hidden'
+  },
+
+  /**
    * 全局 UI 状态事件
    */
   UI_STATE: {
@@ -91,7 +102,7 @@ export interface EventPayloads {
     targetElement: HTMLElement;
     translation?: any;
   };
-  
+
   [UI_EVENTS.TOOLTIP.TRANSITION_TO_POPUP]: {
     word: string;
     targetElement: HTMLElement;
@@ -113,6 +124,29 @@ export interface EventPayloads {
   [UI_EVENTS.TOOLPOPUP.PRONUNCIATION_PLAY]: {
     word: string;
     region: 'us' | 'uk';
+  };
+
+  // 透明弹窗事件载荷
+  [UI_EVENTS.TRANSPARENT_POPUP.SHOW]: {
+    position?: { x: number; y: number };
+    referenceElement?: HTMLElement;
+  };
+
+  [UI_EVENTS.TRANSPARENT_POPUP.HIDE]: {
+    reason?: string;
+  };
+
+  [UI_EVENTS.TRANSPARENT_POPUP.TOGGLE]: {
+    force?: boolean; // true: 强制显示, false: 强制隐藏, undefined: 切换
+  };
+
+  [UI_EVENTS.TRANSPARENT_POPUP.SHOWN]: {
+    position: { x: number; y: number };
+    element: HTMLElement;
+  };
+
+  [UI_EVENTS.TRANSPARENT_POPUP.HIDDEN]: {
+    reason?: string;
   };
 
   // UI 状态事件载荷

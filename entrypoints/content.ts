@@ -1,3 +1,4 @@
+import "@styles/global/essential.css";
 import "@styles/global/main.css"; // 引入 Tailwind CSS
 import { applyWordHighlight } from "@utils/highlight/highlightUtils";
 import { expandSelectionToFullWord } from "@utils/text/selectionUtils";
@@ -33,14 +34,29 @@ export default defineContentScript({
     }
     console.log("Lucid 扩展：内容脚本已加载");
 
-    // 初始化管理器 - 确保事件监听器被设置
-    const { TooltipManager } = await import("@utils/dom/tooltipManager");
-    const { ToolpopupManager } = await import("@utils/dom/toolpopupManager");
+    // 先初始化现有管理器
+    let tooltipManager: any, toolpopupManager: any, transparentPopupManager: any;
 
-    const tooltipManager = TooltipManager.getInstance();
-    const toolpopupManager = ToolpopupManager.getInstance();
+    try {
+      const { TooltipManager } = await import("@utils/dom/tooltipManager");
+      const { ToolpopupManager } = await import("@utils/dom/toolpopupManager");
 
-    console.log("[Lucid] TooltipManager 和 ToolpopupManager 已初始化");
+      tooltipManager = TooltipManager.getInstance();
+      toolpopupManager = ToolpopupManager.getInstance();
+
+      console.log("[Lucid] TooltipManager 和 ToolpopupManager 已初始化");
+    } catch (error) {
+      console.error("[Lucid] 初始化现有管理器失败:", error);
+    }
+
+    // 尝试初始化透明弹窗管理器
+    try {
+      const { TransparentPopupManager } = await import("@utils/dom/managers/TransparentPopupManager");
+      transparentPopupManager = TransparentPopupManager.getInstance();
+      console.log("[Lucid] TransparentPopupManager 已初始化");
+    } catch (error) {
+      console.error("[Lucid] 初始化透明弹窗管理器失败:", error);
+    }
 
     // 添加全局错误处理，特别是postMessage错误
     const originalConsoleError = console.error;
@@ -139,14 +155,35 @@ export default defineContentScript({
     //   }, 50);
     // });
 
-    browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
+    browser.runtime.onMessage.addListener(async (message: ExtensionMessage, _sender, sendResponse) => {
       if (
         message.action === "logSelectionFromContextMenu" ||
         message.action === "highlightSelectionFromContextMenu"
       ) {
         // 假设右键菜单触发高亮也使用此逻辑
         await handleSelectionAndHighlight();
+      } else if (message.action === 'lucid:transparent-popup:toggle') {
+        // 处理透明弹窗切换消息
+        console.log('[Lucid] 收到透明弹窗切换消息，消息详情:', message);
+        console.log('[Lucid] 透明弹窗管理器实例:', transparentPopupManager);
+        console.log('[Lucid] 当前页面URL:', window.location.href);
+
+        if (!transparentPopupManager) {
+          console.error('[Lucid] 透明弹窗管理器未初始化');
+          sendResponse({ success: false, error: '透明弹窗管理器未初始化' });
+          return;
+        }
+
+        try {
+          transparentPopupManager.toggle();
+          console.log('[Lucid] 透明弹窗切换成功');
+          sendResponse({ success: true });
+        } catch (error) {
+          console.error('[Lucid] 透明弹窗切换失败:', error);
+          sendResponse({ success: false, error: error instanceof Error ? error.message : String(error) });
+        }
       }
+      return true; // 保持消息通道开放以支持异步响应
     });
     return () => {
       document.removeEventListener("keyup", debouncedKeyUp);
@@ -154,6 +191,7 @@ export default defineContentScript({
       // 清理管理器
       tooltipManager.destroy();
       toolpopupManager.destroy();
+      transparentPopupManager.destroy();
 
       console.log("[Lucid] 内容脚本清理完成");
     };

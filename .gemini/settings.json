@@ -1,0 +1,48 @@
+{
+  "theme": "Atom One",
+  "selectedAuthType": "oauth-personal",
+  "preferredEditor": "cursor",
+  "fileFiltering": {
+    "respectGitIgnore": false,
+    "enableRecursiveFileSearch": false
+  },
+  "autoAccept": true,
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    },
+    "mcp-server-time": {
+      "command": "uvx",
+      "args": ["mcp-server-time", "--local-timezone=Asia/Shanghai"]
+    },
+    "mcp-deepwiki": {
+      "command": "npx",
+      "args": ["-y", "mcp-deepwiki@latest"]
+    },
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": [
+        "/Users/bigdan/Workspace/ai/mcp/mcp-shrimp-task-manager/dist/index.js"
+      ],
+      "env": {
+        "DATA_DIR": "/Users/bigdan/Workspace/tools/extension/lucidtmp/lucid/memo/data",
+        "TEMPLATES_USE": "zh-CN",
+        "ENABLE_GUI": "true"
+      }
+    }
+  },
+  "features": {
+    "checkpointing": {
+      "enabled": true
+    }
+  }
+}

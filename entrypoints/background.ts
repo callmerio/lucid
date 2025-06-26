@@ -4,6 +4,12 @@ const CONTEXT_MENU_ID = "lucid-log-selected-text";
 
 export default defineBackground(() => {
   console.log("Lucid Extension: Background script loaded.");
+  console.log("Lucid Extension: Available APIs:", {
+    action: !!browser.action,
+    tabs: !!browser.tabs,
+    contextMenus: !!browser.contextMenus,
+    runtime: !!browser.runtime
+  });
 
   // Create context menu item on installation or update
   browser.runtime.onInstalled.addListener(() => {
@@ -32,4 +38,30 @@ export default defineBackground(() => {
         });
     }
   });
+
+  // Listen for extension icon clicks (action button)
+  if (browser.action && browser.action.onClicked) {
+    browser.action.onClicked.addListener(async (tab) => {
+      console.log("Lucid Extension: Action button clicked");
+
+      if (tab?.id) {
+        try {
+          // Send message to content script to toggle transparent popup
+          await browser.tabs.sendMessage(tab.id, {
+            action: 'lucid:transparent-popup:toggle',
+            source: 'background',
+            timestamp: Date.now()
+          });
+          console.log("Lucid Extension: Transparent popup toggle message sent successfully");
+        } catch (error) {
+          console.error("Lucid Extension: Failed to send transparent popup toggle message:", error);
+        }
+      } else {
+        console.warn("Lucid Extension: No active tab found for action button click");
+      }
+    });
+    console.log("Lucid Extension: Action button listener registered");
+  } else {
+    console.error("Lucid Extension: browser.action API not available");
+  }
 });

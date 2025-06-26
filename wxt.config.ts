@@ -28,6 +28,9 @@ export default defineConfig({
     host_permissions: [
       // API 权限将在后续添加
     ],
+    action: {
+      "default_title": "Lucid"
+    },
     web_accessible_resources: [
       // Mock数据已移动到src/tests/mock-data，不再需要web_accessible_resources
       // 如果将来需要在content script中访问assets资源，可以在这里添加

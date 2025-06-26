@@ -1,9 +1,5 @@
-// {{CHENGQI:
-// Action: Modified; Timestamp: 2025-06-25 21:15; Reason: 完全重写popup使用lucid-toolpopup-container设计风格;
-// }}
-
 import { useState, useEffect, useCallback } from "react";
-import "./style.css";
+import './PopupContent.css';
 
 /**
  * 扩展消息接口
@@ -14,6 +10,7 @@ interface ExtensionMessage<T = any> {
   source: "content" | "popup" | "background";
   timestamp: number;
   tabId?: number;
+  target?: string;
 }
 
 /**
@@ -36,7 +33,22 @@ interface ExtensionStats {
   extensionEnabled: boolean;
 }
 
-function App() {
+/**
+ * PopupContent组件属性
+ */
+interface PopupContentProps {
+  className?: string;
+  onClose?: () => void;
+}
+
+/**
+ * 共享的弹窗内容组件
+ * 可以在标准popup和透明弹窗中复用
+ */
+export const PopupContent: React.FC<PopupContentProps> = ({ 
+  className = "lucid-toolpopup-container lucid-toolpopup-visible", 
+  onClose 
+}) => {
   const [words, setWords] = useState<WordData[]>([]);
   const [stats, setStats] = useState<ExtensionStats>({
     totalWords: 0,
@@ -59,7 +71,7 @@ function App() {
    */
   const initializePopup = useCallback(async () => {
     try {
-      console.log("[Popup] 初始化开始");
+      console.log("[PopupContent] 初始化开始");
 
       // 设置消息监听器
       if (typeof browser !== 'undefined' && browser.runtime) {
@@ -74,7 +86,7 @@ function App() {
         });
         if (tabs[0]?.id) {
           setCurrentTabId(tabs[0].id);
-          console.log("[Popup] 当前标签页ID:", tabs[0].id);
+          console.log("[PopupContent] 当前标签页ID:", tabs[0].id);
         }
       }
 
@@ -85,9 +97,9 @@ function App() {
       ]);
 
       setConnectionStatus("connected");
-      console.log("[Popup] 初始化完成");
+      console.log("[PopupContent] 初始化完成");
     } catch (error) {
-      console.error("[Popup] 初始化失败:", error);
+      console.error("[PopupContent] 初始化失败:", error);
       setConnectionStatus("disconnected");
     }
   }, []);
@@ -101,7 +113,7 @@ function App() {
       sender: chrome.runtime.MessageSender,
       sendResponse: (response?: any) => void
     ) => {
-      console.log("[Popup] 收到消息:", message);
+      console.log("[PopupContent] 收到消息:", message);
 
       if (message.target !== "popup") {
         return;
@@ -116,12 +128,12 @@ function App() {
             handleHighlightUpdatedMessage(message.payload);
             break;
           default:
-            console.log("[Popup] 未知消息类型:", message.action);
+            console.log("[PopupContent] 未知消息类型:", message.action);
         }
         sendResponse({ success: true });
       } catch (error) {
-        console.error("[Popup] 处理消息时出错:", error);
-        sendResponse({ success: false, error: error.message });
+        console.error("[PopupContent] 处理消息时出错:", error);
+        sendResponse({ success: false, error: (error as Error).message });
       }
 
       return true;
@@ -143,9 +155,9 @@ function App() {
       ];
       
       setWords(mockWords);
-      console.log("[Popup] 词汇数据加载完成:", mockWords.length, "个词汇");
+      console.log("[PopupContent] 词汇数据加载完成:", mockWords.length, "个词汇");
     } catch (error) {
-      console.error("[Popup] 加载词汇数据失败:", error);
+      console.error("[PopupContent] 加载词汇数据失败:", error);
     }
   }, []);
 
@@ -163,9 +175,9 @@ function App() {
       };
       
       setStats(mockStats);
-      console.log("[Popup] 统计数据加载完成:", mockStats);
+      console.log("[PopupContent] 统计数据加载完成:", mockStats);
     } catch (error) {
-      console.error("[Popup] 加载统计数据失败:", error);
+      console.error("[PopupContent] 加载统计数据失败:", error);
     }
   }, []);
 
@@ -173,7 +185,7 @@ function App() {
    * 处理词汇添加消息
    */
   const handleWordAddedMessage = useCallback((payload: any) => {
-    console.log("[Popup] 处理词汇添加:", payload);
+    console.log("[PopupContent] 处理词汇添加:", payload);
     // 重新加载数据
     loadWordsData();
     loadStatsData();
@@ -183,7 +195,7 @@ function App() {
    * 处理高亮更新消息
    */
   const handleHighlightUpdatedMessage = useCallback((payload: any) => {
-    console.log("[Popup] 处理高亮更新:", payload);
+    console.log("[PopupContent] 处理高亮更新:", payload);
     // 重新加载数据
     loadStatsData();
   }, [loadStatsData]);
@@ -206,13 +218,13 @@ function App() {
           tabId: currentTabId || undefined,
         };
 
-        console.log("[Popup] 发送消息:", message);
+        console.log("[PopupContent] 发送消息:", message);
         const response = await browser.runtime.sendMessage(message);
-        console.log("[Popup] 收到响应:", response);
+        console.log("[PopupContent] 收到响应:", response);
 
         return response;
       } catch (error) {
-        console.error("[Popup] 发送消息失败:", error);
+        console.error("[PopupContent] 发送消息失败:", error);
         setConnectionStatus("disconnected");
         throw error;
       }
@@ -231,7 +243,7 @@ function App() {
           scrollIntoView: true,
         });
       } catch (error) {
-        console.error("[Popup] 聚焦词汇失败:", error);
+        console.error("[PopupContent] 聚焦词汇失败:", error);
       }
     },
     [sendMessage]
@@ -249,7 +261,7 @@ function App() {
       
       setStats(prev => ({ ...prev, extensionEnabled: newState }));
     } catch (error) {
-      console.error("[Popup] 切换扩展状态失败:", error);
+      console.error("[PopupContent] 切换扩展状态失败:", error);
     }
   }, [stats.extensionEnabled, sendMessage]);
 
@@ -260,7 +272,7 @@ function App() {
     if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.onMessage.hasListener) {
       browser.runtime.onMessage.removeListener(handleMessage);
     }
-    console.log("[Popup] 清理完成");
+    console.log("[PopupContent] 清理完成");
   }, [handleMessage]);
 
   /**
@@ -282,7 +294,7 @@ function App() {
   };
 
   return (
-    <div className="lucid-toolpopup-container lucid-toolpopup-visible">
+    <div className={className}>
       {/* 标题栏 */}
       <div className="popup-header">
         <div className="popup-title">
@@ -297,6 +309,11 @@ function App() {
             </span>
           </div>
         </div>
+        {onClose && (
+          <button className="close-button" onClick={onClose} aria-label="关闭">
+            ✕
+          </button>
+        )}
       </div>
 
       {/* 统计卡片 */}
@@ -379,6 +396,4 @@ function App() {
       </div>
     </div>
   );
-}
-
-export default App;
+};

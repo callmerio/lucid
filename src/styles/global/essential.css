@@ -17,7 +17,7 @@
   --lucid-text-disabled: #ccc;
 
   /* 边框颜色 */
-  --lucid-border-subtle: rgba(255, 255, 255, 0.0);
+  --lucid-border-subtle: rgba(255, 255, 255, 0);
 
   /* 交互颜色 */
   --lucid-accent-primary: #ff6b6b;
@@ -26,7 +26,9 @@
   --lucid-accent-secondary-hover: rgba(255, 255, 255, 0.2);
 
   /* 字体系统 */
-  --lucid-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --lucid-font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+    "Microsoft YaHei", sans-serif;
   --lucid-font-size-sm: 12px;
   --lucid-font-size-base: 13px;
   --lucid-font-size-md: 14px;
@@ -69,8 +71,8 @@
   --lucid-width-tooltip-min: 120px;
   --lucid-width-tooltip-max: 280px;
   --lucid-width-toolpopup: 320px;
-  --lucid-height-button-sm: 24px;  /* 从20px改为24px，为16px SVG提供足够空间 */
-  --lucid-height-button-md: 28px;  /* 相应调整中等按钮尺寸 */
+  --lucid-height-button-sm: 24px; /* 从20px改为24px，为16px SVG提供足够空间 */
+  --lucid-height-button-md: 28px; /* 相应调整中等按钮尺寸 */
 }
 
 /* ===== 亮色主题 ===== */
@@ -88,15 +90,26 @@
 
 /* ===== 核心动画 ===== */
 @keyframes lucid-heartbeat {
-  0% { transform: scale(1); }
-  14% { transform: scale(1.15); }
-  28% { transform: scale(1); }
-  42% { transform: scale(1.15); }
-  70% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.15);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(1);
+  }
 }
 
 @keyframes lucid-breathe {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
   }
@@ -133,8 +146,12 @@
 }
 
 @keyframes lucid-shine {
-  from { -webkit-mask-position: 150%; }
-  to { -webkit-mask-position: -50%; }
+  from {
+    -webkit-mask-position: 150%;
+  }
+  to {
+    -webkit-mask-position: -50%;
+  }
 }
 
 /* ===== 基础组件样式 ===== */
@@ -153,7 +170,9 @@
   z-index: var(--lucid-z-tooltip);
   opacity: 0;
   transform: translateY(-2px);
-  transition: opacity var(--lucid-transition-fast), transform var(--lucid-transition-fast);
+  transition:
+    opacity var(--lucid-transition-fast),
+    transform var(--lucid-transition-fast);
   pointer-events: none;
   font-family: var(--lucid-font-family);
   font-size: var(--lucid-font-size-base);
@@ -185,7 +204,9 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  transition: width var(--lucid-transition-normal), padding-right var(--lucid-transition-normal);
+  transition:
+    width var(--lucid-transition-normal),
+    padding-right var(--lucid-transition-normal);
   height: auto;
 }
 
@@ -228,6 +249,47 @@
 }
 
 @keyframes lucid-shine {
-  from { -webkit-mask-position: 150%; }
-  to { -webkit-mask-position: -50%; }
+  from {
+    -webkit-mask-position: 150%;
+  }
+  to {
+    -webkit-mask-position: -50%;
+  }
+}
+
+/* ===== 透明弹窗样式 ===== */
+.lucid-transparent-popup {
+  position: fixed;
+  z-index: 2147483648; /* 比toolpopup更高 */
+  background: var(--lucid-bg-glass-primary);
+  backdrop-filter: var(--lucid-blur-md);
+  -webkit-backdrop-filter: var(--lucid-blur-md);
+  border-radius: var(--lucid-radius-xl);
+  border: 1px solid var(--lucid-border-subtle);
+  padding: var(--lucid-spacing-8);
+  width: 380px;
+  min-height: 450px;
+  box-shadow: var(--lucid-shadow-lg);
+  user-select: none;
+  font-family: var(--lucid-font-family);
+  color: var(--lucid-text-primary);
+  opacity: 0;
+  transform: scaleY(0) translateY(-10px);
+  transform-origin: top center;
+  transition: all var(--lucid-transition-normal) var(--lucid-ease-bounce);
+
+  /* 内容布局 - 与popup保持一致 */
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lucid-transparent-popup.visible {
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
+}
+
+/* 亮色主题适配 */
+[data-theme="light"] .lucid-transparent-popup {
+  background: rgba(255, 255, 255, 0.9); /* 亮色主题透明背景 */
 }
