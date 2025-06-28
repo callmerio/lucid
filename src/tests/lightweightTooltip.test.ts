@@ -5,7 +5,7 @@
 
 import { vi } from 'vitest';
 import { SimpleEventManager } from '../utils/dom/simpleEventManager';
-import { TooltipManager } from '../utils/dom/legacy/tooltipManager';
+import { TooltipManager } from '../utils/dom/managers/tooltip/TooltipManager';
 
 describe('轻量级Tooltip系统测试', () => {
   let simpleEventManager: SimpleEventManager;
@@ -143,12 +143,20 @@ describe('轻量级Tooltip系统测试', () => {
       document.body.appendChild(testElement);
 
       // 显示tooltip
-      await tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip({
+        word: 'test',
+        translation: 'test translation',
+        targetElement: testElement,
+        preferredPosition: 'auto'
+      });
 
-      // 验证tooltip已创建
-      const tooltip = document.querySelector('.lucid-tooltip') as HTMLElement;
+      // 验证tooltip已创建 - 新的TooltipManager使用PopupService
+      const tooltipContainer = document.querySelector('#lucid-toolfull-container-tooltip-test') as HTMLElement;
+      expect(tooltipContainer).toBeTruthy();
+
+      // 检查内部的popup元素
+      const tooltip = document.querySelector('#lucid-toolfull-tooltip-test') as HTMLElement;
       expect(tooltip).toBeTruthy();
-      expect(tooltip?.dataset.word).toBe('test');
 
       // 隐藏tooltip
       tooltipManager.hideTooltip(0);
@@ -173,7 +181,12 @@ describe('轻量级Tooltip系统测试', () => {
       };
 
       // 显示tooltip
-      await tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip({
+        word: 'test',
+        translation: 'test translation',
+        targetElement: testElement,
+        preferredPosition: 'auto'
+      });
 
       // 等待tooltip完全显示
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -200,7 +213,12 @@ describe('轻量级Tooltip系统测试', () => {
       document.body.appendChild(testElement);
 
       // 显示tooltip
-      await tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip({
+        word: 'test',
+        translation: 'test translation',
+        targetElement: testElement,
+        preferredPosition: 'auto'
+      });
 
       // 等待tooltip完全显示和事件监听器添加
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -233,12 +251,22 @@ describe('轻量级Tooltip系统测试', () => {
       document.body.appendChild(element2);
 
       // 显示第一个tooltip
-      await tooltipManager.showTooltip(element1, 'word1');
+      await tooltipManager.showTooltip({
+        word: 'word1',
+        translation: 'translation1',
+        targetElement: element1,
+        preferredPosition: 'auto'
+      });
       let tooltip = document.querySelector('.lucid-tooltip') as HTMLElement;
       expect(tooltip?.dataset.word).toBe('word1');
 
       // 切换到第二个tooltip
-      await tooltipManager.showTooltip(element2, 'word2');
+      await tooltipManager.showTooltip({
+        word: 'word2',
+        translation: 'translation2',
+        targetElement: element2,
+        preferredPosition: 'auto'
+      });
       tooltip = document.querySelector('.lucid-tooltip') as HTMLElement;
       expect(tooltip?.dataset.word).toBe('word2');
 
@@ -254,11 +282,21 @@ describe('轻量级Tooltip系统测试', () => {
       document.body.appendChild(testElement);
 
       // 显示tooltip
-      await tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip({
+        word: 'test',
+        translation: 'test translation',
+        targetElement: testElement,
+        preferredPosition: 'auto'
+      });
       const firstTooltip = document.querySelector('.lucid-tooltip');
 
       // 再次显示相同单词的tooltip
-      await tooltipManager.showTooltip(testElement, 'test');
+      await tooltipManager.showTooltip({
+        word: 'test',
+        translation: 'test translation',
+        targetElement: testElement,
+        preferredPosition: 'auto'
+      });
       const secondTooltip = document.querySelector('.lucid-tooltip');
 
       // 应该是同一个tooltip
@@ -280,7 +318,12 @@ describe('轻量级Tooltip系统测试', () => {
 
       // 尝试显示tooltip，应该不会抛出错误
       expect(() => {
-        tooltipManager.showTooltip(invalidElement as HTMLElement, 'test');
+        tooltipManager.showTooltip({
+          word: 'test',
+          translation: 'test translation',
+          targetElement: invalidElement as HTMLElement,
+          preferredPosition: 'auto'
+        });
       }).not.toThrow();
 
       consoleSpy.mockRestore();

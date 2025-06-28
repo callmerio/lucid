@@ -1,6 +1,9 @@
 /**
  * Tooltip 管理器相关类型定义
+ * 简化版本，支持基本的 Tooltip 和 Toolfull 管理
  */
+
+import { WordDetails } from '@/types/services';
 
 // 基础位置类型
 export interface Position {
@@ -11,7 +14,15 @@ export interface Position {
 // 位置偏好
 export type PositionPreference = 'top' | 'bottom' | 'left' | 'right' | 'auto';
 
-// Tooltip 状态
+// 简单 Tooltip 数据
+export interface SimpleTooltipData {
+  word: string;
+  translation: string;
+  phonetic?: string;
+  partOfSpeech?: string;
+}
+
+// Tooltip 状态（简化版本）
 export interface TooltipState {
   visible: boolean;
   expanded: boolean;
@@ -77,67 +88,6 @@ export interface TooltipManagerOptions {
   hideDelay?: number;
   maxWidth?: number;
   maxHeight?: number;
-}
-
-// 统计信息接口
-export interface TooltipStats {
-  state: {
-    isVisible: boolean;
-    isExpanded: boolean;
-    currentWord: string;
-    listenersCount: number;
-    hasActiveTimeout: boolean;
-  };
-  events: {
-    mouseEnterCount: number;
-    mouseLeaveCount: number;
-    expandClickCount: number;
-    closeClickCount: number;
-  };
-  renderer: {
-    renderCount: number;
-    lastRenderTime: number;
-    currentTooltip: HTMLElement | null;
-  };
-}
-
-// 当前状态信息
-export interface CurrentState {
-  tooltip: TooltipState;
-  renderer: {
-    currentTooltip: HTMLElement | null;
-    isRendering: boolean;
-  };
-  eventHandler: {
-    hasActiveListeners: boolean;
-    lastEventTime: number;
-  };
-}
-
-// 事件处理器统计
-export interface EventHandlerStats {
-  mouseEnterCount: number;
-  mouseLeaveCount: number;
-  expandClickCount: number;
-  closeClickCount: number;
-}
-
-// 状态管理器统计
-export interface StateManagerStats {
-  listenersCount: number;
-  hasActiveTimeout: boolean;
-  currentWord: string;
-  isVisible: boolean;
-  isExpanded: boolean;
-}
-
-// 渲染器配置
-export interface RendererConfig {
-  maxWidth?: number;
-  maxHeight?: number;
-  className?: string;
-  zIndex?: number;
-  animationDuration?: number;
 }
 
 // 位置计算结果

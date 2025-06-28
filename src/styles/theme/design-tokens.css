@@ -35,6 +35,80 @@
   --lucid-error: #f44336;
   --lucid-info: #2196f3;
 
+  /* ===== 高亮颜色调色板 ===== */
+  
+  /* 橙色系 (默认) */
+  --lucid-highlight-orange-1: #ff6b35;
+  --lucid-highlight-orange-2: #ff7a45;
+  --lucid-highlight-orange-3: #ff8a55;
+  --lucid-highlight-orange-4: #ff9a65;
+  --lucid-highlight-orange-5: #ffaa75;
+  --lucid-highlight-orange-6: #ffba85;
+  --lucid-highlight-orange-7: #ffca95;
+  --lucid-highlight-orange-8: #ffdaa5;
+  --lucid-highlight-orange-9: #ffeab5;
+  --lucid-highlight-orange-10: #fffac5;
+
+  /* 蓝色系 */
+  --lucid-highlight-blue-1: #3b82f6;
+  --lucid-highlight-blue-2: #4f90f7;
+  --lucid-highlight-blue-3: #639ef8;
+  --lucid-highlight-blue-4: #77acf9;
+  --lucid-highlight-blue-5: #8bbafc;
+  --lucid-highlight-blue-6: #9fc8fd;
+  --lucid-highlight-blue-7: #b3d6fe;
+  --lucid-highlight-blue-8: #c7e4ff;
+  --lucid-highlight-blue-9: #dbf2ff;
+  --lucid-highlight-blue-10: #eff8ff;
+
+  /* 绿色系 */
+  --lucid-highlight-green-1: #10b981;
+  --lucid-highlight-green-2: #24c48c;
+  --lucid-highlight-green-3: #38cf97;
+  --lucid-highlight-green-4: #4cdaa2;
+  --lucid-highlight-green-5: #60e5ad;
+  --lucid-highlight-green-6: #74f0b8;
+  --lucid-highlight-green-7: #88fbc3;
+  --lucid-highlight-green-8: #9cfcce;
+  --lucid-highlight-green-9: #b0fdd9;
+  --lucid-highlight-green-10: #c4fee4;
+
+  /* 紫色系 */
+  --lucid-highlight-purple-1: #8b5cf6;
+  --lucid-highlight-purple-2: #9670f7;
+  --lucid-highlight-purple-3: #a184f8;
+  --lucid-highlight-purple-4: #ac98f9;
+  --lucid-highlight-purple-5: #b7acfa;
+  --lucid-highlight-purple-6: #c2c0fb;
+  --lucid-highlight-purple-7: #cdd4fc;
+  --lucid-highlight-purple-8: #d8e8fd;
+  --lucid-highlight-purple-9: #e3fcfe;
+  --lucid-highlight-purple-10: #eef0ff;
+
+  /* 粉色系 */
+  --lucid-highlight-pink-1: #ec4899;
+  --lucid-highlight-pink-2: #ef5ca4;
+  --lucid-highlight-pink-3: #f270af;
+  --lucid-highlight-pink-4: #f584ba;
+  --lucid-highlight-pink-5: #f898c5;
+  --lucid-highlight-pink-6: #fbacd0;
+  --lucid-highlight-pink-7: #fec0db;
+  --lucid-highlight-pink-8: #fed4e6;
+  --lucid-highlight-pink-9: #ffe8f1;
+  --lucid-highlight-pink-10: #fffcfc;
+
+  /* 黄色系 */
+  --lucid-highlight-yellow-1: #f59e0b;
+  --lucid-highlight-yellow-2: #f6ab1c;
+  --lucid-highlight-yellow-3: #f7b82d;
+  --lucid-highlight-yellow-4: #f8c53e;
+  --lucid-highlight-yellow-5: #f9d24f;
+  --lucid-highlight-yellow-6: #fadf60;
+  --lucid-highlight-yellow-7: #fbec71;
+  --lucid-highlight-yellow-8: #fcf982;
+  --lucid-highlight-yellow-9: #fdf693;
+  --lucid-highlight-yellow-10: #feffa4;
+
   /* ===== 字体系统 ===== */
 
   /* 字体栈 */

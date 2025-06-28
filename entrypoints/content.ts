@@ -1,5 +1,6 @@
 import "@styles/global/essential.css";
 import "@styles/global/main.css"; // 引入 Tailwind CSS
+import "@styles/components/Highlight.css"; // 高亮组件样式
 import { applyWordHighlight } from "@utils/highlight/highlightUtils";
 import { expandSelectionToFullWord } from "@utils/text/selection";
 import { debounce } from "lodash-es";

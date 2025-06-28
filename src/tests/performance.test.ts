@@ -3,7 +3,7 @@
  */
 
 import { SimpleEventManager } from '../utils/dom/simpleEventManager';
-import { TooltipManager } from '../utils/dom/legacy/tooltipManager';
+import { TooltipManager } from '../utils/dom/managers/tooltip/TooltipManager';
 import { ToolfullManager } from '../utils/dom/managers/popup/ToolfullManager';
 import { UI_EVENTS, EventPriority } from '@constants/uiEvents';
 

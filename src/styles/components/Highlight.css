@@ -1,0 +1,29 @@
+/* src/styles/components/Highlight.css */
+/* 高亮功能专用样式 - 从 highlightUtils.js StyleManager 迁移 */
+
+/* ===== 高亮元素基础样式 ===== */
+.lucid-highlight {
+  transition: color 500ms ease-in-out;
+  cursor: pointer;
+  border-radius: var(--lucid-radius-xs);
+  padding: 1px 2px;
+  margin: 0 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ===== 高亮闪烁动画 ===== */
+@keyframes lucid-flash {
+  0%, 100% { 
+    color: inherit !important; 
+  }
+  50% { 
+    background-color: currentColor !important; 
+    color: #ffffff !important; 
+  }
+}
+
+/* 应用闪烁动画的类 */
+.lucid-highlight.flash {
+  animation: lucid-flash 0.6s ease-in-out;
+}

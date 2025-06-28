@@ -1,22 +1,15 @@
 /**
  * TooltipStateManager - Tooltip 状态管理器
  * 负责管理 tooltip 的显示/隐藏状态和生命周期
+ * 支持统一的 Tooltip 和 Toolfull 管理
  */
 
-export interface TooltipState {
-  visible: boolean;
-  expanded: boolean;
-  word: string;
-  targetElement: HTMLElement | null;
-  hideTimeout: number | null;
-}
+import {
+  TooltipState,
+  StateChangeEvent
+} from '../types';
 
-export interface StateChangeEvent {
-  type: 'show' | 'hide' | 'expand' | 'collapse';
-  state: TooltipState;
-  previousState: TooltipState;
-}
-
+// 向后兼容的类型定义
 export type StateChangeHandler = (event: StateChangeEvent) => void;
 
 export class TooltipStateManager {
@@ -232,7 +225,7 @@ export class TooltipStateManager {
    */
   reset(): void {
     this.cancelHide();
-    
+
     const previousState = { ...this.state };
     this.state = {
       visible: false,

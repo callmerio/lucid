@@ -13,6 +13,7 @@ interface ToolfullProps extends BaseComponentProps {
   word: string;
   wordData: WordDetails;
   onClose: () => void;
+  onMinimize?: () => void;
   // Future event handlers can be added here, e.g.:
   // onPlayPronunciation: (region: 'us' | 'uk') => void;
   // onToggleFavorite: () => void;
@@ -22,6 +23,7 @@ export const Toolfull: React.FC<ToolfullProps> = ({
   word,
   wordData,
   onClose,
+  onMinimize,
   className = "",
 }) => {
   // Helper to create phonetic elements
@@ -40,9 +42,20 @@ export const Toolfull: React.FC<ToolfullProps> = ({
         <div className="lucid-toolfull-title">
           <span className="lucid-toolfull-word">{wordData.word}</span>
         </div>
-        <button className="close-button" onClick={onClose} aria-label="关闭">
-          ✕
-        </button>
+        <div className="lucid-toolfull-actions">
+          {onMinimize && (
+            <button
+              className="minimize-button"
+              onClick={onMinimize}
+              aria-label="最小化"
+            >
+              −
+            </button>
+          )}
+          <button className="close-button" onClick={onClose} aria-label="关闭">
+            ✕
+          </button>
+        </div>
       </div>
 
       <div className="lucid-toolfull-phonetic">

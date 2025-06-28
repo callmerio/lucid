@@ -53,11 +53,14 @@
 .lucid-tooltip-main {
   display: flex;
   align-items: center;
-  flex-grow: 1;
+  position: relative;
+  flex: 1;
 }
 
 .lucid-tooltip-text {
-  /* Styles for the main translation text */
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .lucid-tooltip-phonetic {
@@ -71,49 +74,78 @@
 }
 
 .lucid-tooltip-hover-zone {
-  /* A zone to keep the tooltip open when moving mouse towards it */
   position: absolute;
-  bottom: -10px;
-  left: 0;
   right: 0;
-  height: 10px;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  pointer-events: none;
 }
 
 .lucid-tooltip-actions {
-  display: flex;
+  display: none;
   align-items: center;
+  gap: var(--lucid-spacing-2);
+  margin-left: 0px;
+  opacity: 0;
+  transform: translateX(15px) scale(0.8);
+  max-width: 0;
+  overflow-x: visible;
+  overflow-y: visible;
+  transition: opacity 400ms var(--lucid-ease-bounce), transform 400ms var(--lucid-ease-bounce), max-width var(--lucid-transition-normal), margin-left var(--lucid-transition-normal);
+}
+
+/* Tooltip 展开状态样式 */
+.lucid-tooltip-expanded .lucid-tooltip-content {
+  padding-right: var(--lucid-spacing-3);
+}
+
+.lucid-tooltip-expanded .lucid-tooltip-actions {
+  max-width: 60px;
   margin-left: var(--lucid-spacing-4);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  padding-left: var(--lucid-spacing-4);
 }
 
 .lucid-tooltip-btn {
-  background: none;
-  border: none;
-  color: var(--lucid-text-secondary);
-  cursor: pointer;
-  padding: var(--lucid-spacing-2);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: var(--lucid-height-button-sm);
+  height: var(--lucid-height-button-sm);
+  border: none;
   border-radius: var(--lucid-radius-sm);
-  transition: background-color var(--lucid-transition-fast), color var(--lucid-transition-fast);
+  background: var(--lucid-accent-secondary);
+  color: var(--lucid-text-secondary);
+  cursor: pointer;
+  transition: all var(--lucid-transition-fast);
+  padding: 0;
+  font-family: var(--lucid-font-family);
+  user-select: none;
 }
 
 .lucid-tooltip-btn:hover {
-  background-color: var(--lucid-accent-secondary-hover);
+  background: var(--lucid-accent-secondary-hover);
   color: var(--lucid-text-primary);
+  animation: lucid-heartbeat 4.2s ease-in-out infinite;
 }
 
-.lucid-tooltip-btn-down {
-  /* Specific styles for down button if needed */
-}
-
-.lucid-tooltip-btn-like {
-  /* Specific styles for like button if needed */
+.lucid-tooltip-btn:active {
+  transform: scale(0.95);
 }
 
 .lucid-tooltip-btn svg {
-  width: 16px;
-  height: 16px;
+  flex-shrink: 0;
+}
+
+.lucid-tooltip-btn-like svg {
+  transform: scale(0.7);
+}
+
+.lucid-tooltip-btn-liked {
+  background: var(--lucid-accent-primary) !important;
+  color: white !important;
+}
+
+.lucid-tooltip-btn-liked:hover {
+  background: var(--lucid-accent-primary-hover) !important;
+  animation: lucid-heartbeat 4.2s ease-in-out infinite;
 }
