@@ -1,4 +1,15 @@
-import { TooltipManager } from "../dom/legacy/tooltipManager";
+import { TooltipManager } from "../dom/managers/tooltip/TooltipManager";
+import { serviceContainer } from "@services/container/ServiceContainer";
+import type { HighlightStorageService } from "@services/storage/highlightStorage";
+// import { UI_EVENTS } from "@constants/uiEvents";
+// import { simpleEventManager } from "../dom/simpleEventManager";
+
+/**
+ * 获取高亮存储服务实例
+ */
+function getStorageService(): HighlightStorageService {
+  return serviceContainer.resolve<HighlightStorageService>('HighlightStorageService');
+}
 
 /**
  * 扩展程序在 `browser.storage.local` 中保存的数据结构。
@@ -90,13 +101,20 @@ function createHighlightElement(
  * 为高亮元素添加tooltip事件监听
  */
 function addTooltipEvents(element: HTMLElement, word: string): void {
+  // 方案1: 使用新的 TooltipManager
   const tooltipManager = TooltipManager.getInstance();
 
   element.addEventListener('mouseenter', async () => {
     // 鼠标进入高亮元素时，取消任何隐藏操作并显示tooltip
     tooltipManager.cancelHide();
     try {
-      await tooltipManager.showTooltip(element, word);
+      // 新的 TooltipManager 需要 ShowTooltipOptions 参数
+      await tooltipManager.showTooltip({
+        word: word,
+        translation: `Loading translation for "${word}"...`, // 临时占位符，实际翻译会在内部获取
+        targetElement: element,
+        preferredPosition: 'auto'
+      });
     } catch (error) {
       console.error('[Lucid] Error showing tooltip:', error);
     }
@@ -104,8 +122,31 @@ function addTooltipEvents(element: HTMLElement, word: string): void {
 
   element.addEventListener('mouseleave', () => {
     // 只有鼠标真正离开高亮元素时才隐藏tooltip
-    tooltipManager.hideTooltip(300);
+    // 新的 TooltipManager 的 hideTooltip 方法接受 boolean 参数
+    tooltipManager.hideTooltip(false); // false 表示延迟隐藏
   });
+
+  // 方案2: 或者使用事件系统（备选方案，当前注释掉）
+  /*
+  element.addEventListener('mouseenter', () => {
+    simpleEventManager.dispatchGlobalEvent(
+      UI_EVENTS.TOOLTIP.SHOW,
+      {
+        word: word,
+        targetElement: element
+      },
+      'highlightUtils'
+    );
+  });
+
+  element.addEventListener('mouseleave', () => {
+    simpleEventManager.dispatchGlobalEvent(
+      UI_EVENTS.TOOLTIP.HIDE,
+      {},
+      'highlightUtils'
+    );
+  });
+  */
 }
 // ---------- end helpers ----------
 function highlightWordInContainer(
@@ -1045,15 +1086,9 @@ export function updateAllWordHighlights(
  */
 export async function removeWordHighlight(word: string): Promise<void> {
   try {
-    // 更新storage，将计数设为0
-    const data: ExtensionStorage = (await browser.storage.local.get([
-      "wordMarkings",
-    ])) as ExtensionStorage;
-    const wordMarkings = data.wordMarkings || {};
-
-    // 从storage中删除该词汇的记录
-    delete wordMarkings[word];
-    await browser.storage.local.set({ wordMarkings });
+    // 使用服务移除单词标记
+    const storageService = getStorageService();
+    await storageService.removeWordMarking(word);
 
     // 移除页面上所有相同词汇的高亮元素
     document.querySelectorAll<HTMLElement>(".lucid-highlight").forEach((el) => {
@@ -1097,13 +1132,9 @@ export async function decreaseWordHighlight(
       return;
     }
 
-    // 更新storage
-    const data: ExtensionStorage = (await browser.storage.local.get([
-      "wordMarkings",
-    ])) as ExtensionStorage;
-    const wordMarkings = data.wordMarkings || {};
-    wordMarkings[word] = newCount;
-    await browser.storage.local.set({ wordMarkings });
+    // 使用服务更新存储
+    const storageService = getStorageService();
+    await storageService.updateWordMarking(word, newCount);
 
     // 更新页面上所有相同词汇的高亮元素
     updateAllWordHighlights(word, newCount, baseColor, isDarkText);
@@ -1239,13 +1270,9 @@ export async function addWordHighlight(
     const baseColor = targetElement.dataset.baseColor || DEFAULT_BASE_COLOR;
     const newCount = 1; // 新高亮设置为1
 
-    // 更新storage
-    const data: ExtensionStorage = (await browser.storage.local.get([
-      "wordMarkings",
-    ])) as ExtensionStorage;
-    const wordMarkings = data.wordMarkings || {};
-    wordMarkings[word] = newCount;
-    await browser.storage.local.set({ wordMarkings });
+    // 使用服务更新存储
+    const storageService = getStorageService();
+    await storageService.updateWordMarking(word, newCount);
 
     // 使用改进的高亮方法来高亮页面上的所有匹配词汇
     const { className: highlightClassName, hex } = calculateHighlight(
@@ -1378,11 +1405,6 @@ export async function applyWordHighlight(
 
     // 更新storage中的计数
     try {
-      const data: ExtensionStorage = (await browser.storage.local.get([
-        "settings",
-        "wordMarkings",
-      ])) as ExtensionStorage;
-      const wordMarkings = data.wordMarkings || {};
 
       const prev = Number(targetHighlight.dataset.markCount ?? 0);
       const newCount = Math.min(prev + 1, MAX_MARK_COUNT);
@@ -1390,9 +1412,9 @@ export async function applyWordHighlight(
       // Diagnostic log to check counts during re-highlight
       console.log(`[Lucid] Re-highlighting. Word: "${word}", Prev DOM count: ${prev}, Calculated new count: ${newCount}, Max count: ${MAX_MARK_COUNT}`);
 
-      // 更新storage
-      wordMarkings[word] = newCount;
-      await browser.storage.local.set({ wordMarkings });
+      // 使用服务更新存储
+      const storageService = getStorageService();
+      await storageService.updateWordMarking(word, newCount);
 
       // 更新页面上所有相同词汇的高亮元素
       const baseColor = targetHighlight.dataset.baseColor || DEFAULT_BASE_COLOR;
@@ -1434,23 +1456,21 @@ export async function applyWordHighlight(
   }
 
   try {
-    const data: ExtensionStorage = (await browser.storage.local.get([
-      "settings",
-      "wordMarkings",
-    ])) as ExtensionStorage;
-    const settings = data.settings || {};
-    const wordMarkings = data.wordMarkings || {};
+    const storageService = getStorageService();
+    
+    // 获取设置和当前计数
+    const settings = await storageService.getSettings();
+    const currentMarkCount = await storageService.getMarkCount(word);
+    
+    const baseColor = settings.highlightColor || DEFAULT_BASE_COLOR;
+    const newMarkCount = Math.min(currentMarkCount + 1, MAX_MARK_COUNT); // 增加标记次数，但不超过上限
 
-    const baseColor = settings.highlightBaseColor || DEFAULT_BASE_COLOR;
-    let currentMarkCount = wordMarkings[word] || 0;
-    currentMarkCount = Math.min(currentMarkCount + 1, MAX_MARK_COUNT); // 增加标记次数，但不超过上限
-
-    wordMarkings[word] = currentMarkCount;
-    await browser.storage.local.set({ wordMarkings });
+    // 更新存储
+    await storageService.updateWordMarking(word, newMarkCount);
 
     const { className: highlightClassName, hex } = calculateHighlight(
       baseColor,
-      currentMarkCount,
+      newMarkCount,
       isDarkText,
     );
 
@@ -1647,19 +1667,8 @@ export async function toggleWordHighlightState(
   }
 
   try {
-    const data: ExtensionStorage = (await browser.storage.local.get([
-      "wordMarkings",
-    ])) as ExtensionStorage;
-    const wordMarkings = data.wordMarkings || {};
-    // Avoid logging the entire wordMarkings if it's huge. Log specific entry or a copy.
-    const wordMarkingsCopyForLog = wordMarkings ? { [cleanedWord]: wordMarkings[cleanedWord] } : {};
-    console.log(`[Lucid DEBUG] For word "${cleanedWord}" right after storage.get:`);
-    console.log(`[Lucid DEBUG] Relevant wordMarkings entry:`, JSON.parse(JSON.stringify(wordMarkingsCopyForLog)));
-    console.log(
-      `[Lucid DEBUG] Raw value for wordMarkings["${cleanedWord}"]:`,
-      wordMarkings ? wordMarkings[cleanedWord] : "wordMarkings is undefined"
-    );
-    const currentMarkCount = wordMarkings[cleanedWord] || 0;
+    const storageService = getStorageService();
+    const currentMarkCount = await storageService.getMarkCount(cleanedWord);
     console.log(
       `[Lucid DEBUG] Calculated currentMarkCount for "${cleanedWord}": ${currentMarkCount}`
     );

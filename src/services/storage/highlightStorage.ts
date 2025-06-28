@@ -135,6 +135,59 @@ export class HighlightStorageService {
   }
 
   /**
+   * 增加单词标记次数
+   */
+  async incrementMarkCount(word: string): Promise<number> {
+    try {
+      const wordMarkings = await this.getWordMarkings();
+      const currentCount = wordMarkings[word] || 0;
+      const newCount = currentCount + 1;
+      wordMarkings[word] = newCount;
+      await browser.storage.local.set({ wordMarkings });
+      return newCount;
+    } catch (error) {
+      console.error('[HighlightStorage] Error incrementing mark count:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 减少单词标记次数
+   */
+  async decrementMarkCount(word: string): Promise<number> {
+    try {
+      const wordMarkings = await this.getWordMarkings();
+      const currentCount = wordMarkings[word] || 0;
+      const newCount = Math.max(0, currentCount - 1);
+      
+      if (newCount === 0) {
+        delete wordMarkings[word];
+      } else {
+        wordMarkings[word] = newCount;
+      }
+      
+      await browser.storage.local.set({ wordMarkings });
+      return newCount;
+    } catch (error) {
+      console.error('[HighlightStorage] Error decrementing mark count:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取指定单词的标记次数
+   */
+  async getMarkCount(word: string): Promise<number> {
+    try {
+      const wordMarkings = await this.getWordMarkings();
+      return wordMarkings[word] || 0;
+    } catch (error) {
+      console.error('[HighlightStorage] Error getting mark count:', error);
+      return 0;
+    }
+  }
+
+  /**
    * 获取存储使用情况
    */
   async getStorageUsage(): Promise<{ used: number; quota: number }> {

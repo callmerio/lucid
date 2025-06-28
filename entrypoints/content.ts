@@ -4,6 +4,8 @@ import { applyWordHighlight } from "@utils/highlight/highlightUtils";
 import { expandSelectionToFullWord } from "@utils/text/selection";
 import { debounce } from "lodash-es";
 import { defineContentScript } from 'wxt/utils/define-content-script';
+import { serviceContainer } from "@services/container/ServiceContainer";
+import { HighlightStorageService } from "@services/storage/highlightStorage";
 
 /* ------------------------------------------------------------------
  *  内容脚本入口
@@ -33,6 +35,13 @@ export default defineContentScript({
       return () => { };
     }
     console.log("Lucid 扩展：内容脚本已加载");
+
+    // 初始化服务容器 - 注册 HighlightStorageService
+    serviceContainer.registerSingleton(
+      'HighlightStorageService',
+      () => HighlightStorageService.getInstance()
+    );
+    console.log("[Lucid] HighlightStorageService 已注册到服务容器");
 
     // 先初始化现有管理器
     let tooltipManager: any, toolfullManager: any, transparentPopupManager: any;
