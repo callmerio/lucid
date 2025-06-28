@@ -4,26 +4,26 @@
 
 import { SimpleEventManager } from '../utils/dom/simpleEventManager';
 import { TooltipManager } from '../utils/dom/legacy/tooltipManager';
-import { ToolpopupManager } from '../utils/dom/managers/popup/ToolpopupManager';
+import { ToolfullManager } from '../utils/dom/managers/popup/ToolfullManager';
 import { UI_EVENTS, EventPriority } from '@constants/uiEvents';
 
 describe('性能基准测试', () => {
   let eventManager: SimpleEventManager;
   let tooltipManager: TooltipManager;
-  let toolpopupManager: ToolpopupManager;
+  let toolfullManager: ToolfullManager;
 
   beforeEach(() => {
     eventManager = SimpleEventManager.getInstance();
     tooltipManager = TooltipManager.getInstance();
-    toolpopupManager = ToolpopupManager.getInstance();
-    
+    toolfullManager = ToolfullManager.getInstance();
+
     // 清理之前的状态
     eventManager.cleanupGlobalEvents();
   });
 
   afterEach(() => {
     tooltipManager.destroy();
-    toolpopupManager.destroy();
+    toolfullManager.destroy();
     eventManager.cleanupGlobalEvents();
   });
 
@@ -36,7 +36,7 @@ describe('性能基准测试', () => {
       for (let i = 0; i < 1000; i++) {
         const cleanup = eventManager.subscribeGlobalEvent(
           UI_EVENTS.TOOLTIP.SHOW,
-          () => {},
+          () => { },
           {},
           `Listener${i}`
         );
@@ -88,7 +88,7 @@ describe('性能基准测试', () => {
 
       // 验证优先级排序正确
       expect(callOrder.length).toBe(100);
-      
+
       // 清理
       cleanupFunctions.forEach(cleanup => cleanup());
 
@@ -103,12 +103,12 @@ describe('性能基准测试', () => {
       // 创建和销毁大量监听器
       for (let cycle = 0; cycle < 10; cycle++) {
         const cycleCleanups: (() => void)[] = [];
-        
+
         // 创建100个监听器
         for (let i = 0; i < 100; i++) {
           const cleanup = eventManager.subscribeGlobalEvent(
             UI_EVENTS.TOOLTIP.SHOW,
-            () => {},
+            () => { },
             {},
             `MemoryTest${cycle}-${i}`
           );
@@ -120,7 +120,7 @@ describe('性能基准测试', () => {
       }
 
       const finalStats = eventManager.getEventStats();
-      
+
       console.log(`📊 初始活跃监听器: ${initialStats.activeListeners}`);
       console.log(`📊 最终活跃监听器: ${finalStats.activeListeners}`);
 
@@ -137,7 +137,7 @@ describe('性能基准测试', () => {
       document.body.appendChild(testElement);
 
       const startTime = performance.now();
-      
+
       // 连续显示和隐藏tooltip
       for (let i = 0; i < 10; i++) {
         await tooltipManager.showTooltip(testElement, 'performance');
@@ -234,13 +234,13 @@ describe('性能基准测试', () => {
     test('高频事件分发压力测试', () => {
       const cleanup = eventManager.subscribeGlobalEvent(
         UI_EVENTS.INTERACTION.SHIFT_KEY_PRESSED,
-        () => {},
+        () => { },
         {},
         'StressTestListener'
       );
 
       const startTime = performance.now();
-      
+
       // 高频分发1000个事件
       for (let i = 0; i < 1000; i++) {
         eventManager.dispatchGlobalEvent(
@@ -269,30 +269,30 @@ describe('性能基准测试', () => {
     test('与重构前性能对比', () => {
       // 这个测试模拟重构前的直接调用方式的性能
       const directCallStartTime = performance.now();
-      
+
       // 模拟直接调用（无事件系统开销）
       for (let i = 0; i < 100; i++) {
         // 直接方法调用
-        const mockDirectCall = () => {};
+        const mockDirectCall = () => { };
         mockDirectCall();
       }
-      
+
       const directCallTime = performance.now() - directCallStartTime;
 
       // 测试事件系统的性能
       const cleanup = eventManager.subscribeGlobalEvent(
         UI_EVENTS.TOOLTIP.SHOW,
-        () => {},
+        () => { },
         {},
         'RegressionTestListener'
       );
 
       const eventSystemStartTime = performance.now();
-      
+
       for (let i = 0; i < 100; i++) {
         eventManager.dispatchGlobalEvent(UI_EVENTS.TOOLTIP.SHOW, {}, 'RegressionTest');
       }
-      
+
       const eventSystemTime = performance.now() - eventSystemStartTime;
 
       console.log(`📊 直接调用100次耗时: ${directCallTime.toFixed(2)}ms`);

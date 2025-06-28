@@ -164,11 +164,11 @@ describe('轻量级Tooltip系统测试', () => {
       testElement.dataset.word = 'test';
       document.body.appendChild(testElement);
 
-      // Mock ToolpopupManager to avoid external dependencies
-      const mockShowToolpopup = vi.fn();
-      const mockToolpopupManager = {
+      // Mock ToolfullManager to avoid external dependencies
+      const mockShowToolfull = vi.fn();
+      const mockToolfullManager = {
         getInstance: () => ({
-          showToolpopup: mockShowToolpopup
+          showToolfull: mockShowToolfull
         })
       };
 

@@ -1,7 +1,7 @@
 /**
- * @file ToolpopupManager.ts
+ * @file ToolfullManager.ts
  * @description Manager for the detailed word information popup.
- * This manager is responsible for subscribing to global events and triggering the display of the toolpopup via the PopupService.
+ * This manager is responsible for subscribing to global events and triggering the display of the toolfull via the PopupService.
  */
 
 import { popupService } from "@services/PopupService";
@@ -11,18 +11,18 @@ import { simpleEventManager } from "../../simpleEventManager";
 import { Toolfull } from "@components/ui/Toolfull";
 import React from "react";
 
-export class ToolpopupManager {
-  private static instance: ToolpopupManager;
+export class ToolfullManager {
+  private static instance: ToolfullManager;
 
   private constructor() {
     this.setupGlobalEventListeners();
   }
 
-  public static getInstance(): ToolpopupManager {
-    if (!ToolpopupManager.instance) {
-      ToolpopupManager.instance = new ToolpopupManager();
+  public static getInstance(): ToolfullManager {
+    if (!ToolfullManager.instance) {
+      ToolfullManager.instance = new ToolfullManager();
     }
-    return ToolpopupManager.instance;
+    return ToolfullManager.instance;
   }
 
   private setupGlobalEventListeners(): void {
@@ -30,23 +30,23 @@ export class ToolpopupManager {
       UI_EVENTS.TOOLTIP.TRANSITION_TO_POPUP,
       (event) => {
         const { word, targetElement } = event.payload;
-        this.showToolpopup(word, targetElement);
+        this.showToolfull(word, targetElement);
       },
       {},
-      "ToolpopupManager"
+      "ToolfullManager"
     );
   }
 
-  public async showToolpopup(
+  public async showToolfull(
     word: string,
     referenceElement?: HTMLElement
   ): Promise<void> {
-    console.log(`[ToolpopupManager] Request to show toolpopup for: "${word}"`);
+    console.log(`[ToolfullManager] Request to show toolfull for: "${word}"`);
 
     // 从DataService获取单词详情
     const wordDetails = await dataService.getWordDetails(word);
     if (!wordDetails) {
-      console.warn(`[ToolpopupManager] No detailed info found for: ${word}`);
+      console.warn(`[ToolfullManager] No detailed info found for: ${word}`);
       return;
     }
 
@@ -56,7 +56,7 @@ export class ToolpopupManager {
       <Toolfull
         word={word}
         wordData={wordDetails}
-        onClose={() => this.hideToolpopup(word)}
+        onClose={() => this.hideToolfull(word)}
       />
     );
 
@@ -65,13 +65,13 @@ export class ToolpopupManager {
     });
   }
 
-  public hideToolpopup(word: string): void {
+  public hideToolfull(word: string): void {
     const popupId = `toolfull-${word}`;
     popupService.hide(popupId);
   }
 
   public destroy(): void {
     // Here you could add logic to unsubscribe from global events if needed.
-    console.log("[ToolpopupManager] Destroyed");
+    console.log("[ToolfullManager] Destroyed");
   }
 }

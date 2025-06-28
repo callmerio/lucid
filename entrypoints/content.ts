@@ -35,16 +35,16 @@ export default defineContentScript({
     console.log("Lucid 扩展：内容脚本已加载");
 
     // 先初始化现有管理器
-    let tooltipManager: any, toolpopupManager: any, transparentPopupManager: any;
+    let tooltipManager: any, toolfullManager: any, transparentPopupManager: any;
 
     try {
       const { TooltipManager } = await import("@utils/dom/managers/tooltip/TooltipManager.tsx");
-      const { ToolpopupManager } = await import("@utils/dom/managers/popup/ToolpopupManager.tsx");
+      const { ToolfullManager } = await import("@utils/dom/managers/popup/ToolfullManager.tsx");
 
       tooltipManager = TooltipManager.getInstance();
-      toolpopupManager = ToolpopupManager.getInstance();
+      toolfullManager = ToolfullManager.getInstance();
 
-      console.log("[Lucid] TooltipManager 和 ToolpopupManager 已初始化");
+      console.log("[Lucid] TooltipManager 和 ToolfullManager 已初始化");
     } catch (error) {
       console.error("[Lucid] 初始化现有管理器失败:", error);
     }
@@ -190,7 +190,7 @@ export default defineContentScript({
 
       // 清理管理器
       tooltipManager.destroy();
-      toolpopupManager.destroy();
+      toolfullManager.destroy();
       transparentPopupManager.destroy();
 
       console.log("[Lucid] 内容脚本清理完成");

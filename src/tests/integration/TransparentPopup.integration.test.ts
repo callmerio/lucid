@@ -87,7 +87,7 @@ Object.defineProperty(global, 'browser', { value: mockBrowser, writable: true })
 describe('透明弹窗集成测试', () => {
   let mockTransparentPopupManager: any;
   let mockTooltipManager: any;
-  let mockToolpopupManager: any;
+  let mockToolfullManager: any;
 
   beforeEach(() => {
     // 重置所有模拟
@@ -138,11 +138,11 @@ describe('透明弹窗集成测试', () => {
       destroy: vi.fn()
     };
 
-    mockToolpopupManager = {
+    mockToolfullManager = {
       isVisible: false,
-      getInstance: vi.fn(() => mockToolpopupManager),
-      showToolpopup: vi.fn(),
-      hideToolpopup: vi.fn(),
+      getInstance: vi.fn(() => mockToolfullManager),
+      showToolfull: vi.fn(),
+      hideToolfull: vi.fn(),
       destroy: vi.fn()
     };
   });
@@ -238,21 +238,21 @@ describe('透明弹窗集成测试', () => {
   });
 
   describe('与现有功能兼容性测试', () => {
-    it('应该与TooltipManager和ToolpopupManager共存', () => {
+    it('应该与TooltipManager和ToolfullManager共存', () => {
       const transparentManager = mockTransparentPopupManager;
       const tooltipManager = mockTooltipManager;
-      const toolpopupManager = mockToolpopupManager;
+      const toolfullManager = mockToolfullManager;
 
       // 同时初始化所有管理器
       transparentManager.getInstance();
       tooltipManager.getInstance();
-      toolpopupManager.getInstance();
+      toolfullManager.getInstance();
 
       // 显示透明弹窗不应影响其他管理器
       transparentManager.show();
       expect(transparentManager.isVisible).toBe(true);
       expect(tooltipManager.isVisible).toBe(false);
-      expect(toolpopupManager.isVisible).toBe(false);
+      expect(toolfullManager.isVisible).toBe(false);
 
       // 显示tooltip不应影响透明弹窗
       tooltipManager.showTooltip();
@@ -262,21 +262,21 @@ describe('透明弹窗集成测试', () => {
     it('应该正确处理多个管理器的销毁', () => {
       const transparentManager = mockTransparentPopupManager;
       const tooltipManager = mockTooltipManager;
-      const toolpopupManager = mockToolpopupManager;
+      const toolfullManager = mockToolfullManager;
 
       // 显示所有组件
       transparentManager.show();
       tooltipManager.showTooltip();
-      toolpopupManager.showToolpopup();
+      toolfullManager.showToolfull();
 
       // 销毁所有管理器
       transparentManager.destroy();
       tooltipManager.destroy();
-      toolpopupManager.destroy();
+      toolfullManager.destroy();
 
       expect(transparentManager.destroy).toHaveBeenCalled();
       expect(tooltipManager.destroy).toHaveBeenCalled();
-      expect(toolpopupManager.destroy).toHaveBeenCalled();
+      expect(toolfullManager.destroy).toHaveBeenCalled();
     });
   });
 

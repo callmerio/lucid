@@ -5,4 +5,4 @@
 
 // 主要管理器
 export { TransparentPopupManager } from './TransparentPopupManager';
-export { ToolpopupManager } from './ToolpopupManager';
+export { ToolfullManager } from './ToolfullManager';
