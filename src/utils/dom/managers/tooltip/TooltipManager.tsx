@@ -36,6 +36,7 @@ export class TooltipManager {
   private options: TooltipManagerOptions;
   private currentMode: "simple" | "detailed" = "simple";
   private currentDetailedData: WordDetails | null = null;
+  private detailedHideTimeout: number | null = null;
 
   private constructor(options: TooltipManagerOptions = {}) {
     this.options = options;
@@ -62,6 +63,10 @@ export class TooltipManager {
    */
   private handleStateChange(event: any): void {
     console.log("[TooltipManager] State changed:", event.type);
+
+    // StateManager的状态变化只用于内部状态同步
+    // 实际的弹窗隐藏应该由明确的用户操作或事件触发
+    // 避免重复调用 popupService.hide()
   }
 
   /**
@@ -89,8 +94,8 @@ export class TooltipManager {
         />
       );
 
-      // 显示 tooltip
-      popupService.show(`tooltip-${word}`, tooltipContent, {
+      // 显示 tooltip - 使用简单模式专用ID
+      popupService.show(`tooltip-simple-${word}`, tooltipContent, {
         targetElement,
         position: options.preferredPosition,
       });
@@ -133,12 +138,53 @@ export class TooltipManager {
         />
       );
 
-      // 显示详细视图
-      popupService.show(`tooltip-${word}`, toolfullContent, {
+      // 先隐藏简单模式弹窗
+      popupService.hide(`tooltip-simple-${word}`);
+
+      // 显示详细视图 - 使用详细模式专用ID
+      popupService.show(`tooltip-detailed-${word}`, toolfullContent, {
         targetElement,
       });
+
+      // 详细模式使用 Popup 组件的外部点击检测，不需要鼠标事件监听
     } catch (error) {
       console.error("[TooltipManager] Error showing detailed view:", error);
+    }
+  }
+
+  /**
+   * 为详细模式设置鼠标事件监听 (已废弃)
+   * 详细模式现在依赖 Popup 组件的外部点击检测
+   */
+  private setupDetailedModeMouseEvents(word: string): void {
+    // 不再需要鼠标事件监听，详细模式依赖 Popup 组件的外部点击检测
+    console.log(`[TooltipManager] Detailed mode for "${word}" will use Popup's outside click detection`);
+  }
+
+  /**
+   * 清理详细模式的鼠标事件监听 (已废弃)
+   */
+  private cleanupDetailedModeMouseEvents(word: string): void {
+    // 不再需要清理鼠标事件，因为不再添加鼠标事件监听
+    console.log(`[TooltipManager] No mouse events to cleanup for detailed mode: "${word}"`);
+  }
+
+  /**
+   * 安排详细模式延迟隐藏 (已废弃)
+   * 详细模式现在只通过外部点击关闭
+   */
+  private scheduleDetailedHide(): void {
+    // 不再自动隐藏详细模式，只通过外部点击关闭
+    console.log("[TooltipManager] Detailed mode auto-hide is disabled");
+  }
+
+  /**
+   * 取消详细模式延迟隐藏
+   */
+  private cancelDetailedHide(): void {
+    if (this.detailedHideTimeout) {
+      clearTimeout(this.detailedHideTimeout);
+      this.detailedHideTimeout = null;
     }
   }
 
@@ -211,6 +257,12 @@ export class TooltipManager {
    * 处理最小化操作（从详细模式回到简单模式）
    */
   private handleMinimize(word: string, targetElement: HTMLElement): void {
+    // 清理详细模式定时器
+    this.cancelDetailedHide();
+
+    // 先隐藏详细模式弹窗
+    popupService.hide(`tooltip-detailed-${word}`);
+
     // 切换回简单模式
     this.showTooltip({
       word,
@@ -225,7 +277,14 @@ export class TooltipManager {
   hideTooltip(immediate: boolean = false): void {
     const word = this.stateManager.getCurrentWord();
     if (word) {
-      popupService.hide(`tooltip-${word}`);
+      // 根据当前模式隐藏对应的弹窗
+      if (this.currentMode === "simple") {
+        popupService.hide(`tooltip-simple-${word}`);
+      } else if (this.currentMode === "detailed") {
+        // 隐藏详细模式弹窗（清理操作已简化）
+        this.cancelDetailedHide();
+        popupService.hide(`tooltip-detailed-${word}`);
+      }
     }
     this.stateManager.hide(immediate);
   }
@@ -387,6 +446,8 @@ export class TooltipManager {
    * 销毁管理器
    */
   destroy(): void {
+    // 清理详细模式的延迟隐藏定时器
+    this.cancelDetailedHide();
     this.stateManager.destroy();
     // 重置单例实例
     TooltipManager.instance = null as any;

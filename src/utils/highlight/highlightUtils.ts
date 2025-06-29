@@ -126,6 +126,41 @@ function addTooltipEvents(element: HTMLElement, word: string): void {
     tooltipManager.hideTooltip(false); // false 表示延迟隐藏
   });
 
+  // 添加点击事件：点击高亮单词触发详细模式
+  element.addEventListener('click', async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    console.log(`[highlightUtils] Clicked on highlighted word: ${word}`);
+    
+    try {
+      // 如果当前是简单模式且可见，切换到详细模式
+      if (tooltipManager.isVisible()) {
+        const currentMode = tooltipManager.getCurrentMode();
+        if (currentMode === 'simple') {
+          console.log(`[highlightUtils] Switching from simple to detailed mode for: ${word}`);
+          await tooltipManager.showDetailedView(word, element);
+        } else {
+          console.log(`[highlightUtils] Already in detailed mode for: ${word}`);
+        }
+      } else {
+        // 如果tooltip不可见，直接显示详细模式
+        console.log(`[highlightUtils] Tooltip not visible, showing detailed mode directly for: ${word}`);
+        // 先显示tooltip以设置正确的状态，然后立即切换到详细模式
+        await tooltipManager.showTooltip({
+          word: word,
+          translation: `Loading translation for "${word}"...`,
+          targetElement: element,
+          preferredPosition: 'auto'
+        });
+        // 立即切换到详细模式
+        await tooltipManager.showDetailedView(word, element);
+      }
+    } catch (error) {
+      console.error('[highlightUtils] Error handling click on highlighted word:', error);
+    }
+  });
+
   // 方案2: 或者使用事件系统（备选方案，当前注释掉）
   /*
   element.addEventListener('mouseenter', () => {
