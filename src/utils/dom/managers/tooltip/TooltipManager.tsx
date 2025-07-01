@@ -67,6 +67,11 @@ export class TooltipManager {
     // StateManager的状态变化只用于内部状态同步
     // 实际的弹窗隐藏应该由明确的用户操作或事件触发
     // 避免重复调用 popupService.hide()
+    // 详细模式下完全忽略状态管理器的自动隐藏
+    if (this.currentMode === "detailed" && event.type === "hide") {
+      console.log("[TooltipManager] Ignoring auto-hide in detailed mode");
+      return;
+    }
   }
 
   /**
@@ -95,7 +100,7 @@ export class TooltipManager {
       );
 
       // 显示 tooltip - 使用简单模式专用ID
-      popupService.show(`tooltip-simple-${word}`, tooltipContent, {
+      await popupService.show(`tooltip-simple-${word}`, tooltipContent, {
         targetElement,
         position: options.preferredPosition,
       });
@@ -118,6 +123,9 @@ export class TooltipManager {
   ): Promise<void> {
     try {
       this.currentMode = "detailed";
+      
+      // 取消状态管理器的自动隐藏，详细模式由用户手动控制
+      this.stateManager.cancelHide();
 
       // 获取详细数据
       const detailedData = await dataService.getWordDetails(word);
@@ -142,41 +150,55 @@ export class TooltipManager {
       popupService.hide(`tooltip-simple-${word}`);
 
       // 显示详细视图 - 使用详细模式专用ID
-      popupService.show(`tooltip-detailed-${word}`, toolfullContent, {
+      await popupService.show(`toolfull-detailed-${word}`, toolfullContent, {
         targetElement,
       });
 
       // 详细模式使用 Popup 组件的外部点击检测，不需要鼠标事件监听
+      // 设置详细模式专用的键盘监听器
+      this.setupDetailedModeKeyboardListener(word, targetElement);
     } catch (error) {
       console.error("[TooltipManager] Error showing detailed view:", error);
     }
   }
 
   /**
-   * 为详细模式设置鼠标事件监听 (已废弃)
-   * 详细模式现在依赖 Popup 组件的外部点击检测
+   * 为详细模式设置专用的键盘监听器
    */
-  private setupDetailedModeMouseEvents(word: string): void {
-    // 不再需要鼠标事件监听，详细模式依赖 Popup 组件的外部点击检测
-    console.log(`[TooltipManager] Detailed mode for "${word}" will use Popup's outside click detection`);
+  private setupDetailedModeKeyboardListener(
+    word: string,
+    targetElement: HTMLElement
+  ): void {
+    const keyDownHandler = (event: KeyboardEvent) => {
+      if (event.key === "Shift" && this.currentMode === "detailed") {
+        // 详细模式下按 Shift 键切换回简单模式
+        console.log(
+          "[TooltipManager] Shift key pressed in detailed mode, switching to simple mode"
+        );
+        
+        // 阻止事件传播，避免与其他 Shift 监听器冲突
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // 切换回简单模式
+        this.handleMinimize(word, targetElement);
+        
+        // 移除监听器
+        document.removeEventListener("keydown", keyDownHandler);
+      }
+    };
+
+    document.addEventListener("keydown", keyDownHandler);
+
+    // 在详细模式隐藏时自动清理监听器
+    const originalHideTooltip = this.hideTooltip.bind(this);
+    this.hideTooltip = (immediate?: boolean) => {
+      document.removeEventListener("keydown", keyDownHandler);
+      originalHideTooltip(immediate);
+    };
   }
 
-  /**
-   * 清理详细模式的鼠标事件监听 (已废弃)
-   */
-  private cleanupDetailedModeMouseEvents(word: string): void {
-    // 不再需要清理鼠标事件，因为不再添加鼠标事件监听
-    console.log(`[TooltipManager] No mouse events to cleanup for detailed mode: "${word}"`);
-  }
 
-  /**
-   * 安排详细模式延迟隐藏 (已废弃)
-   * 详细模式现在只通过外部点击关闭
-   */
-  private scheduleDetailedHide(): void {
-    // 不再自动隐藏详细模式，只通过外部点击关闭
-    console.log("[TooltipManager] Detailed mode auto-hide is disabled");
-  }
 
   /**
    * 取消详细模式延迟隐藏
@@ -261,13 +283,18 @@ export class TooltipManager {
     this.cancelDetailedHide();
 
     // 先隐藏详细模式弹窗
-    popupService.hide(`tooltip-detailed-${word}`);
+    popupService.hide(`toolfull-detailed-${word}`);
 
     // 切换回简单模式
     this.showTooltip({
       word,
       translation: "Loading...", // 可以从缓存获取
       targetElement,
+    }).catch((error) => {
+      console.error(
+        "[TooltipManager] Error showing tooltip after minimize:",
+        error
+      );
     });
   }
 
@@ -276,14 +303,24 @@ export class TooltipManager {
    */
   hideTooltip(immediate: boolean = false): void {
     const word = this.stateManager.getCurrentWord();
+    
+    // 调试日志：记录隐藏原因
+    console.log(`[TooltipManager] hideTooltip called:`, {
+      word,
+      currentMode: this.currentMode,
+      immediate,
+      stack: new Error().stack?.split('\n').slice(1, 4).join('\n') // 调用堆栈前3行
+    });
+    
     if (word) {
       // 根据当前模式隐藏对应的弹窗
       if (this.currentMode === "simple") {
         popupService.hide(`tooltip-simple-${word}`);
       } else if (this.currentMode === "detailed") {
-        // 隐藏详细模式弹窗（清理操作已简化）
+        // 详细模式下，检查是否应该忽略某些自动隐藏调用
+        console.log(`[TooltipManager] Attempting to hide detailed popup for: ${word}`);
         this.cancelDetailedHide();
-        popupService.hide(`tooltip-detailed-${word}`);
+        popupService.hide(`toolfull-detailed-${word}`);
       }
     }
     this.stateManager.hide(immediate);
@@ -386,7 +423,10 @@ export class TooltipManager {
    * 处理鼠标离开事件
    */
   handleMouseLeave(_element: HTMLElement): void {
-    this.stateManager.hide();
+    // 详细模式下不自动隐藏，只有简单模式才自动隐藏
+    if (this.currentMode !== "detailed") {
+      this.stateManager.hide();
+    }
   }
 
   /**
@@ -398,11 +438,16 @@ export class TooltipManager {
     } else if (event.key === "Enter" || event.key === " ") {
       this.toggleExpanded();
     } else if (event.key === "Shift") {
-      // Shift 键切换到详细模式
       const word = this.getCurrentWord();
       const targetElement = this.getCurrentTargetElement();
       if (word && targetElement) {
-        this.showDetailedView(word, targetElement);
+        if (this.currentMode === "simple") {
+          // 简单模式下切换到详细模式
+          this.showDetailedView(word, targetElement);
+        } else if (this.currentMode === "detailed") {
+          // 详细模式下切换回简单模式
+          this.handleMinimize(word, targetElement);
+        }
       }
     }
   }

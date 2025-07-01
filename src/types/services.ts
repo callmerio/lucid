@@ -13,7 +13,7 @@ export interface IPopupService {
    * @param content - 要在弹窗中渲染的React组件
    * @param options - 弹窗的配置选项
    */
-  show(id: string, content: React.ReactNode, options?: PopupOptions): void;
+  show(id: string, content: React.ReactNode, options?: PopupOptions): Promise<void>;
 
   /**
    * 隐藏一个弹窗
@@ -27,7 +27,7 @@ export interface IPopupService {
    * @param content - 新的React组件内容
    * @param options - 新的配置选项
    */
-  update(id: string, content?: React.ReactNode, options?: PopupOptions): void;
+  update(id: string, content?: React.ReactNode, options?: PopupOptions): Promise<void>;
 }
 
 /**

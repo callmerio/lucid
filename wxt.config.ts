@@ -31,9 +31,31 @@ export default defineConfig({
     action: {
       "default_title": "Lucid"
     },
+    commands: {
+      "toggle-transparent-popup": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+L",
+          "mac": "Command+Shift+L"
+        },
+        "description": "切换透明弹窗显示"
+      },
+      "highlight-selection": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+H",
+          "mac": "Command+Shift+H"
+        },
+        "description": "高亮选中文本"
+      }
+    },
     web_accessible_resources: [
-      // Mock数据已移动到src/tests/mock-data，不再需要web_accessible_resources
-      // 如果将来需要在content script中访问assets资源，可以在这里添加
+      // CSS 资源用于 Shadow DOM 样式注入
+      {
+        "resources": [
+          "assets/styles/*.css",
+          "content-scripts/content.css"
+        ],
+        "matches": ["<all_urls>"]
+      }
     ],
   },
   dev: {
@@ -70,7 +92,7 @@ export default defineConfig({
       },
       define: {
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      },
+      }
     };
   },
 });

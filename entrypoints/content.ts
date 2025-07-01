@@ -168,10 +168,12 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener(async (message: ExtensionMessage, _sender, sendResponse) => {
       if (
         message.action === "logSelectionFromContextMenu" ||
-        message.action === "highlightSelectionFromContextMenu"
+        message.action === "highlightSelectionFromContextMenu" ||
+        message.action === "lucid:highlight-selection"
       ) {
         // 假设右键菜单触发高亮也使用此逻辑
         await handleSelectionAndHighlight();
+        sendResponse({ success: true });
       } else if (message.action === 'lucid:transparent-popup:toggle') {
         // 处理透明弹窗切换消息
         console.log('[Lucid] 收到透明弹窗切换消息，消息详情:', message);

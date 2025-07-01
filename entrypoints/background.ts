@@ -64,4 +64,51 @@ export default defineBackground(() => {
   } else {
     console.error("Lucid Extension: browser.action API not available");
   }
+
+  // Listen for global keyboard commands
+  if (browser.commands && browser.commands.onCommand) {
+    browser.commands.onCommand.addListener(async (command) => {
+      console.log("Lucid Extension: Command received:", command);
+      
+      // Get the current active tab
+      const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
+      
+      if (!activeTab?.id) {
+        console.warn("Lucid Extension: No active tab found for command:", command);
+        return;
+      }
+
+      try {
+        switch (command) {
+          case "toggle-transparent-popup":
+            await browser.tabs.sendMessage(activeTab.id, {
+              action: 'lucid:transparent-popup:toggle',
+              source: 'keyboard-shortcut',
+              command: command,
+              timestamp: Date.now()
+            });
+            console.log("Lucid Extension: Transparent popup toggle command sent");
+            break;
+            
+          case "highlight-selection":
+            await browser.tabs.sendMessage(activeTab.id, {
+              action: 'lucid:highlight-selection',
+              source: 'keyboard-shortcut', 
+              command: command,
+              timestamp: Date.now()
+            });
+            console.log("Lucid Extension: Highlight selection command sent");
+            break;
+            
+          default:
+            console.warn("Lucid Extension: Unknown command:", command);
+        }
+      } catch (error) {
+        console.error("Lucid Extension: Failed to send command message:", error);
+      }
+    });
+    console.log("Lucid Extension: Command listeners registered");
+  } else {
+    console.error("Lucid Extension: browser.commands API not available");
+  }
 });
