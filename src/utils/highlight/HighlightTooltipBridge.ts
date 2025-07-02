@@ -6,8 +6,7 @@
  */
 
 import { eventManager } from "../core/eventManager";
-import { UI_EVENTS } from "../../constants/uiEvents";
-import type { EventPayloads } from "../../constants/uiEvents";
+import { UI_EVENTS, type EventPayloads } from "../../constants/uiEvents";
 
 /**
  * 高亮-提示框桥接器类

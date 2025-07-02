@@ -1,6 +1,5 @@
 // 导入控制器和相关类型
-import { highlightController } from "./HighlightController";
-import type { ToggleHighlightContext } from "./HighlightController";
+import { highlightController, type ToggleHighlightContext } from "./HighlightController";
 // 初始化桥接器（确保事件订阅正常工作）
 import "./HighlightTooltipBridge";
 

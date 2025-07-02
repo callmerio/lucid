@@ -35,6 +35,7 @@ export class TooltipManager {
   private stateManager: TooltipStateManager;
   private options: TooltipManagerOptions;
   private currentMode: "simple" | "detailed" = "simple";
+  private currentDetailedWord: string = ""; // 跟踪当前详细模式的单词
   private currentDetailedData: WordDetails | null = null;
   private detailedHideTimeout: number | null = null;
   private isTransitioning: boolean = false; // 防止转换过程中的重复调用
@@ -83,9 +84,22 @@ export class TooltipManager {
       options;
 
     try {
-      // 更新状态
+      // 如果当前是详细模式，避免重置状态，只更新状态管理器
+      if (this.currentMode === "detailed") {
+        console.log(
+          `[TooltipManager] In detailed mode, updating state for word: "${word}" without mode reset`
+        );
+        // 只更新状态管理器，不重置模式，也不创建简单tooltip
+        this.stateManager.show(word, targetElement);
+        return;
+      }
+
+      // 正常的简单模式逻辑
       this.stateManager.show(word, targetElement);
       this.currentMode = "simple";
+      console.log(
+        `[TooltipManager] Switched to simple mode for word: "${word}"`
+      );
 
       // 创建 Tooltip 组件
       const tooltipContent = (
@@ -123,16 +137,49 @@ export class TooltipManager {
     targetElement: HTMLElement
   ): Promise<void> {
     try {
-      // 防重复：如果已经在详细模式或正在转换中，直接返回
-      if (this.currentMode === "detailed" || this.isTransitioning) {
-        console.log(`[TooltipManager] Already in detailed mode or transitioning for word: "${word}"`);
+      // 如果正在转换中，直接返回
+      if (this.isTransitioning) {
+        console.log(
+          `[TooltipManager] Currently transitioning, ignoring request for word: "${word}"`
+        );
         return;
       }
 
-      console.log(`[TooltipManager] Switching to detailed mode for word: "${word}"`);
+      // 在状态更新前获取当前单词状态，避免状态更新导致检查失效
+      const previousWord = this.currentDetailedWord; // 使用专用的详细模式单词跟踪
+      const wasInDetailedMode = this.currentMode === "detailed";
+
+      console.log(`[TooltipManager] showDetailedView called:`, {
+        requestedWord: word,
+        currentDetailedWord: previousWord,
+        stateManagerWord: this.stateManager.getCurrentWord(),
+        wasInDetailedMode,
+        currentMode: this.currentMode,
+      });
+
+      // 如果已经是详细模式且切换到不同单词，先关闭旧的详细弹窗
+      if (wasInDetailedMode && previousWord && previousWord !== word) {
+        console.log(
+          `[TooltipManager] Switching from "${previousWord}" to "${word}" detailed view - closing old popup`
+        );
+        popupService.hide(`toolfull-detailed-${previousWord}`);
+      } else if (wasInDetailedMode && previousWord === word) {
+        console.log(
+          `[TooltipManager] Already showing detailed view for word: "${word}"`
+        );
+        return;
+      }
+
+      console.log(
+        `[TooltipManager] Switching to detailed mode for word: "${word}"`
+      );
       this.isTransitioning = true;
       this.currentMode = "detailed";
-      
+      this.currentDetailedWord = word; // 更新详细模式单词跟踪
+
+      // 更新状态管理器到新单词（在检查逻辑完成后）
+      this.stateManager.show(word, targetElement);
+
       // 取消状态管理器的自动隐藏，详细模式由用户手动控制
       this.stateManager.cancelHide();
 
@@ -163,16 +210,26 @@ export class TooltipManager {
         targetElement,
       });
 
+      console.log(
+        `[TooltipManager] Successfully shown detailed popup for word: "${word}"`
+      );
+
       // 详细模式使用 Popup 组件的外部点击检测，不需要鼠标事件监听
       // 设置详细模式专用的键盘监听器
       this.setupDetailedModeKeyboardListener(word, targetElement);
-      
+
       // 完成转换
       this.isTransitioning = false;
+      console.log(`[TooltipManager] Transition completed for word: "${word}"`);
     } catch (error) {
-      console.error("[TooltipManager] Error showing detailed view:", error);
+      console.error(
+        `[TooltipManager] Error in showDetailedView for word "${word}":`,
+        error
+      );
       // 转换失败时也要重置标志
       this.isTransitioning = false;
+      this.currentMode = "simple"; // 回退到简单模式
+      throw error;
     }
   }
 
@@ -189,14 +246,14 @@ export class TooltipManager {
         console.log(
           "[TooltipManager] Shift key pressed in detailed mode, switching to simple mode"
         );
-        
+
         // 阻止事件传播，避免与其他 Shift 监听器冲突
         event.preventDefault();
         event.stopPropagation();
-        
+
         // 切换回简单模式
         this.handleMinimize(word, targetElement);
-        
+
         // 移除监听器
         document.removeEventListener("keydown", keyDownHandler);
       }
@@ -211,8 +268,6 @@ export class TooltipManager {
       originalHideTooltip(immediate);
     };
   }
-
-
 
   /**
    * 取消详细模式延迟隐藏
@@ -299,6 +354,10 @@ export class TooltipManager {
     // 先隐藏详细模式弹窗
     popupService.hide(`toolfull-detailed-${word}`);
 
+    // 清理详细模式状态
+    this.currentDetailedWord = "";
+    this.currentMode = "simple";
+
     // 切换回简单模式
     this.showTooltip({
       word,
@@ -317,24 +376,29 @@ export class TooltipManager {
    */
   hideTooltip(immediate: boolean = false): void {
     const word = this.stateManager.getCurrentWord();
-    
+
     // 调试日志：记录隐藏原因
     console.log(`[TooltipManager] hideTooltip called:`, {
       word,
       currentMode: this.currentMode,
       immediate,
-      stack: new Error().stack?.split('\n').slice(1, 4).join('\n') // 调用堆栈前3行
+      stack: new Error().stack?.split("\n").slice(1, 4).join("\n"), // 调用堆栈前3行
     });
-    
+
     if (word) {
       // 根据当前模式隐藏对应的弹窗
       if (this.currentMode === "simple") {
         popupService.hide(`tooltip-simple-${word}`);
       } else if (this.currentMode === "detailed") {
         // 详细模式下，检查是否应该忽略某些自动隐藏调用
-        console.log(`[TooltipManager] Attempting to hide detailed popup for: ${word}`);
+        console.log(
+          `[TooltipManager] Attempting to hide detailed popup for: ${word}`
+        );
         this.cancelDetailedHide();
         popupService.hide(`toolfull-detailed-${word}`);
+        // 清理详细模式状态
+        this.currentDetailedWord = "";
+        this.currentMode = "simple";
       }
     }
     this.stateManager.hide(immediate);

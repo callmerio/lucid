@@ -1,7 +1,6 @@
 import { 
   getEffectiveTextColor, 
   buildTextGradient, 
-  isBoundaryChar, 
   hasWordBoundary 
 } from "./HighlightUtilities";
 import { eventManager } from "../core/eventManager";
