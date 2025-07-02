@@ -131,10 +131,15 @@
 /* ===== 基础组件样式 ===== */
 
 /* 确保所有 Lucid 组件使用统一的字体系统 */
-.lucid-toolfull,
-.lucid-highlight {
+.lucid-toolfull {
   font-family: var(--lucid-font-family);
   font-weight: var(--lucid-font-weight-normal);
+}
+
+/* 高亮元素不应改变字体，保持原始文本的字体特征 */
+.lucid-highlight {
+  /* 不设置 font-family, font-weight, font-size, letter-spacing 等
+     以避免影响原始文本的字形、字宽和间距 */
 }
 
 /* Tooltip 样式已移至 src/components/ui/Tooltip.css */

@@ -93,6 +93,7 @@ export const designTokensCSS = `
   --lucid-radius-lg: 8px;
   --lucid-radius-xl: 12px;
   --lucid-radius-full: 9999px;
+  --lucid-radius-xs: 2px;
 
   /* ===== 阴影系统 ===== */
 
@@ -472,6 +473,36 @@ export const toolfullCSS = `
 }
 `;
 
+// 高亮组件样式
+export const highlightCSS = `
+/* ===== 高亮元素基础样式 ===== */
+.lucid-highlight {
+  transition: color 500ms ease-in-out;
+  cursor: pointer;
+  position: relative;
+  /* 移除 padding, margin, border-radius 以避免影响原始文本的布局和间距 */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+/* background intentionally left to inline style */
+
+/* ===== 高亮闪烁动画 ===== */
+@keyframes lucid-flash {
+  0%, 100% { 
+    color: inherit !important; 
+  }
+  50% { 
+    background-color: currentColor !important; 
+    color: #ffffff !important; 
+  }
+}
+
+/* 应用闪烁动画的类 */
+.lucid-highlight.flash {
+  animation: lucid-flash 200ms ease-in-out;
+}
+`;
+
 // 动画样式
 export const animationsCSS = `
 /* ===== Lucid Extension Animations ===== */
@@ -597,6 +628,7 @@ export const getAllShadowStyles = (): string => {
     shadowResetCSS,
     designTokensCSS,
     animationsCSS,
+    highlightCSS,
     tooltipCSS,
     toolfullCSS
   ].join('\n\n');
@@ -618,5 +650,14 @@ export const getToolfullStyles = (): string => {
     designTokensCSS,
     animationsCSS,
     toolfullCSS
+  ].join('\n\n');
+};
+
+export const getHighlightStyles = (): string => {
+  return [
+    shadowResetCSS,
+    designTokensCSS,
+    animationsCSS,
+    highlightCSS
   ].join('\n\n');
 };
