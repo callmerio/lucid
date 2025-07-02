@@ -35,7 +35,7 @@ export class TooltipManager {
   private stateManager: TooltipStateManager;
   private options: TooltipManagerOptions;
   private currentMode: "simple" | "detailed" = "simple";
-  private currentDetailedWord: string = ""; // 跟踪当前详细模式的单词
+  public currentDetailedWord: string = ""; // 跟踪当前详细模式的单词（公开访问）
   private currentDetailedData: WordDetails | null = null;
   private detailedHideTimeout: number | null = null;
   private isTransitioning: boolean = false; // 防止转换过程中的重复调用
@@ -197,7 +197,7 @@ export class TooltipManager {
         <Toolfull
           word={word}
           wordData={detailedData}
-          onClose={() => this.handleClose()}
+          onClose={() => this.handleDetailedClose(word)}
           onMinimize={() => this.handleMinimize(word, targetElement)}
         />
       );
@@ -345,6 +345,28 @@ export class TooltipManager {
   }
 
   /**
+   * 处理详细模式弹窗关闭操作（包括外部点击关闭）
+   */
+  private handleDetailedClose(word: string): void {
+    console.log(`[TooltipManager] Detailed popup closed for word: "${word}"`);
+    
+    // 清理详细模式状态
+    this.currentDetailedWord = "";
+    this.currentMode = "simple";
+    this.cancelDetailedHide();
+    
+    // 更新状态管理器
+    this.stateManager.hide(true);
+    
+    // 调用用户提供的关闭回调
+    if (this.options.onClose) {
+      this.options.onClose(word);
+    }
+    
+    console.log(`[TooltipManager] Reset to simple mode after detailed popup close`);
+  }
+
+  /**
    * 处理最小化操作（从详细模式回到简单模式）
    */
   private handleMinimize(word: string, targetElement: HTMLElement): void {
@@ -381,6 +403,7 @@ export class TooltipManager {
     console.log(`[TooltipManager] hideTooltip called:`, {
       word,
       currentMode: this.currentMode,
+      currentDetailedWord: this.currentDetailedWord,
       immediate,
       stack: new Error().stack?.split("\n").slice(1, 4).join("\n"), // 调用堆栈前3行
     });
@@ -388,6 +411,7 @@ export class TooltipManager {
     if (word) {
       // 根据当前模式隐藏对应的弹窗
       if (this.currentMode === "simple") {
+        console.log(`[TooltipManager] Hiding simple tooltip for: ${word}`);
         popupService.hide(`tooltip-simple-${word}`);
       } else if (this.currentMode === "detailed") {
         // 详细模式下，检查是否应该忽略某些自动隐藏调用
@@ -399,6 +423,7 @@ export class TooltipManager {
         // 清理详细模式状态
         this.currentDetailedWord = "";
         this.currentMode = "simple";
+        console.log(`[TooltipManager] Reset to simple mode after hiding detailed tooltip`);
       }
     }
     this.stateManager.hide(immediate);

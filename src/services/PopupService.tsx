@@ -34,6 +34,22 @@ class PopupService implements IPopupService {
     return PopupService.instance;
   }
 
+  /**
+   * 处理弹窗关闭事件（包括外部点击和ESC键）
+   */
+  private handlePopupClose(id: string, content: React.ReactNode): void {
+    console.log(`[PopupService] Popup close triggered for: ${id}`);
+    
+    // 检查内容是否有onClose属性（React组件的onClose）
+    if (React.isValidElement(content) && content.props && typeof (content.props as any).onClose === 'function') {
+      console.log(`[PopupService] Calling component onClose for: ${id}`);
+      (content.props as any).onClose();
+    }
+    
+    // 隐藏弹窗
+    this.hide(id);
+  }
+
   public async show(
     id: string,
     content: React.ReactNode,
@@ -92,7 +108,7 @@ class PopupService implements IPopupService {
           id={id}
           content={content}
           options={options}
-          onClose={() => this.hide(id)}
+          onClose={() => this.handlePopupClose(id, content)}
         />
       );
 

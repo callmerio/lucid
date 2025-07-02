@@ -123,15 +123,28 @@ export class HighlightTooltipBridge {
         return;
       }
 
+      // 获取当前模式和详细模式单词状态
+      const currentMode = typeof tooltipManager.getCurrentMode === 'function' ? 
+        tooltipManager.getCurrentMode() : 'simple';
+      const currentDetailedWord = typeof tooltipManager.currentDetailedWord === 'string' ? 
+        tooltipManager.currentDetailedWord : '';
+
+      console.debug(`[Lucid] HandleHighlightHoverLeave:`, {
+        word: payload.word,
+        currentMode,
+        currentDetailedWord,
+        shouldIgnore: currentMode === "detailed"
+      });
+
       // 检查当前模式，只有非详细模式才自动隐藏
-      if (typeof tooltipManager.getCurrentMode === 'function' && 
-          tooltipManager.getCurrentMode() === "detailed") {
+      if (currentMode === "detailed") {
         console.debug(`[Lucid] Ignoring auto-hide in detailed mode for word: "${payload.word}"`);
         return;
       }
 
-      // 延迟隐藏 tooltip
+      // 延迟隐藏 tooltip（仅简单模式）
       if (typeof tooltipManager.hideTooltip === 'function') {
+        console.debug(`[Lucid] Hiding simple tooltip for word: "${payload.word}"`);
         tooltipManager.hideTooltip(false); // false 表示延迟隐藏
       }
 
