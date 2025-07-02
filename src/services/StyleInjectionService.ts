@@ -8,11 +8,12 @@ import {
   getAllShadowStyles,
   getTooltipStyles,
   getToolfullStyles,
+  getHighlightStyles,
   shadowResetCSS
 } from '@styles/shadow/shadowStyles';
 
 export interface StyleInjectionOptions {
-  componentType?: 'tooltip' | 'toolfull' | 'all';
+  componentType?: 'tooltip' | 'toolfull' | 'highlight' | 'all';
   customStyles?: string[];
   priority?: number;
 }
@@ -33,12 +34,14 @@ class StyleInjectionService {
   /**
    * 根据组件类型获取对应的样式
    */
-  private getStylesByComponentType(componentType: 'tooltip' | 'toolfull' | 'all'): string {
+  private getStylesByComponentType(componentType: 'tooltip' | 'toolfull' | 'highlight' | 'all'): string {
     switch (componentType) {
       case 'tooltip':
         return getTooltipStyles();
       case 'toolfull':
         return getToolfullStyles();
+      case 'highlight':
+        return getHighlightStyles();
       case 'all':
       default:
         return getAllShadowStyles();
@@ -124,7 +127,7 @@ class StyleInjectionService {
   /**
    * Fallback: 注入完整的内联样式 (仅在 link 加载失败时使用)
    */
-  private injectInlineStyles(container: HTMLElement, componentType: 'tooltip' | 'toolfull' | 'all'): void {
+  private injectInlineStyles(container: HTMLElement, componentType: 'tooltip' | 'toolfull' | 'highlight' | 'all'): void {
     console.log(`[StyleInjectionService] Injecting fallback styles for ${componentType}`);
     
     // 注入完整的组件样式作为备用
@@ -145,7 +148,7 @@ class StyleInjectionService {
   /**
    * 根据组件类型获取优化的样式
    */
-  public getStylesForComponent(componentType: 'tooltip' | 'toolfull'): string {
+  public getStylesForComponent(componentType: 'tooltip' | 'toolfull' | 'highlight'): string {
     return this.getStylesByComponentType(componentType);
   }
 
@@ -171,7 +174,7 @@ class StyleInjectionService {
    * 检查样式是否支持组件类型
    */
   public supportsComponentType(componentType: string): boolean {
-    return ['tooltip', 'toolfull', 'all'].includes(componentType);
+    return ['tooltip', 'toolfull', 'highlight', 'all'].includes(componentType);
   }
 }
 

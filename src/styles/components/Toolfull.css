@@ -240,3 +240,149 @@
   opacity: 1;
   transform: scaleY(1) translateY(0);
 }
+
+/* 当toolpopup显示在目标元素上方时的样式 */
+.lucid-toolfull.lucid-toolfull-above {
+  /* 可以添加特殊样式，比如阴影方向调整等 */
+}
+
+.lucid-toolfull-word {
+  /* font-size 由 JavaScript 动态设置为 tooltip 字体的2倍 */
+  font-weight: var(--lucid-font-weight-semibold);
+  color: var(--lucid-text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.lucid-toolfull-syllable {
+  display: inline;
+}
+
+.lucid-toolfull-syllable-separator {
+  color: var(--lucid-text-tertiary);
+  font-weight: var(--lucid-font-weight-normal);
+  margin: 0 1px;
+}
+
+.lucid-toolfull-header-icons {
+  display: flex;
+  align-items: center;
+}
+
+.lucid-toolfull-header-icons svg {
+  width: var(--lucid-height-button-md);
+  height: var(--lucid-height-button-md);
+  margin-left: var(--lucid-spacing-5);
+  cursor: pointer;
+  fill: var(--lucid-text-tertiary);
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.3));
+  transition: all var(--lucid-transition-normal);
+}
+
+/* Checkmark图标hover效果 */
+.lucid-toolfull-header-icons svg.icon:hover {
+  animation: lucid-breathe 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+}
+
+/* Heart图标样式 */
+.lucid-toolfull-header-icons svg.icon-heart {
+  fill: var(--lucid-accent-primary);
+}
+
+/* Heart图标hover效果 */
+.lucid-toolfull-header-icons svg.icon-heart:hover {
+  animation: lucid-breathe 1.5s ease-in-out infinite;
+  fill: var(--lucid-accent-primary-hover);
+  filter: drop-shadow(0 0 8px var(--lucid-accent-primary));
+}
+
+.lucid-toolfull-header-icons svg.icon {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 8;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.lucid-toolfull-phonetic {
+  font-size: var(--lucid-font-size-md);
+  color: var(--lucid-text-muted);
+  margin-bottom: var(--lucid-spacing-8);
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: fit-content;
+  transition: all var(--lucid-transition-normal);
+}
+
+.lucid-toolfull-phonetic-group {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all var(--lucid-transition-normal);
+  white-space: nowrap;
+}
+
+.lucid-toolfull-phonetic-region {
+  background-color: var(--lucid-accent-secondary);
+  padding: var(--lucid-spacing-1) var(--lucid-spacing-3);
+  border-radius: var(--lucid-radius-sm);
+  font-size: var(--lucid-font-size-sm);
+  margin-right: var(--lucid-spacing-4);
+  color: var(--lucid-text-disabled);
+  transition: all var(--lucid-transition-normal);
+}
+
+.lucid-toolfull-phonetic-text {
+  cursor: pointer;
+  transition: all var(--lucid-transition-normal);
+}
+
+.lucid-toolfull-phonetic-text:hover {
+  color: var(--lucid-text-primary);
+}
+
+/* 默认只显示US音标，UK音标隐藏在右侧 */
+.lucid-toolfull-phonetic-group.uk-phonetic {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  margin-left: 0;
+}
+
+/* 悬浮时扩展显示UK音标 */
+.lucid-toolfull-phonetic:hover .lucid-toolfull-phonetic-group.uk-phonetic {
+  opacity: 1;
+  max-width: 200px;
+  margin-left: 15px;
+}
+
+.lucid-toolfull-explain-group {
+  margin-bottom: 15px;
+}
+
+.lucid-toolfull-pos {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-right: 8px;
+  color: #ccc;
+  display: inline-block;
+  transition: all 0.3s ease;
+  align-items: center;
+  position: relative;
+}
+
+.lucid-toolfull-definition {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.lucid-toolfull-definition-text-chinese {
+  /* font-size 和 line-height 由 JavaScript 动态设置，与 tooltip 字体大小保持一致 */
+  color: #ddd;
+  position: relative;
+}

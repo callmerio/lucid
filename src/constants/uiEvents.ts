@@ -78,7 +78,9 @@ export const UI_EVENTS = {
     WORD_HIGHLIGHTED: 'lucid:highlight:word-highlighted',
     WORD_UNHIGHLIGHTED: 'lucid:highlight:word-unhighlighted',
     COUNT_CHANGED: 'lucid:highlight:count-changed',
-    STATE_UPDATED: 'lucid:highlight:state-updated'
+    STATE_UPDATED: 'lucid:highlight:state-updated',
+    HOVER_ENTER: 'lucid:highlight:hover-enter',
+    HOVER_LEAVE: 'lucid:highlight:hover-leave'
   },
 
   /**
@@ -172,6 +174,17 @@ export interface EventPayloads {
     word: string;
     oldCount: number;
     newCount: number;
+  };
+
+  [UI_EVENTS.HIGHLIGHT.HOVER_ENTER]: {
+    word: string;
+    element: HTMLElement;
+    translation?: string;
+  };
+
+  [UI_EVENTS.HIGHLIGHT.HOVER_LEAVE]: {
+    word: string;
+    element: HTMLElement;
   };
 
   // 交互事件载荷
