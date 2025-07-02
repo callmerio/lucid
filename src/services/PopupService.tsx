@@ -41,8 +41,14 @@ class PopupService implements IPopupService {
   ): Promise<void> {
     if (this.popups.has(id)) {
       console.warn(
-        `[PopupService] Popup with id "${id}" is already shown. Use update() instead.`
+        `[PopupService] Popup with id "${id}" is already shown. Ignoring duplicate show request.`
       );
+      // 对于详细模式弹窗，不应该重复显示，直接返回
+      if (id.includes('toolfull-detailed')) {
+        console.log(`[PopupService] Ignoring duplicate detailed popup request for: ${id}`);
+        return;
+      }
+      // 对于其他弹窗，仍然使用更新逻辑
       await this.update(id, content, options);
       return;
     }

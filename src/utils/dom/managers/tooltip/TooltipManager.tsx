@@ -37,6 +37,7 @@ export class TooltipManager {
   private currentMode: "simple" | "detailed" = "simple";
   private currentDetailedData: WordDetails | null = null;
   private detailedHideTimeout: number | null = null;
+  private isTransitioning: boolean = false; // 防止转换过程中的重复调用
 
   private constructor(options: TooltipManagerOptions = {}) {
     this.options = options;
@@ -122,6 +123,14 @@ export class TooltipManager {
     targetElement: HTMLElement
   ): Promise<void> {
     try {
+      // 防重复：如果已经在详细模式或正在转换中，直接返回
+      if (this.currentMode === "detailed" || this.isTransitioning) {
+        console.log(`[TooltipManager] Already in detailed mode or transitioning for word: "${word}"`);
+        return;
+      }
+
+      console.log(`[TooltipManager] Switching to detailed mode for word: "${word}"`);
+      this.isTransitioning = true;
       this.currentMode = "detailed";
       
       // 取消状态管理器的自动隐藏，详细模式由用户手动控制
@@ -157,8 +166,13 @@ export class TooltipManager {
       // 详细模式使用 Popup 组件的外部点击检测，不需要鼠标事件监听
       // 设置详细模式专用的键盘监听器
       this.setupDetailedModeKeyboardListener(word, targetElement);
+      
+      // 完成转换
+      this.isTransitioning = false;
     } catch (error) {
       console.error("[TooltipManager] Error showing detailed view:", error);
+      // 转换失败时也要重置标志
+      this.isTransitioning = false;
     }
   }
 
